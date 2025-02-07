@@ -1,41 +1,65 @@
-import { View, Text } from 'react-native';
+import { View, Text,TouchableOpacity } from 'react-native';
 import { Link } from 'expo-router';
+import { tituloForm, labelForm, parrafoForm,inputForm, botonGeneral, textoBotonGeneral, letraPequeñaForm, fondoTotal, titulo, tarjetaForm } from '../components/tokens';
 import React from 'react';
 
 const Index = () => {
   return (
-    <View className="flex-1 items-center justify-center bg-white space-y-5">
-      <Text className="text-4xl text-red-600">🏠 Index</Text>
+    <View className={`${fondoTotal} flex-1 justify-center items-center  px-6`}>
+      <View className={tarjetaForm}>
+        <Text className={tituloForm}>🏠 Home</Text>
 
-      <Link href="/login">
-        <Text className="bg-slate-200 text-3xl p-5 rounded-lg">
-          🔑 Autenticación
-        </Text>
-      </Link>
+        <View className="mt-6">
+          <TouchableOpacity className={botonGeneral}>
+            <Link href="/login">
+              <Text className={textoBotonGeneral}>
+                🔑 Autenticación
+              </Text>
+            </Link>
+          </TouchableOpacity>
+        </View>
+        
+        <View className="mt-4">
+          <TouchableOpacity className={botonGeneral}>
+            <Link href="/about">
+              <Text className={textoBotonGeneral}>
+                👨🏻‍💻 Sobre nosotros
+              </Text>
+            </Link>
+          </TouchableOpacity>
+        </View>
 
-      <Link href="/about">
-        <Text className="bg-slate-200 text-3xl p-5 rounded-lg">
-          👨🏻‍💻 Sobre nosotros
-        </Text>
-      </Link>
+        <View className="mt-4">
+          <TouchableOpacity className={botonGeneral}>
+            <Link href="/register">
+              <Text className={textoBotonGeneral}>
+                👤 Registro
+              </Text>
+            </Link>
+          </TouchableOpacity>
+        </View>
 
-      <Link href="/register">
-        <Text className="rounded-lg p-4 bg-slate-200 text-3xl">
-          👤 Registro
-        </Text>
-      </Link>
+        <View className="mt-4">
+          <TouchableOpacity className={botonGeneral}>
+            <Link href="/questions">
+              <Text className={textoBotonGeneral}>
+                ❓ Preguntas frecuentes
+              </Text>
+            </Link>
+          </TouchableOpacity>
+        </View>
 
-      <Link href="/questions">
-        <Text className="rounded-lg p-4 bg-slate-200 text-3xl">
-          ❓ Preguntas frecuentes
-        </Text>
-      </Link>
+        <View className="mt-4">
+          <TouchableOpacity className={botonGeneral}>
+            <Link href="/rutines">
+              <Text className={textoBotonGeneral}>
+                🏋🏻‍♂️ Crear rutina
+              </Text>
+            </Link>
+          </TouchableOpacity>
+        </View>
 
-      <Link href="/rutines">
-        <Text className="rounded-lg p-4 bg-slate-200 text-3xl">
-          🏋🏻‍♂️ Crear rutina
-        </Text>
-      </Link>
+      </View>
     </View>
   );
 };

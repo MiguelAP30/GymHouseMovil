@@ -1,11 +1,11 @@
 import { View, Text, TextInput, TouchableOpacity, Image } from 'react-native';
 import { Link } from 'expo-router';
-import { tituloForm, labelForm, parrafoForm,inputForm } from '../components/tokens';
+import { tituloForm, labelForm, parrafoForm,inputForm, botonGeneral, textoBotonGeneral, letraPequeñaForm, fondoTotal } from '../../components/tokens';
 
 
 export default function Login() {
   return (
-    <View className="flex-1 justify-center items-center bg-gray-900 px-6">
+    <View className={`${fondoTotal} flex-1 justify-center items-center  px-6`}>
       
       {/* Logo */}
       <Image source={require('../../assets/logo.png')} className="w-32 h-32 mb-6" />
@@ -38,12 +38,12 @@ export default function Login() {
       </View>
 
       {/* Botón: Iniciar sesión */}
-      <TouchableOpacity className="bg-gray-700 w-full py-3 mt-6 rounded-lg">
-        <Text className="text-center text-white text-lg font-semibold">Iniciar sesión</Text>
+      <TouchableOpacity className={botonGeneral}>
+        <Text className={textoBotonGeneral}>Iniciar sesión</Text>
       </TouchableOpacity>
 
       {/* Enlace: Registro */}
-      <Text className="text-gray-400 mt-4">
+      <Text className={letraPequeñaForm}>
         ¿No tienes una cuenta? 
         <Link href="/register" className="text-blue-400"> Regístrate</Link>
       </Text>

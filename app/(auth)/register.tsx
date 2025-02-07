@@ -2,13 +2,13 @@ import { View, Text, TextInput, TouchableOpacity, Image, ScrollView } from 'reac
 import { Link } from 'expo-router';
 import { Picker } from '@react-native-picker/picker';
 import { useState } from 'react';
-import { tituloForm, labelForm, parrafoForm, inputForm } from '../components/tokens';
+import { tituloForm, labelForm, parrafoForm, inputForm, botonGeneral, textoBotonGeneral, letraPequeñaForm, fondoTotal } from '../../components/tokens';
 
 export default function Register() {
   const [selectedGender, setSelectedGender] = useState('');
 
   return (
-    <View className="flex-1 bg-gray-900 px-6">
+    <View className={`${fondoTotal} flex-1 px-6`}>
       <ScrollView 
         contentContainerStyle={{ alignItems: 'center', paddingBottom: 20 }} 
         showsVerticalScrollIndicator={false} // 🔥 Oculta la barra de scroll
@@ -79,12 +79,12 @@ export default function Register() {
         </View>
 
         {/* Botón: Registrarse */}
-        <TouchableOpacity className="bg-gray-700 w-full py-3 mt-6 rounded-lg">
-          <Text className="text-center text-white text-lg font-semibold">Registrarse</Text>
+        <TouchableOpacity className={botonGeneral}>
+          <Text className={textoBotonGeneral}>Registrarse</Text>
         </TouchableOpacity>
 
         {/* Enlace: Inicio de sesión */}
-        <Text className="text-gray-400 mt-4">
+        <Text className={letraPequeñaForm}>
           ¿Ya tienes una cuenta?  
           <Link href="/login" className="text-blue-400"> Iniciar sesión</Link>
         </Text>
