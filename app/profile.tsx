@@ -15,12 +15,12 @@ const Profile = () => {
     {
       id: '3ac68afc-c605-48d3-a4f8-fbd91aa97f63',
       title: 'Second Item',
-      page: 'index'
+      page: '/register'
     },
     {
       id: '58694a0f-3da1-471f-bd96-145571e29d72',
       title: 'Third Item',
-      page: 'index'
+      page: '/index'
     },
   ];
   
@@ -76,4 +76,5 @@ const Profile = () => {
 }
 
 //flatlist implementacion facil
+//safe area
 export default Profile
