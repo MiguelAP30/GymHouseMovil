@@ -11,6 +11,7 @@ const HomeLayout = () => {
       <Stack.Screen name="(auth)" options={{headerShown:false}}/>
       <Stack.Screen name="marketplace" options={{headerShown:false}}/>
       <Stack.Screen name="recomendations" options={{headerShown:false}}/>
+      <Stack.Screen name="(account)" options={{headerShown:false}}/>
     </Stack>
   )
 }
