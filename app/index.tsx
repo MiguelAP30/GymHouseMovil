@@ -18,22 +18,22 @@ const Index = () => {
             </Link>
           </TouchableOpacity>
         </View>
-        
-        <View className="mt-4">
-          <TouchableOpacity className={botonGeneral}>
-            <Link href="/about">
-              <Text className={textoBotonGeneral}>
-                👨🏻‍💻 Sobre nosotros
-              </Text>
-            </Link>
-          </TouchableOpacity>
-        </View>
 
         <View className="mt-4">
           <TouchableOpacity className={botonGeneral}>
             <Link href="/register">
               <Text className={textoBotonGeneral}>
                 👤 Registro
+              </Text>
+            </Link>
+          </TouchableOpacity>
+        </View>
+        
+        <View className="mt-4">
+          <TouchableOpacity className={botonGeneral}>
+            <Link href="/about">
+              <Text className={textoBotonGeneral}>
+                👨🏻‍💻 Sobre nosotros
               </Text>
             </Link>
           </TouchableOpacity>
@@ -51,7 +51,7 @@ const Index = () => {
 
         <View className="mt-4">
           <TouchableOpacity className={botonGeneral}>
-            <Link href="/rutines">
+            <Link href="/crearRutines">
               <Text className={textoBotonGeneral}>
                 🏋🏻‍♂️ Crear rutina
               </Text>

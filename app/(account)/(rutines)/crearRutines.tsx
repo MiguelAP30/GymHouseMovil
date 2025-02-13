@@ -2,7 +2,7 @@ import { View, Text, TextInput, TouchableOpacity, Switch, Image } from 'react-na
 import { tituloForm, parrafoForm, labelForm, inputForm , botonGeneral, textoBotonGeneral, fondoTotal, tarjetaForm} from '../../../components/tokens';
 import { Picker } from '@react-native-picker/picker';
 import { useState } from 'react';
-const rutines = () => {
+const crearRutines = () => {
 
     const [selectedTag, setSelectedTag] = useState("Cardio");
     const [isVisible, setIsVisible] = useState(false);
@@ -63,4 +63,4 @@ const rutines = () => {
   )
 }
 
-export default rutines
+export default crearRutines
