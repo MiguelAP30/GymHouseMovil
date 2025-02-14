@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react'
 import NetInfo from '@react-native-community/netinfo'
 import { Stack } from 'expo-router'
+import "../global.css"
 
 
 
