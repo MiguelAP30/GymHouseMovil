@@ -27,15 +27,6 @@
     },
     "plugins": [
       "expo-router"
-    ],
-    "extra": {
-      "router": {
-        "origin": false
-      },
-      "eas": {
-        "projectId": "bebb4741-26c8-4f0d-94dc-f3c17fa250d7"
-      }
-    },
-    "owner": "miguelap"
+    ]
   }
 }
