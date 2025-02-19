@@ -2,16 +2,26 @@ import { View, Text, TextInput, TouchableOpacity, Image, ScrollView } from 'reac
 import { Link } from 'expo-router';
 import { Picker } from '@react-native-picker/picker';
 import { useState } from 'react';
-import { tituloForm, labelForm, parrafoForm, inputForm, botonGeneral, textoBotonGeneral, letraPequeñaForm, fondoTotal } from '../../components/tokens';
+import { useForm, Controller } from 'react-hook-form';
+import { 
+  tituloForm, labelForm, parrafoForm, inputForm, 
+  botonGeneral, textoBotonGeneral, letraPequeñaForm, fondoTotal 
+} from '../../components/tokens';
 
 export default function Register() {
+  const { control, handleSubmit, formState: { errors } } = useForm();
   const [selectedGender, setSelectedGender] = useState('');
+
+  const onSubmit = (data: any) => {
+    console.log("Datos del formulario:", data);
+    alert("Registro exitoso:\n" + JSON.stringify(data, null, 2));
+  };
 
   return (
     <View className={`${fondoTotal} flex-1 px-6`}>
       <ScrollView 
         contentContainerStyle={{ alignItems: 'center', paddingBottom: 20 }} 
-        showsVerticalScrollIndicator={false} // 🔥 Oculta la barra de scroll
+        showsVerticalScrollIndicator={false} 
       >
 
         {/* Logo */}
@@ -26,60 +36,145 @@ export default function Register() {
         {/* Input: Nombre */}
         <View className="w-full mt-6">
           <Text className={labelForm}>Nombre</Text>
-          <TextInput placeholder="Tu nombre completo" placeholderTextColor="gray" className={inputForm} />
-        </View>
-
-        {/* Input: Nombre de usuario */}
-        <View className="w-full mt-4">
-          <Text className={labelForm}>Nombre de usuario</Text>
-          <TextInput placeholder="Tu usuario" placeholderTextColor="gray" className={inputForm} />
+          <Controller
+            control={control}
+            name="name"
+            rules={{ required: "El nombre es obligatorio", minLength: { value: 3, message: "Mínimo 3 caracteres" } }}
+            render={({ field: { onChange, onBlur, value } }) => (
+              <TextInput
+                placeholder="Tu nombre completo"
+                placeholderTextColor="gray"
+                className={inputForm}
+                onBlur={onBlur}
+                onChangeText={onChange}
+                value={value}
+              />
+            )}
+          />
+          {errors.name && <Text className="text-red-500">{errors.name.message?.toString()}</Text>}
         </View>
 
         {/* Input: Correo */}
         <View className="w-full mt-4">
           <Text className={labelForm}>Correo electrónico</Text>
-          <TextInput placeholder="tucorreo@ejemplo.com" placeholderTextColor="gray" className={inputForm} />
+          <Controller
+            control={control}
+            name="email"
+            rules={{ required: "El correo es obligatorio", pattern: { value: /\S+@\S+\.\S+/, message: "Correo inválido" } }}
+            render={({ field: { onChange, onBlur, value } }) => (
+              <TextInput
+                placeholder="tucorreo@ejemplo.com"
+                placeholderTextColor="gray"
+                className={inputForm}
+                onBlur={onBlur}
+                onChangeText={onChange}
+                value={value}
+              />
+            )}
+          />
+          {errors.email && <Text className="text-red-500">{errors.email.message?.toString()}</Text>}
+        </View>
+
+        
+        {/* Input: Contraseña */}
+        <View className="w-full mt-4">
+          <Text className={labelForm}>Contraseña</Text>
+          <Controller
+            control={control}
+            name="password"
+            rules={{ 
+              required: "La contraseña es obligatoria", 
+              minLength: { value: 6, message: "Mínimo 6 caracteres" } 
+            }}
+            render={({ field: { onChange, onBlur, value } }) => (
+              <TextInput
+                placeholder="********"
+                placeholderTextColor="gray"
+                secureTextEntry
+                className={inputForm}
+                onBlur={onBlur}
+                onChangeText={onChange}
+                value={value}
+              />
+            )}
+          />
+          {errors.password && <Text className="text-red-500">{errors.password.message?.toString()}</Text>}
         </View>
 
         {/* Input: Teléfono */}
         <View className="w-full mt-4">
           <Text className={labelForm}>Número de teléfono</Text>
-          <TextInput placeholder="3001234567" placeholderTextColor="gray" keyboardType="phone-pad" className={inputForm} />
+          <Controller
+            control={control}
+            name="phone"
+            rules={{ required: "El teléfono es obligatorio", minLength: { value: 10, message: "Mínimo 10 dígitos" } }}
+            render={({ field: { onChange, onBlur, value } }) => (
+              <TextInput
+                placeholder="3001234567"
+                placeholderTextColor="gray"
+                keyboardType="phone-pad"
+                className={inputForm}
+                onBlur={onBlur}
+                onChangeText={onChange}
+                value={value}
+              />
+            )}
+          />
+          {errors.phone && <Text className="text-red-500">{errors.phone.message?.toString()}</Text>}
         </View>
 
         {/* Input: Dirección */}
         <View className="w-full mt-4">
           <Text className={labelForm}>Dirección</Text>
-          <TextInput placeholder="Calle 123 # 45-67" placeholderTextColor="gray" className={inputForm} />
-        </View>
-
-        {/* Input: Fecha de nacimiento */}
-        <View className="w-full mt-4">
-          <Text className={labelForm}>Fecha de nacimiento</Text>
-          <TextInput placeholder="DD/MM/AAAA" placeholderTextColor="gray" keyboardType="numeric" className={inputForm} />
+          <Controller
+            control={control}
+            name="address"
+            rules={{ required: "La dirección es obligatoria" }}
+            render={({ field: { onChange, onBlur, value } }) => (
+              <TextInput
+                placeholder="Calle 123 # 45-67"
+                placeholderTextColor="gray"
+                className={inputForm}
+                onBlur={onBlur}
+                onChangeText={onChange}
+                value={value}
+              />
+            )}
+          />
+          {errors.address && <Text className="text-red-500">{errors.address.message?.toString()}</Text>}
         </View>
 
         {/* Input: Género */}
         <View className="w-full mt-4">
           <Text className={labelForm}>Género</Text>
-          <View className="bg-gray-800 rounded-lg">
-            <Picker selectedValue={selectedGender} onValueChange={(itemValue) => setSelectedGender(itemValue)} style={{ color: 'white' }}>
-              <Picker.Item label="Seleccione su género" value="" />
-              <Picker.Item label="Masculino" value="masculino" />
-              <Picker.Item label="Femenino" value="femenino" />
-              <Picker.Item label="Otro" value="otro" />
-            </Picker>
-          </View>
+          <Controller
+            control={control}
+            name="gender"
+            rules={{ required: "Selecciona un género" }}
+            render={({ field: { onChange, value } }) => (
+              <View className="bg-gray-800 rounded-lg">
+                <Picker
+                  selectedValue={value || ""}
+                  onValueChange={(itemValue) => {
+                    setSelectedGender(itemValue);
+                    onChange(itemValue);
+                  }}
+                  style={{ color: 'white' }}
+                >
+                  <Picker.Item label="Seleccione su género" value="" />
+                  <Picker.Item label="Masculino" value="masculino" />
+                  <Picker.Item label="Femenino" value="femenino" />
+                  <Picker.Item label="Otro" value="otro" />
+                </Picker>
+              </View>
+            )}
+          />
+          {errors.gender && <Text className="text-red-500">{errors.gender.message?.toString()}</Text>}
         </View>
 
-        {/* Input: Contraseña */}
-        <View className="w-full mt-4">
-          <Text className={labelForm}>Contraseña</Text>
-          <TextInput placeholder="********" placeholderTextColor="gray" secureTextEntry className={inputForm} />
-        </View>
 
         {/* Botón: Registrarse */}
-        <TouchableOpacity className={botonGeneral}>
+        <TouchableOpacity className={botonGeneral} onPress={handleSubmit(onSubmit)}>
           <Text className={textoBotonGeneral}>Registrarse</Text>
         </TouchableOpacity>
 
