@@ -23,6 +23,7 @@ const HomeLayout = () => {
       <Stack.Screen name="profile" options={{headerShown:false}}/>
       <Stack.Screen name="(auth)" options={{headerShown:false}}/>
       <Stack.Screen name="(account)" options={{headerShown:false}}/>
+      
     </Stack>
   )
 }

@@ -59,6 +59,16 @@ const Index = () => {
           </TouchableOpacity>
         </View>
 
+        <View className="mt-4">
+          <TouchableOpacity className={botonGeneral}>
+            <Link href="/dashboardAdmin/dashboard">
+              <Text className={textoBotonGeneral}>
+                💻 Dashborad
+              </Text>
+            </Link>
+          </TouchableOpacity>
+        </View>
+
       </View>
     </View>
   );

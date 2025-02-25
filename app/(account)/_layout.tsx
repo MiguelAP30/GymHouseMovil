@@ -33,6 +33,13 @@ export default function AccountLayout() {
           tabBarIcon: ({ color, size }) => <Ionicons name="barbell" size={size} color={color} />,
         }}
       />
+    <Tabs.Screen
+        name="dashboardAdmin"
+        options={{
+          headerShown: false,
+          tabBarIcon: ({ color, size }) => <Ionicons name="speedometer" size={size} color={color} />,
+        }}
+      />
     </Tabs>
   );
 }
