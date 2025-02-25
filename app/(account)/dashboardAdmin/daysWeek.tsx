@@ -76,13 +76,13 @@ const daysWeek = () => {
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
-    backgroundColor: '#e6e6e6', // Fondo gris claro
+    backgroundColor: '#e6e6e6', 
     alignItems: 'center',
     paddingVertical: 20,
   },
   dayContainer: {
     width: '90%',
-    backgroundColor: '#b3d1ff', // Azul claro
+    backgroundColor: '#b3d1ff', 
     borderRadius: 10,
     padding: 15,
     marginBottom: 15,
@@ -91,7 +91,7 @@ const styles = StyleSheet.create({
   dayTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#007bff', // Azul fuerte
+    color: '#007bff', 
     marginBottom: 10,
   },
   exerciseContainer: {
