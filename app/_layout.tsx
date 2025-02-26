@@ -2,6 +2,7 @@ import React, { useEffect } from 'react'
 import NetInfo from '@react-native-community/netinfo'
 import { Stack } from 'expo-router'
 import "../global.css"
+import { NetworkProvider } from '../contexts/NetworkProvider'
 
 
 
@@ -18,6 +19,7 @@ const HomeLayout = () => {
   }, [])
 
   return (
+    <NetworkProvider>
     <Stack>
       <Stack.Screen name="index" options={{headerShown:false}}/>
       <Stack.Screen name="profile" options={{headerShown:false}}/>
@@ -25,6 +27,7 @@ const HomeLayout = () => {
       <Stack.Screen name="(account)" options={{headerShown:false}}/>
       
     </Stack>
+    </NetworkProvider>
   )
 }
 

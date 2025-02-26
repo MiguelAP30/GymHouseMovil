@@ -5,6 +5,7 @@ import React from 'react';
 
 const Index = () => {
   return (
+    
     <View className={`${fondoTotal} flex-1 justify-center items-center  px-6`}>
       <View className={tarjetaForm}>
         <Text className={tituloForm}>🏠 Home</Text>

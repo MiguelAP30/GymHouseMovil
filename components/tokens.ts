@@ -15,3 +15,14 @@ export const parrafoForm = "text-gray-400 text-center mt-2";
 export const letraPequeñaForm = "text-gray-400 mt-4";
 export const inputForm = "bg-gray-700 text-white px-4 py-3 rounded-lg w-full";
 export const tarjetaForm="w-full bg-gray-800 p-6 rounded-xl shadow-lg";
+// Tokens para DaysWeek
+export const fondoRutina = "bg-gray-200"; // Fondo del ScrollView
+export const tarjetaRutina = "bg-blue-300 w-11/12 rounded-lg p-4 mb-4 items-center"; // Contenedor de cada día
+export const tituloDia = "text-blue-600 text-2xl font-bold mb-2"; // Título del día
+export const listaEjercicios = "text-gray-800 text-lg font-medium"; // Texto de ejercicios
+
+
+export const fondoEjercicios = "bg-gray-200"; // Fondo del ScrollView
+export const tarjetaEjercicio = "bg-gray-800 w-11/12 rounded-lg p-4 mb-4 shadow-lg"; // Contenedor de cada ejercicio
+export const tituloEjercicio = "text-white text-lg font-bold"; // Nombre del ejercicio
+export const descripcionEjercicio = "text-gray-400"; // Músculos trabajados

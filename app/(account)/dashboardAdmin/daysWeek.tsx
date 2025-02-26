@@ -1,5 +1,6 @@
-import { View, Text, ScrollView, StyleSheet } from 'react-native';
+import { View, Text, ScrollView } from 'react-native';
 import React from 'react';
+import { fondoRutina, tarjetaRutina, tituloDia, listaEjercicios } from '../../../components/tokens';
 
 const daysWeek = () => {
   const routines = {
@@ -53,55 +54,25 @@ const daysWeek = () => {
       'Jumping jacks',
     ],
   };
-  
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      {Object.entries(routines).map(([day, exercises], index) => (
-        <View key={index} style={styles.dayContainer}>
-          <Text style={styles.dayTitle}>{day}</Text>
-          <View style={styles.exerciseContainer}>
-            {exercises.map((exercise, idx) => (
-              <Text key={idx} style={styles.exerciseText}>
-                - {exercise}
-              </Text>
-            ))}
-          </View>
-        </View>
-      ))}
-    </ScrollView>
+<ScrollView className={fondoRutina} contentContainerStyle={{ alignItems: 'center', paddingVertical: 20 }}>
+  {Object.entries(routines).map(([day, exercises], index) => (
+    <View key={index} className={tarjetaRutina}>
+  <Text className={tituloDia}>{day}</Text>
+  <View className="items-center"> {/* Aquí agregamos items-center */}
+    {exercises.map((exercise, idx) => (
+      <Text key={idx} className={listaEjercicios}>
+        - {exercise}
+      </Text>
+    ))}
+  </View>
+</View>
+
+  ))}
+</ScrollView>
+
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flexGrow: 1,
-    backgroundColor: '#e6e6e6', 
-    alignItems: 'center',
-    paddingVertical: 20,
-  },
-  dayContainer: {
-    width: '90%',
-    backgroundColor: '#b3d1ff', 
-    borderRadius: 10,
-    padding: 15,
-    marginBottom: 15,
-    alignItems: 'center',
-  },
-  dayTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#007bff', 
-    marginBottom: 10,
-  },
-  exerciseContainer: {
-    alignItems: 'center',
-  },
-  exerciseText: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: '#333',
-  },
-});
 
 export default daysWeek;

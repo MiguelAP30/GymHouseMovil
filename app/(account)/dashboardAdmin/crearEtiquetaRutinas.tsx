@@ -1,25 +1,40 @@
-import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet, Alert } from 'react-native';
 import React, { useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
+import { useNetwork } from '../../../contexts/NetworkProvider';
 
 const CrearEtiquetaRutinas = () => {
   const [etiqueta, setEtiqueta] = useState('');
   const [etiquetas, setEtiquetas] = useState(['Cardio', 'Fuerza', 'eeee']);
-
+  const { isConnected } = useNetwork();
   const agregarEtiqueta = () => {
-    if (etiqueta.trim()) {
-      setEtiquetas([...etiquetas, etiqueta]);
-      setEtiqueta('');
+    if(!isConnected){
+      Alert.alert("Error", "No tienes conexión a Internet");
+      return;
+    }else{
+      if (etiqueta.trim()) {
+        setEtiquetas([...etiquetas, etiqueta]);
+        setEtiqueta('');
+      }
     }
   };
 
   const eliminarEtiqueta = (index:any) => {
-    setEtiquetas(etiquetas.filter((_, i) => i !== index));
+    if(!isConnected){
+      Alert.alert("Error", "No tienes conexión a Internet");
+      return;
+    }else{
+      setEtiquetas(etiquetas.filter((_, i) => i !== index));
+    }
   };
 
   return (
     <View style={styles.container}>
-
+      {isConnected === false && (
+        <View className="w-full items-center mb-4">
+          <Text className="text-red-500">No tienes conexión a Internet</Text>
+        </View>
+      )}
       <View style={styles.card}>
         <Text style={styles.title}>Agregar nueva etiqueta</Text>
         <TextInput

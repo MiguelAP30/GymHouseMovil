@@ -1,25 +1,30 @@
-import { View, Text, TextInput, TouchableOpacity, Switch, Image } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
+import { View, Text, TextInput, TouchableOpacity, Switch, Image, Alert } from 'react-native';
+
 import { useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { 
   tituloForm, parrafoForm, labelForm, inputForm, 
   botonGeneral, textoBotonGeneral, fondoTotal, tarjetaForm
 } from '../../../components/tokens';
+import { useNetwork } from '../../../contexts/NetworkProvider';
 
 const CrearRutina = () => {
   const { control, handleSubmit, formState: { errors } } = useForm();
   const [selectedTag, setSelectedTag] = useState("Cardio");
   const [isVisible, setIsVisible] = useState(false);
-
+  const { isConnected } = useNetwork();
   const onSubmit = (data: any) => {
-    console.log("Datos de la rutina:", data);
-    alert("Rutina creada:\n" + JSON.stringify(data, null, 2));
+    if(!isConnected){
+      Alert.alert("Error", "No tienes conexión a Internet");
+      return;
+    }else{
+      Alert.alert("Rutina creada", JSON.stringify(data, null, 2));
+    }
   };
 
   return (
     <View className={`${fondoTotal} flex-1 justify-center items-center px-6`}>
-      
+      {isConnected === false && <Text className="text-red-500 mb-4">No tienes conexión a Internet</Text>}
       {/* Logo Superior */}
       <Image source={require('../../../assets/logo.png')} className="w-16 h-16 mb-4" />
 
@@ -75,33 +80,7 @@ const CrearRutina = () => {
           {errors.descripcion && <Text className="text-red-500">{errors.descripcion.message?.toString()}</Text>}
         </View>
 
-        {/* Selector: Etiqueta de la rutina */}
-        <View className="mt-4">
-          <Text className={labelForm}>Etiqueta de la rutina</Text>
-          <Controller
-            control={control}
-            name="etiqueta"
-            rules={{ required: "Selecciona una etiqueta" }}
-            render={({ field: { onChange, value } }) => (
-              <View className="bg-gray-700 rounded-lg">
-                <Picker
-                  selectedValue={value || selectedTag}
-                  onValueChange={(itemValue) => {
-                    setSelectedTag(itemValue);
-                    onChange(itemValue);
-                  }}
-                  style={{ color: 'white' }}
-                >
-                  <Picker.Item label="Cardio" value="Cardio" />
-                  <Picker.Item label="Fuerza" value="Fuerza" />
-                  <Picker.Item label="Flexibilidad" value="Flexibilidad" />
-                  <Picker.Item label="Resistencia" value="Resistencia" />
-                </Picker>
-              </View>
-            )}
-          />
-          {errors.etiqueta && <Text className="text-red-500">{errors.etiqueta.message?.toString()}</Text>}
-        </View>
+
 
         {/* Switch: Visibilidad */}
         <View className="mt-4 flex-row items-center justify-between">
