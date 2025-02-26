@@ -2,9 +2,16 @@ import { View, Text,TouchableOpacity } from 'react-native';
 import { Link } from 'expo-router';
 import { tituloForm, labelForm, parrafoForm,inputForm, botonGeneral, textoBotonGeneral, letraPequeñaForm, fondoTotal, titulo, tarjetaForm } from '../components/tokens';
 import React from 'react';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import Login from './(auth)/login';
 
 const Index = () => {
+  console.log("Se está renderizando Index");
   return (
+ /*    <SafeAreaView>
+    <Login />
+  </SafeAreaView> */
+  
     <View className={`${fondoTotal} flex-1 justify-center items-center  px-6`}>
       <View className={tarjetaForm}>
         <Text className={tituloForm}>🏠 Home</Text>
@@ -70,8 +77,11 @@ const Index = () => {
         </View>
 
       </View>
-    </View>
+    </View> 
+    
   );
 };
 
 export default Index;
+
+
