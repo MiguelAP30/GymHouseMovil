@@ -8,11 +8,13 @@ const dashboardAdminLayout = () => {
   return (
     <Drawer
       screenOptions={{
-        drawerStyle: { backgroundColor: '#12313e' , width: 250 },
+        drawerStyle: { backgroundColor: '#1F2937' , width: 250 },
         drawerLabelStyle: { color: '#ffffff', fontSize: 16 },
-        headerStyle: { backgroundColor: '#12313e' },
-        headerTintColor: '#fff',
-        
+        headerStyle: { backgroundColor: '#1F2937' },
+        headerTintColor: '#37A4DF',
+        drawerActiveBackgroundColor: '#6200ea',
+        drawerActiveTintColor: '#ffffff',
+        drawerInactiveBackgroundColor: '#1F2937',
 
       }}
     >

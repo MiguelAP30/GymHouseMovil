@@ -5,11 +5,16 @@ export default function AccountLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarShowLabel: false,
-        tabBarStyle: { backgroundColor: '#fff', height: 60 },
+        tabBarShowLabel: true,
+        tabBarStyle: { backgroundColor: '#000000',
+          height: 60, 
+          borderTopColor: '#000000',
+          borderTopWidth: 1,},
         tabBarActiveTintColor: '#6200ea',
-        tabBarInactiveTintColor: '#333',
-        
+        headerStyle: { backgroundColor: '#1F2937' },
+        headerTintColor: '#37A4DF',
+        tabBarInactiveTintColor: '#37A4DF',
+        tabBarLabelStyle: { fontSize: 10, fontWeight: 'bold' },
       }}
     >
       <Tabs.Screen
