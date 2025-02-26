@@ -1,5 +1,5 @@
 import { View, Text, TextInput, TouchableOpacity, Switch, Image } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
+//import { Picker } from '@react-native-picker/picker';
 import { useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { 
@@ -9,7 +9,7 @@ import {
 
 const CrearRutina = () => {
   const { control, handleSubmit, formState: { errors } } = useForm();
-  const [selectedTag, setSelectedTag] = useState("Cardio");
+  //const [selectedTag, setSelectedTag] = useState("Cardio");
   const [isVisible, setIsVisible] = useState(false);
 
   const onSubmit = (data: any) => {
@@ -78,7 +78,7 @@ const CrearRutina = () => {
         {/* Selector: Etiqueta de la rutina */}
         <View className="mt-4">
           <Text className={labelForm}>Etiqueta de la rutina</Text>
-          <Controller
+          {/*<Controller
             control={control}
             name="etiqueta"
             rules={{ required: "Selecciona una etiqueta" }}
@@ -99,7 +99,7 @@ const CrearRutina = () => {
                 </Picker>
               </View>
             )}
-          />
+          />*/}
           {errors.etiqueta && <Text className="text-red-500">{errors.etiqueta.message?.toString()}</Text>}
         </View>
 

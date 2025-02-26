@@ -1,6 +1,6 @@
 import { View, Text, TextInput, TouchableOpacity, Image, ScrollView } from 'react-native';
 import { Link } from 'expo-router';
-import { Picker } from '@react-native-picker/picker';
+// import { Picker } from '@react-native-picker/picker';
 import { useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { 
@@ -153,7 +153,7 @@ export default function Register() {
             rules={{ required: "Selecciona un género" }}
             render={({ field: { onChange, value } }) => (
               <View className="bg-gray-800 rounded-lg">
-                <Picker
+                {/*<Picker
                   selectedValue={value || ""}
                   onValueChange={(itemValue) => {
                     setSelectedGender(itemValue);
@@ -165,7 +165,7 @@ export default function Register() {
                   <Picker.Item label="Masculino" value="masculino" />
                   <Picker.Item label="Femenino" value="femenino" />
                   <Picker.Item label="Otro" value="otro" />
-                </Picker>
+                </Picker>*/}
               </View>
             )}
           />
