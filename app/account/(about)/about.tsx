@@ -5,7 +5,7 @@ import { titulo, parrafo, parrafoNegrilla, fondoTotal } from '../../../component
 
 
 
-const about = () => {
+const About = () => {
     return (
       <View className={`${fondoTotal} flex-1 justify-center items-center px-6`}>
         {/* Logo Superior */}
@@ -25,4 +25,4 @@ const about = () => {
       );
 }
 
-export default about
+export default About

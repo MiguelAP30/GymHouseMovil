@@ -2,6 +2,9 @@ import React, { useEffect } from 'react'
 import NetInfo from '@react-native-community/netinfo'
 import { Stack } from 'expo-router'
 import { StatusBar } from 'react-native';
+import About from './account/(about)/about';
+import Index from './index';
+import Register from './register';
 import "../global.css"
 
 
@@ -23,8 +26,8 @@ const HomeLayout = () => {
       <StatusBar barStyle="light-content" backgroundColor="#1F2937" />
       <Stack>
         <Stack.Screen name="index" options={{headerShown:false}}/>
-        <Stack.Screen name="(auth)" options={{headerShown:false}}/>
-        <Stack.Screen name="(account)" options={{headerShown:false}}/>
+        <Stack.Screen name="account" options={{headerShown:false}}/>
+        <Stack.Screen name="register" options={{headerShown:false}}/>
       </Stack>
     </>
   )
