@@ -9,10 +9,9 @@ import {
   TagOfTrainingPlanDAO,
   UserDAO
 } from '../interfaces/interfaces';
+import { getEnvironment } from '../config/env';
 
-// Cambia localhost por tu IP local
-const API = process.env.API_GYMHOUSE_URL; // Asegúrate que esta IP coincida con la de tu computadora
-//v1
+const API = getEnvironment().API_URL;
 
 // Autenticación
 export const postRegister = async (data: RegisterDAO) => {
