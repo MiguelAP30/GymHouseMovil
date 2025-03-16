@@ -15,7 +15,7 @@ import {
 import { useEffect, useState, useContext } from 'react';
 import { useRouter } from 'expo-router';
 import { postLogin } from '../lib/api_gymhouse';
-import { AuthContext } from '../validators/AuthStore';
+import { AuthContext } from '../context/AuthStore';
 
 export default function Index() {
   const { control, handleSubmit, formState: { errors } } = useForm<{ email: string; password: string }>();

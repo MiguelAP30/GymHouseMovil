@@ -7,7 +7,7 @@ import {
   botonGeneral, textoBotonGeneral, letraPequeñaForm, fondoTotal 
 } from '../components/tokens';
 import { postRegister } from '../lib/api_gymhouse';
-import { AuthContext } from '../validators/AuthStore';
+import { AuthContext } from '../context/AuthStore';
 
 interface RegisterFormData {
   email: string;

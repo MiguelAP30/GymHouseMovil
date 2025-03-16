@@ -1,6 +1,6 @@
 import React, { createContext, useState, useEffect, ReactNode } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { AuthResponseDAO, UserDAO } from '../interfaces/DataAccesObject';
+import { AuthResponseDAO, UserDAO } from '../interfaces/interfaces';
 
 interface AuthContextType {
   isAuthenticated: boolean;
