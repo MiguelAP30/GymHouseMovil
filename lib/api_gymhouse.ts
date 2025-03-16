@@ -11,7 +11,7 @@ import {
 } from '../interfaces/interfaces';
 
 // Cambia localhost por tu IP local
-const API = 'http://192.168.153.228:8000/api/v1' // Asegúrate que esta IP coincida con la de tu computadora
+const API = process.env.API_GYMHOUSE_URL; // Asegúrate que esta IP coincida con la de tu computadora
 //v1
 
 // Autenticación
