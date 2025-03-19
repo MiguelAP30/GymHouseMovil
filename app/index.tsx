@@ -42,7 +42,11 @@ export default function Index() {
 
     setIsLoading(true);
     try {
-      const response = await postLogin(data);
+      const formData = {
+        ...data,
+        email: data.email.toLowerCase()
+      };
+      const response = await postLogin(formData);
       await login(response.access_token, response.user);
       router.push('/account/about');
     } catch (error) {

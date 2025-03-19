@@ -30,7 +30,11 @@ export default function Register() {
   const onSubmit = async (data: RegisterFormData) => {
     setIsLoading(true);
     try {
-      const response = await postRegister(data);
+      const formData = {
+        ...data,
+        email: data.email.toLowerCase()
+      };
+      const response = await postRegister(formData);
       if (response.access_token) {
         await login(response.access_token, response.user);
         router.push('/account/about');

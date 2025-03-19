@@ -13,6 +13,26 @@ import { getEnvironment } from '../config/env';
 
 const API = getEnvironment().API_URL;
 
+// Verificación de token
+const verifyToken = async () => {
+  try {
+    const token = await AsyncStorage.getItem('token');
+    if (!token) return false;
+
+    const response = await fetch(`${API}/user_data`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    return response.ok;
+  } catch (error) {
+    console.error('Error verificando token:', error);
+    return false;
+  }
+};
+
 // Autenticación
 export const postRegister = async (data: RegisterDAO) => {
   try {
@@ -166,6 +186,14 @@ const authenticatedFetch = async (url: string, options: RequestInit = {}) => {
     throw new Error('No hay token de autenticación');
   }
 
+  // Verificar token antes de hacer la petición
+  const isValidToken = await verifyToken();
+  if (!isValidToken) {
+    await AsyncStorage.removeItem('token');
+    await AsyncStorage.removeItem('user');
+    throw new Error('Token inválido o expirado');
+  }
+
   const headers = {
     ...options.headers,
     'Authorization': `Bearer ${token}`,
@@ -185,6 +213,14 @@ const authenticatedFetch = async (url: string, options: RequestInit = {}) => {
       statusText: response.statusText,
       errorData
     });
+    
+    // Si el error es de autenticación (401), limpiar el token y redirigir
+    if (response.status === 401) {
+      await AsyncStorage.removeItem('token');
+      await AsyncStorage.removeItem('user');
+      throw new Error('Sesión expirada');
+    }
+    
     throw new Error(errorData.message || 'Error en la petición');
   }
 
