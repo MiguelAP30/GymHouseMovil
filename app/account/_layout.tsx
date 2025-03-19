@@ -1,15 +1,22 @@
-import { Tabs } from 'expo-router';
+import { Tabs, Redirect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { useContext } from 'react';
+import ProtectedRoute from '../../context/ProtectedRoute';
+
 
 export default function AccountLayout() {
+
   return (
+    <ProtectedRoute>
     <Tabs
       screenOptions={{
         tabBarShowLabel: true,
-        tabBarStyle: { backgroundColor: '#000000',
+        tabBarStyle: { 
+          backgroundColor: '#000000',
           height: 60, 
           borderTopColor: '#000000',
-          borderTopWidth: 1,},
+          borderTopWidth: 1,
+        },
         tabBarActiveTintColor: '#6200ea',
         headerStyle: { backgroundColor: '#1F2937' },
         headerTintColor: '#37A4DF',
@@ -38,7 +45,7 @@ export default function AccountLayout() {
           tabBarIcon: ({ color, size }) => <Ionicons name="barbell" size={size} color={color} />,
         }}
       />
-    <Tabs.Screen
+      <Tabs.Screen
         name="dashboardAdmin"
         options={{
           headerShown: false,
@@ -46,5 +53,6 @@ export default function AccountLayout() {
         }}
       />
     </Tabs>
+    </ProtectedRoute>
   );
 }
