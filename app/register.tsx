@@ -30,15 +30,24 @@ export default function Register() {
   const onSubmit = async (data: RegisterFormData) => {
     setIsLoading(true);
     try {
-      const response = await postRegister(data);
-      if (response.access_token) {
-        await login(response.access_token, response.user);
-        router.push('/account/about');
-      } else {
-        Alert.alert("Error", "Error al registrar usuario");
+      const formData = {
+        ...data,
+        email: data.email.toLowerCase()
+      };
+      const response = await postRegister(formData);
+      
+      if (!response.access_token || !response.user) {
+        throw new Error('Respuesta del servidor incompleta');
       }
+      
+      await login(response.access_token, response.user);
+      router.push('/account/about');
     } catch (error) {
-      Alert.alert("Error", "Error al registrar usuario");
+      console.error('Error en registro:', error);
+      Alert.alert(
+        "Error",
+        error instanceof Error ? error.message : "Error al registrar usuario"
+      );
     } finally {
       setIsLoading(false);
     }

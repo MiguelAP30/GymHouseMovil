@@ -6,8 +6,7 @@ import About from './account/(about)/about';
 import Index from './index';
 import Register from './register';
 import "../global.css"
-
-
+import { AuthProvider } from '../context/AuthStore';
 
 const HomeLayout = () => {
   const [isConnected, setIsConnected] = React.useState(false)
@@ -22,14 +21,13 @@ const HomeLayout = () => {
   }, [])
 
   return (
-    <>
-      <StatusBar barStyle="light-content" backgroundColor="#1F2937" />
+    <AuthProvider>
       <Stack>
         <Stack.Screen name="index" options={{headerShown:false}}/>
         <Stack.Screen name="account" options={{headerShown:false}}/>
         <Stack.Screen name="register" options={{headerShown:false}}/>
       </Stack>
-    </>
+    </AuthProvider>
   )
 }
 

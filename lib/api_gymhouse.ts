@@ -13,6 +13,26 @@ import { getEnvironment } from '../config/env';
 
 const API = getEnvironment().API_URL;
 
+// Verificación de token
+const verifyToken = async () => {
+  try {
+    const token = await AsyncStorage.getItem('token');
+    if (!token) return false;
+
+    const response = await fetch(`${API}/user_data`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    return response.ok;
+  } catch (error) {
+    console.error('Error verificando token:', error);
+    return false;
+  }
+};
+
 // Autenticación
 export const postRegister = async (data: RegisterDAO) => {
   try {
@@ -35,8 +55,60 @@ export const postRegister = async (data: RegisterDAO) => {
       throw new Error(errorData.message || 'Error en el registro');
     }
 
-    const rawData = await response.json();
-    return rawData;
+    // Después del registro exitoso, intentar hacer login automáticamente
+    const loginResponse = await fetch(`${API}/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        email: data.email,
+        password: data.password
+      })
+    });
+
+    if (!loginResponse.ok) {
+      throw new Error('Registro exitoso pero error al iniciar sesión automáticamente');
+    }
+
+    const rawData = await loginResponse.json();
+    
+    if (!rawData.access_token) {
+      console.error('Respuesta del servidor inválida:', rawData);
+      throw new Error('La respuesta del servidor no tiene el formato esperado');
+    }
+
+    // Decodificar el token JWT para obtener la información del usuario
+    const tokenParts = rawData.access_token.split('.');
+    if (tokenParts.length !== 3) {
+      throw new Error('Token JWT inválido');
+    }
+
+    const payload = JSON.parse(atob(tokenParts[1]));
+    
+    // Construir el objeto usuario usando los datos del registro
+    const user = {
+      email: data.email,
+      name: data.name,
+      id_number: data.id_number,
+      user_name: data.username,
+      phone: data.phone,
+      birth_date: new Date(data.birth_date).getTime(),
+      gender: data.gender,
+      address: data.address,
+      password: '',
+      status: true,
+      start_date: null,
+      final_date: null,
+      role_id: payload['user.role'] || 1 // rol por defecto: logued
+    };
+
+    return {
+      access_token: rawData.access_token,
+      user: user,
+      status: 201,
+      message: 'Registro exitoso'
+    };
   } catch (error) {
     console.error('Error en el registro:', error);
     throw error;
@@ -65,7 +137,43 @@ export const postLogin = async (data: LoginDAO) => {
     }
 
     const rawData = await response.json();
-    return rawData;
+    
+    if (!rawData.access_token) {
+      console.error('Respuesta del servidor inválida:', rawData);
+      throw new Error('La respuesta del servidor no tiene el formato esperado');
+    }
+
+    // Decodificar el token JWT para obtener la información del usuario
+    const tokenParts = rawData.access_token.split('.');
+    if (tokenParts.length !== 3) {
+      throw new Error('Token JWT inválido');
+    }
+
+    const payload = JSON.parse(atob(tokenParts[1]));
+    
+    // Construir el objeto usuario a partir de los claims del token
+    const user = {
+      email: payload.sub,
+      name: payload['user.name'],
+      id_number: payload['user.id_number'],
+      role_id: payload['user.role'],
+      status: payload['user.status'],
+      user_name: payload['user.name'], // Usando el mismo nombre como username por ahora
+      phone: '',  // Valores por defecto para campos requeridos
+      birth_date: 0,
+      gender: '',
+      address: '',
+      password: '',
+      start_date: null,
+      final_date: null
+    };
+
+    return {
+      access_token: rawData.access_token,
+      user: user,
+      status: 200,
+      message: 'Login exitoso'
+    };
   } catch (error) {
     console.error('Error en el inicio de sesión:', error);
     throw error;
@@ -166,6 +274,14 @@ const authenticatedFetch = async (url: string, options: RequestInit = {}) => {
     throw new Error('No hay token de autenticación');
   }
 
+  // Verificar token antes de hacer la petición
+  const isValidToken = await verifyToken();
+  if (!isValidToken) {
+    await AsyncStorage.removeItem('token');
+    await AsyncStorage.removeItem('user');
+    throw new Error('Token inválido o expirado');
+  }
+
   const headers = {
     ...options.headers,
     'Authorization': `Bearer ${token}`,
@@ -185,6 +301,14 @@ const authenticatedFetch = async (url: string, options: RequestInit = {}) => {
       statusText: response.statusText,
       errorData
     });
+    
+    // Si el error es de autenticación (401), limpiar el token y redirigir
+    if (response.status === 401) {
+      await AsyncStorage.removeItem('token');
+      await AsyncStorage.removeItem('user');
+      throw new Error('Sesión expirada');
+    }
+    
     throw new Error(errorData.message || 'Error en la petición');
   }
 
