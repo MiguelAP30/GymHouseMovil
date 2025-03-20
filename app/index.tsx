@@ -47,10 +47,19 @@ export default function Index() {
         email: data.email.toLowerCase()
       };
       const response = await postLogin(formData);
+      
+      if (!response.access_token || !response.user) {
+        throw new Error('Respuesta del servidor incompleta');
+      }
+      
       await login(response.access_token, response.user);
       router.push('/account/about');
     } catch (error) {
-      Alert.alert("Error", "Credenciales inválidas");
+      console.error('Error en login:', error);
+      Alert.alert(
+        "Error", 
+        error instanceof Error ? error.message : "Error al iniciar sesión"
+      );
     } finally {
       setIsLoading(false);
     }

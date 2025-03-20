@@ -1,7 +1,7 @@
 import { useEffect, useContext } from 'react';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { AuthContext } from '../validators/AuthStore';
+import { AuthContext } from '../context/AuthStore';
 
 export const useAuth = () => {
   const router = useRouter();
