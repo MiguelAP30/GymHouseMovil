@@ -46,7 +46,7 @@ export default function Index() {
       await login(response.access_token, response.user);
       router.push('/account/about');
     } catch (error) {
-      Alert.alert("Error", "Credenciales inválidas");
+      Alert.alert("Error", "Credenciales inválidas"+error);
     } finally {
       setIsLoading(false);
     }
