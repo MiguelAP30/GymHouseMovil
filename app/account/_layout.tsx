@@ -55,7 +55,7 @@ export default function AccountLayout() {
             title: 'Crear Rutina',
             headerShown: false,
             tabBarIcon: ({ color, size }) => <Ionicons name="barbell" size={size} color={color} />,
-            //href: canAccessRutines ? "rutines" : null,
+            href: canAccessRutines ? "/account/rutines" : null,
           }}
         />
       
@@ -67,7 +67,7 @@ export default function AccountLayout() {
           title: 'Dashboard',
           headerShown: false,
           tabBarIcon: ({ color, size }) => <Ionicons name="speedometer" size={size} color={color} />,
-          //href: isAdmin ? "dashboardAdmin" : null,
+          href: isAdmin ? "/account/dashboardAdmin" : null,
         }}
       />
     </Tabs>
