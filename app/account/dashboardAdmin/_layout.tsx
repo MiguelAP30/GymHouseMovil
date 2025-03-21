@@ -1,10 +1,18 @@
-import { View, Text } from 'react-native';
-import React from 'react';
-import { Stack } from 'expo-router';
-import Drawer from 'expo-router/drawer';
+import { View } from 'react-native';
+import React, { useContext } from 'react';
+import { Drawer } from 'expo-router/drawer';
 import { Ionicons } from '@expo/vector-icons';
+import { AuthContext } from '../../../context/AuthStore';
+import { ROLES } from '../../../interfaces/interfaces';
+import { Redirect } from 'expo-router';
 
-const dashboardAdminLayout = () => {
+const DashboardAdminLayout = () => {
+  const { isAuthenticated, role } = useContext(AuthContext);
+
+  if (!isAuthenticated || role !== ROLES.admin) {
+    return <Redirect href="/unauthorized" />;
+  }
+
   return (
     <Drawer
       screenOptions={{
@@ -15,7 +23,6 @@ const dashboardAdminLayout = () => {
         drawerActiveBackgroundColor: '#6200ea',
         drawerActiveTintColor: '#ffffff',
         drawerInactiveBackgroundColor: '#1F2937',
-
       }}
     >
       <Drawer.Screen
@@ -23,10 +30,10 @@ const dashboardAdminLayout = () => {
         options={{
           title: 'Dashboard',
           headerShown: true,
-          drawerIcon: ({ color, size }) => <Ionicons name="speedometer" size={size} color={'#fff'} />,
+          drawerIcon: ({ size }) => <Ionicons name="speedometer" size={size} color={'#fff'} />,
         }}
         listeners={{
-          drawerItemPress: (e) => e.preventDefault(), // Evita la navegación
+          drawerItemPress: (e) => e.preventDefault(),
         }}
       />
       <Drawer.Screen
@@ -34,7 +41,7 @@ const dashboardAdminLayout = () => {
         options={{
           title: 'Etiquetas Rutinas',
           headerShown: true,
-          drawerIcon: ({ color, size }) => <Ionicons name="pricetag" size={size} color={'#fff'} />,
+          drawerIcon: ({ size }) => <Ionicons name="pricetag" size={size} color={'#fff'} />,
         }}
       />
       <Drawer.Screen
@@ -42,7 +49,7 @@ const dashboardAdminLayout = () => {
         options={{
           title: 'Días de la Semana',
           headerShown: true,
-          drawerIcon: ({ color, size }) => <Ionicons name="calendar" size={size} color={'#fff'} />,
+          drawerIcon: ({ size }) => <Ionicons name="calendar" size={size} color={'#fff'} />,
         }}
       />
       <Drawer.Screen
@@ -50,7 +57,7 @@ const dashboardAdminLayout = () => {
         options={{
           title: 'Dificultad de los ejercicios',
           headerShown: true,
-          drawerIcon: ({ color, size }) => <Ionicons name="barbell" size={size} color={'#fff'} />,
+          drawerIcon: ({ size }) => <Ionicons name="barbell" size={size} color={'#fff'} />,
         }}
       />
       <Drawer.Screen
@@ -58,7 +65,7 @@ const dashboardAdminLayout = () => {
         options={{
           title: 'Ejercicios',
           headerShown: true,
-          drawerIcon: ({ color, size }) => <Ionicons name="fitness" size={size} color={'#fff'} />,
+          drawerIcon: ({ size }) => <Ionicons name="fitness" size={size} color={'#fff'} />,
         }}
       />
       <Drawer.Screen
@@ -66,7 +73,7 @@ const dashboardAdminLayout = () => {
         options={{
           title: 'Gimnasios',
           headerShown: true,
-          drawerIcon: ({ color, size }) => <Ionicons name="home" size={size} color={'#fff'} />,
+          drawerIcon: ({ size }) => <Ionicons name="home" size={size} color={'#fff'} />,
         }}
       />
       <Drawer.Screen
@@ -74,7 +81,7 @@ const dashboardAdminLayout = () => {
         options={{
           title: 'Máquinas',
           headerShown: true,
-          drawerIcon: ({ color, size }) => <Ionicons name="cog" size={size} color={'#fff'} />,
+          drawerIcon: ({ size }) => <Ionicons name="cog" size={size} color={'#fff'} />,
         }}
       />
       <Drawer.Screen
@@ -82,7 +89,7 @@ const dashboardAdminLayout = () => {
         options={{
           title: 'Músculo Específico',
           headerShown: true,
-          drawerIcon: ({ color, size }) => <Ionicons name="body" size={size} color={'#fff'} />,
+          drawerIcon: ({ size }) => <Ionicons name="body" size={size} color={'#fff'} />,
         }}
       />
       <Drawer.Screen
@@ -90,7 +97,7 @@ const dashboardAdminLayout = () => {
         options={{
           title: 'Calificación de Ejercicio',
           headerShown: true,
-          drawerIcon: ({ color, size }) => <Ionicons name="star" size={size} color={'#fff'} />,
+          drawerIcon: ({ size }) => <Ionicons name="star" size={size} color={'#fff'} />,
         }}
       />
       <Drawer.Screen
@@ -98,11 +105,11 @@ const dashboardAdminLayout = () => {
         options={{
           title: 'Roles',
           headerShown: true,
-          drawerIcon: ({ color, size }) => <Ionicons name="people" size={size} color={'#fff'} />,
+          drawerIcon: ({ size }) => <Ionicons name="people" size={size} color={'#fff'} />,
         }}
       />
     </Drawer>
   );
 }
 
-export default dashboardAdminLayout;
+export default DashboardAdminLayout;

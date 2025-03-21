@@ -1,54 +1,16 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { router } from 'expo-router';
+import { View, Text } from 'react-native';
+import { Link } from 'expo-router';
 
-export default function Unauthorized() {
+export default function UnauthorizedScreen() {
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Acceso No Autorizado</Text>
-      <Text style={styles.message}>
-        No tienes permisos para acceder a esta página.
+    <View className="flex-1 items-center justify-center bg-gray-900 p-4">
+      <Text className="text-2xl font-bold text-white mb-4">Acceso No Autorizado</Text>
+      <Text className="text-white text-center mb-6">
+        No tienes permisos para acceder a esta sección.
       </Text>
-      <TouchableOpacity 
-        style={styles.button}
-        onPress={() => router.back()}
-      >
-        <Text style={styles.buttonText}>Volver</Text>
-      </TouchableOpacity>
+      <Link href="/account/about" className="bg-blue-600 px-6 py-3 rounded-lg">
+        <Text className="text-white font-bold">Volver al Inicio</Text>
+      </Link>
     </View>
   );
-}
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-    backgroundColor: '#1F2937',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#37A4DF',
-    marginBottom: 10,
-  },
-  message: {
-    fontSize: 16,
-    color: '#fff',
-    textAlign: 'center',
-    marginBottom: 20,
-  },
-  button: {
-    backgroundColor: '#6200ea',
-    padding: 15,
-    borderRadius: 8,
-    width: '80%',
-  },
-  buttonText: {
-    color: '#fff',
-    textAlign: 'center',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-}); 
+} 
