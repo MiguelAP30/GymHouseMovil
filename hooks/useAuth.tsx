@@ -19,7 +19,7 @@ export const useAuth = () => {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
-        }
+        } 
       });
 
       if (!response.ok) {

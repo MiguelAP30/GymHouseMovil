@@ -61,7 +61,7 @@ export default function AccountLayout() {
       {/* Ruta exclusiva para admin */}
       {isAdmin && (
         <Tabs.Screen
-          name="(dashboardAdmin)"
+          name="dashboardAdmin"
           options={{
             title: 'Dashboard',
             headerShown: false,
