@@ -91,7 +91,7 @@ export const postRegister = async (data: RegisterDAO) => {
       email: data.email,
       name: data.name,
       id_number: data.id_number,
-      user_name: data.username,
+      user_name: data.user_name,
       phone: data.phone,
       birth_date: new Date(data.birth_date).getTime(),
       gender: data.gender,
@@ -264,6 +264,20 @@ export const postGym = async (data: GymDAO) => {
 
 export const getGym = async () => {
   return authenticatedFetch('/gym').then(res => res.json());
+}
+
+// Usuarios y Roles
+export const getAllUsers = async () => {
+  const response = await authenticatedFetch('/user');
+  const data = await response.json();
+  return { data: data }; // Adaptamos la respuesta al formato esperado por el componente
+}
+
+export const updateUserRole = async (email: string, role_id: number) => {
+  // La API espera el role_id como query parameter, no como body
+  return authenticatedFetch(`/user/user_role/${email}?role_id=${role_id}`, {
+    method: 'PUT'
+  }).then(res => res.json());
 }
 
 // Función auxiliar para hacer peticiones autenticadas

@@ -61,7 +61,7 @@ export interface RegisterDAO {
     email: string;
     id_number: string;
     password: string;
-    username: string;
+    user_name: string;
     name: string;
     phone: string;
     address: string;

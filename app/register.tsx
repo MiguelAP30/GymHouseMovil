@@ -16,7 +16,7 @@ interface RegisterFormData {
   phone: string;
   address: string;
   id_number: string;
-  username: string;
+  user_name: string;
   birth_date: string;
   gender: string;
 }
@@ -94,7 +94,7 @@ export default function Register() {
           <Text className={labelForm}>Nombre de usuario</Text>
           <Controller
             control={control}
-            name="username"
+            name="user_name"
             rules={{ required: "El nombre de usuario es obligatorio" }}
             render={({ field: { onChange, onBlur, value } }) => (
               <TextInput
@@ -107,7 +107,7 @@ export default function Register() {
               />
             )}
           />
-          {errors.username && <Text className="text-red-500">{errors.username.message}</Text>}
+          {errors.user_name && <Text className="text-red-500">{errors.user_name.message}</Text>}
         </View>
 
         {/* Input: Número de identificación */}
