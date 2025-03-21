@@ -1,7 +1,6 @@
 import { View, Text, TextInput, TouchableOpacity, Image, Alert, ScrollView } from 'react-native';
 import { Link } from 'expo-router';
 import { useForm, Controller } from 'react-hook-form';
-import NetInfo from '@react-native-community/netinfo';
 import { 
   tituloForm, 
   labelForm, 
@@ -16,23 +15,27 @@ import { useEffect, useState, useContext } from 'react';
 import { useRouter } from 'expo-router';
 import { postLogin } from '../lib/api_gymhouse';
 import { AuthContext } from '../context/AuthStore';
+import { ConnectivityContext } from './_layout';
 
 export default function Index() {
   const { control, handleSubmit, formState: { errors } } = useForm<{ email: string; password: string }>();
-  const [isConnected, setIsConnected] = useState<boolean | null>(null);
   const router = useRouter();
-  const { login } = useContext(AuthContext);
+  const { login, logout, isAuthenticated, user, token } = useContext(AuthContext);
+  const { isConnected } = useContext(ConnectivityContext);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    const unsubscribe = NetInfo.addEventListener(state => {
-      setIsConnected(state.isConnected ?? false);
-    });
-
-    return () => {
-      unsubscribe();
+    const checkAuthAndRedirect = async () => {
+      if (isAuthenticated && user && token) {
+        router.push('/account/about');
+      } else if (token) {
+        // Si hay token pero no hay usuario autenticado, limpiamos el estado
+        await logout();
+      }
     };
-  }, []);
+
+    checkAuthAndRedirect();
+  }, [isAuthenticated, user, token]);
 
   const onSubmit = async (data: { email: string; password: string }) => {
     if (!isConnected) {

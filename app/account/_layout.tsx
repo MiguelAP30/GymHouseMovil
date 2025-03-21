@@ -48,27 +48,28 @@ export default function AccountLayout() {
       />
 
       {/* Rutas para usuarios con roles específicos */}
-      {canAccessRutines && (
+      
         <Tabs.Screen
-          name="(rutines)/crearRutines"
+          name="rutines"
           options={{
             title: 'Crear Rutina',
+            headerShown: false,
             tabBarIcon: ({ color, size }) => <Ionicons name="barbell" size={size} color={color} />,
+            //href: canAccessRutines ? "rutines" : null,
           }}
         />
-      )}
+      
 
       {/* Ruta exclusiva para admin */}
-      {isAdmin && (
-        <Tabs.Screen
-          name="dashboardAdmin"
-          options={{
-            title: 'Dashboard',
-            headerShown: false,
-            tabBarIcon: ({ color, size }) => <Ionicons name="speedometer" size={size} color={color} />,
-          }}
-        />
-      )}
+      <Tabs.Screen
+        name="dashboardAdmin"
+        options={{
+          title: 'Dashboard',
+          headerShown: false,
+          tabBarIcon: ({ color, size }) => <Ionicons name="speedometer" size={size} color={color} />,
+          //href: isAdmin ? "dashboardAdmin" : null,
+        }}
+      />
     </Tabs>
   );
 }

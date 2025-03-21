@@ -1,13 +1,21 @@
 import { View, Text, TextInput, TouchableOpacity, Switch, Image } from 'react-native';
 //import { Picker } from '@react-native-picker/picker';
-import { useState } from 'react';
+import { useState, useContext } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { 
   tituloForm, parrafoForm, labelForm, inputForm, 
   botonGeneral, textoBotonGeneral, fondoTotal, tarjetaForm
 } from '../../../components/tokens';
+import { AuthContext } from '../../../context/AuthStore';
+import { ROLES } from '../../../interfaces/interfaces';
+import { Redirect } from 'expo-router';
+
 
 const CrearRutina = () => {
+  const { isAuthenticated, role } = useContext(AuthContext);
+  if (!isAuthenticated || (role ?? 0) < ROLES.premium) {
+    return <Redirect href="/unauthorized" />;
+  }
   const { control, handleSubmit, formState: { errors } } = useForm();
   //const [selectedTag, setSelectedTag] = useState("Cardio");
   const [isVisible, setIsVisible] = useState(false);
