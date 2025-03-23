@@ -39,6 +39,8 @@ export default function AccountLayout() {
           tabBarIcon: ({ color, size }) => <Ionicons name="information-circle" size={size} color={color} />,
         }}
       />
+      
+      
       <Tabs.Screen
         name="(questions)/questions"
         options={{
@@ -68,6 +70,15 @@ export default function AccountLayout() {
           headerShown: false,
           tabBarIcon: ({ color, size }) => <Ionicons name="speedometer" size={size} color={color} />,
           href: isAdmin ? "/account/dashboardAdmin" : null,
+        }}
+      />
+      <Tabs.Screen
+        name="perfil"
+        options={{
+          title: 'Perfil',
+          headerShown: false,
+          tabBarIcon: ({ color, size }) => <Ionicons name="person" size={size} color={color} />,
+          href: "/account/perfil",
         }}
       />
     </Tabs>

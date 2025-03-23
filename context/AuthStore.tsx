@@ -13,6 +13,7 @@ interface AuthContextType {
   login: (token: string, userData: UserDAO) => Promise<void>;
   logout: () => Promise<void>;
   fetchUserData: () => Promise<void>;
+  getProfileByEmail: (email: string) => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthContextType>({
@@ -23,6 +24,7 @@ export const AuthContext = createContext<AuthContextType>({
   login: async () => {},
   logout: async () => {},
   fetchUserData: async () => {},
+  getProfileByEmail: async () => {},
 });
 
 interface AuthProviderProps {
@@ -74,24 +76,30 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
 
       const data = await response.json();
+      
+      const profileData = await getProfileByEmail(data.data["sub"]);
+      
       const userData: UserDAO = {
         ...user!,
-        role_id: data.data["user.role"],
-        name: data.data["user.name"],
-        email: data.data["sub"],
-        id_number: user?.id_number || '',
-        user_name: user?.user_name || '',
-        phone: user?.phone || '',
-        birth_date: user?.birth_date || 0,
-        gender: user?.gender || '',
-        address: user?.address || '',
-        password: user?.password || '',
+        role_id: profileData["role_id"],
+        name: profileData["name"],
+        email: profileData["email"], 
+        id_number: profileData["id_number"],
+        user_name: profileData["user_name"],
+        phone: profileData["phone"],
+        birth_date: profileData["birth_date"],
+        gender: profileData["gender"] == 'm' ? 'Masculino' : 'Femenino',
+        address: profileData["address"],
+        password: profileData["password"],
         status: user?.status || false,
         start_date: user?.start_date || null,
         final_date: user?.final_date || null
       };
-
-      setUser(userData);
+      console.log("profileData ",profileData);
+      
+      console.log("userData ",userData);
+      
+      //setUser(userData);
       setRole(data.data["user.role"]);
       await AsyncStorage.setItem('user', JSON.stringify(userData));
     } catch (error) {
@@ -137,10 +145,33 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       role,
       login, 
       logout,
-      fetchUserData 
+      fetchUserData ,
+      getProfileByEmail
     }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
+const getProfileByEmail = async (email: string) => {
+  try {
+    const currentToken = await AsyncStorage.getItem('token');
+    if (!currentToken) return null;
+
+    const response = await fetch(`${API}/user/${email}`, {
+      headers: {
+        'Authorization': `Bearer ${currentToken}`, 
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error('Error al obtener datos del usuario');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching profile:', error);
+    throw error;
+  }
+};
