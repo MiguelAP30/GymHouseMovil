@@ -56,14 +56,14 @@ const Roles = () => {
           className={botonGuardar}
           onPress={fetchUsers}
         >
-          <Text className="text-white text-center">Reintentar</Text>
+          <Text className="text-black text-center">Reintentar</Text>
         </TouchableOpacity>
       </View>
     )
   }
 
   return (
-    <ScrollView className="flex-1 p-4">
+    <ScrollView className="flex-1 p-4 bg-black">
       <Text className={tituloForm}>Gestión de Roles</Text>
       
       {users.length === 0 ? (

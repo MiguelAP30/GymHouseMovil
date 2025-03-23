@@ -9,7 +9,7 @@ export default function AccountLayout() {
   const isAdmin = role === ROLES.admin;
 
   if (!isAuthenticated || role === null) {
-    return <Redirect href="/login" />;
+    return <Redirect href="/index" />;
   }
 
   const canAccessRutines = role === ROLES.premium || role === ROLES.gym || role === ROLES.admin;
