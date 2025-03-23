@@ -14,7 +14,7 @@ export default function PerfilLayout() {
     <Stack
       screenOptions={{
         headerStyle: {
-          backgroundColor: '#1F2937', 
+          backgroundColor: '#1F2937',
         },
         headerTintColor: '#37A4DF',
         headerTitleStyle: {
