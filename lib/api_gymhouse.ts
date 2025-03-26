@@ -7,7 +7,8 @@ import {
   RutinaDAO,
   TrainingPlanDAO,
   TagOfTrainingPlanDAO,
-  UserDAO
+  UserDAO,
+  ExerciseDAO
 } from '../interfaces/interfaces';
 import { getEnvironment } from '../config/env';
 
@@ -343,6 +344,35 @@ const authenticatedFetch = async (url: string, options: RequestInit = {}) => {
 
 const getMachines = async () => {
   return authenticatedFetch('/machine').then(res => res.json());
+}
+
+// Ejercicios
+export const getExercises = async () => {
+  return authenticatedFetch('/exercise').then(res => res.json());
+}
+
+export const getExerciseById = async (id: number) => {
+  return authenticatedFetch(`/exercise/${id}`).then(res => res.json());
+}
+
+export const postExercise = async (data: ExerciseDAO) => {
+  return authenticatedFetch('/exercise', {
+    method: 'POST',
+    body: JSON.stringify(data)
+  }).then(res => res.json());
+}
+
+export const putExercise = async (id: number, data: ExerciseDAO) => {
+  return authenticatedFetch(`/exercise/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data)
+  }).then(res => res.json());
+}
+
+export const deleteExercise = async (id: number) => {
+  return authenticatedFetch(`/exercise/${id}`, {
+    method: 'DELETE'
+  }).then(res => res.json());
 }
 
 

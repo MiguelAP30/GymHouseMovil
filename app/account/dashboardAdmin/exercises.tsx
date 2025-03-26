@@ -1,12 +1,235 @@
-import { View, Text } from 'react-native'
-import React from 'react'
+import { View, Text, TouchableOpacity, Modal, TextInput, ScrollView, ActivityIndicator } from 'react-native'
+import React, { useState, useEffect } from 'react'
+import { Ionicons } from '@expo/vector-icons'
+import { ExerciseDAO } from '../../../interfaces/interfaces'
+import { getExercises, postExercise, putExercise, deleteExercise } from '../../../lib/api_gymhouse'
 
-const exercises = () => {
+const Exercises = () => {
+  const [modalVisible, setModalVisible] = useState(false)
+  const [editModalVisible, setEditModalVisible] = useState(false)
+  const [selectedExercise, setSelectedExercise] = useState<ExerciseDAO | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [exercises, setExercises] = useState<ExerciseDAO[]>([])
+  const [newExercise, setNewExercise] = useState<Omit<ExerciseDAO, 'id'>>({
+    name: '',
+    description: '',
+    dateAdded: new Date().toISOString().split('T')[0],
+    dificulty_id: 1,
+    image: '',
+    machine_id: 1,
+    video: ''
+  })
+
+  useEffect(() => {
+    fetchExercises()
+  }, [])
+
+  const fetchExercises = async () => {
+    try {
+      setLoading(true)
+      const response = await getExercises()
+      setExercises(response)
+    } catch (error) {
+      console.error('Error al obtener ejercicios:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleAddExercise = async () => {
+    try {
+      await postExercise(newExercise)
+      await fetchExercises()
+      setNewExercise({
+        name: '',
+        description: '',
+        dateAdded: new Date().toISOString().split('T')[0],
+        dificulty_id: 1,
+        image: '',
+        machine_id: 1,
+        video: ''
+      })
+      setModalVisible(false)
+    } catch (error) {
+      console.error('Error al agregar ejercicio:', error)
+    }
+  }
+
+  const handleDeleteExercise = async (id: number) => {
+    try {
+      await deleteExercise(id)
+      await fetchExercises()
+    } catch (error) {
+      console.error('Error al eliminar ejercicio:', error)
+    }
+  }
+
+  const handleEditExercise = (exercise: ExerciseDAO) => {
+    setSelectedExercise(exercise)
+    setEditModalVisible(true)
+  }
+
+  const handleUpdateExercise = async () => {
+    if (!selectedExercise?.id) return
+    
+    try {
+      await putExercise(selectedExercise.id, selectedExercise)
+      await fetchExercises()
+      setEditModalVisible(false)
+    } catch (error) {
+      console.error('Error al actualizar ejercicio:', error)
+    }
+  }
+
+  if (loading) {
+    return (
+      <View className="flex-1 justify-center items-center">
+        <ActivityIndicator size="large" color="#0000ff" />
+      </View>
+    )
+  }
+
   return (
-    <View>
-      <Text>exercises</Text>
+    <View className="flex-1 p-5 bg-gray-100">
+      <View className="flex-row justify-between items-center mb-5">
+        <Text className="text-2xl font-bold">Ejercicios</Text>
+        <TouchableOpacity 
+          className="bg-blue-500 p-2.5 rounded-lg"
+          onPress={() => setModalVisible(true)}
+        >
+          <Text className="text-white font-bold">Agregar Ejercicio</Text>
+        </TouchableOpacity>
+      </View>
+
+      <ScrollView className="flex-1">
+        {exercises.map(exercise => (
+          <View key={exercise.id} className="bg-white p-4 rounded-lg mb-2.5 flex-row justify-between items-center shadow-md">
+            <View className="flex-1">
+              <Text className="text-lg font-bold">{exercise.name}</Text>
+              <Text className="text-gray-600">{exercise.description}</Text>
+              <Text className="text-blue-500 mt-1">Dificultad: {exercise.dificulty_id}</Text>
+            </View>
+            <View className="flex-row">
+              <TouchableOpacity 
+                onPress={() => handleEditExercise(exercise)}
+                className="mr-2.5"
+              >
+                <Ionicons name="pencil" size={24} color="#007AFF" />
+              </TouchableOpacity>
+              <TouchableOpacity 
+                onPress={() => exercise.id && handleDeleteExercise(exercise.id)}
+                className="ml-2.5"
+              >
+                <Ionicons name="trash" size={24} color="#FF3B30" />
+              </TouchableOpacity>
+            </View>
+          </View>
+        ))}
+      </ScrollView>
+
+      {/* Modal para agregar ejercicio */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+      >
+        <View className="flex-1 justify-center items-center bg-black/50">
+          <View className="bg-white p-5 rounded-lg w-4/5">
+            <Text className="text-xl font-bold mb-4">Nuevo Ejercicio</Text>
+            <TextInput
+              className="border border-gray-300 p-2.5 rounded-lg mb-2.5"
+              placeholder="Nombre del ejercicio"
+              value={newExercise.name}
+              onChangeText={(text) => setNewExercise({...newExercise, name: text})}
+            />
+            <TextInput
+              className="border border-gray-300 p-2.5 rounded-lg mb-2.5"
+              placeholder="Descripción"
+              value={newExercise.description}
+              onChangeText={(text) => setNewExercise({...newExercise, description: text})}
+            />
+            <TextInput
+              className="border border-gray-300 p-2.5 rounded-lg mb-2.5"
+              placeholder="URL de la imagen"
+              value={newExercise.image}
+              onChangeText={(text) => setNewExercise({...newExercise, image: text})}
+            />
+            <TextInput
+              className="border border-gray-300 p-2.5 rounded-lg mb-2.5"
+              placeholder="URL del video"
+              value={newExercise.video}
+              onChangeText={(text) => setNewExercise({...newExercise, video: text})}
+            />
+            <View className="flex-row justify-end mt-4">
+              <TouchableOpacity 
+                className="bg-red-500 p-2.5 rounded-lg mr-2.5"
+                onPress={() => setModalVisible(false)}
+              >
+                <Text className="text-white font-bold">Cancelar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                className="bg-blue-500 p-2.5 rounded-lg"
+                onPress={handleAddExercise}
+              >
+                <Text className="text-white font-bold">Guardar</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Modal para editar ejercicio */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={editModalVisible}
+      >
+        <View className="flex-1 justify-center items-center bg-black/50">
+          <View className="bg-white p-5 rounded-lg w-4/5">
+            <Text className="text-xl font-bold mb-4">Editar Ejercicio</Text>
+            <TextInput
+              className="border border-gray-300 p-2.5 rounded-lg mb-2.5"
+              placeholder="Nombre del ejercicio"
+              value={selectedExercise?.name}
+              onChangeText={(text) => selectedExercise && setSelectedExercise({...selectedExercise, name: text})}
+            />
+            <TextInput
+              className="border border-gray-300 p-2.5 rounded-lg mb-2.5"
+              placeholder="Descripción"
+              value={selectedExercise?.description}
+              onChangeText={(text) => selectedExercise && setSelectedExercise({...selectedExercise, description: text})}
+            />
+            <TextInput
+              className="border border-gray-300 p-2.5 rounded-lg mb-2.5"
+              placeholder="URL de la imagen"
+              value={selectedExercise?.image}
+              onChangeText={(text) => selectedExercise && setSelectedExercise({...selectedExercise, image: text})}
+            />
+            <TextInput
+              className="border border-gray-300 p-2.5 rounded-lg mb-2.5"
+              placeholder="URL del video"
+              value={selectedExercise?.video}
+              onChangeText={(text) => selectedExercise && setSelectedExercise({...selectedExercise, video: text})}
+            />
+            <View className="flex-row justify-end mt-4">
+              <TouchableOpacity 
+                className="bg-red-500 p-2.5 rounded-lg mr-2.5"
+                onPress={() => setEditModalVisible(false)}
+              >
+                <Text className="text-white font-bold">Cancelar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                className="bg-blue-500 p-2.5 rounded-lg"
+                onPress={handleUpdateExercise}
+              >
+                <Text className="text-white font-bold">Actualizar</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   )
 }
 
-export default exercises
+export default Exercises

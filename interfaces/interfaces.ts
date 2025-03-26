@@ -110,3 +110,14 @@ export interface ProductDAO {
     stock: number
     state_id: number
 }
+
+export interface ExerciseDAO {
+    id?: number;
+    name: string;
+    description: string;
+    dateAdded: string;
+    dificulty_id: number;
+    image: string;
+    machine_id: number;
+    video: string;
+}
