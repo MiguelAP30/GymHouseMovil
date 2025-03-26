@@ -268,16 +268,36 @@ export const getGym = async () => {
 
 // Usuarios y Roles
 export const getAllUsers = async () => {
-  const response = await authenticatedFetch('/user');
-  const data = await response.json();
-  return { data: data }; // Adaptamos la respuesta al formato esperado por el componente
+  try {
+    const response = await authenticatedFetch('/user');
+    const data = await response.json();
+    
+    if (!data) {
+      throw new Error('No se recibieron datos de usuarios');
+    }
+    
+    return { data: Array.isArray(data) ? data : [data] };
+  } catch (error) {
+    console.error('Error al obtener usuarios:', error);
+    throw error;
+  }
 }
 
 export const updateUserRole = async (email: string, role_id: number) => {
-  // La API espera el role_id como query parameter, no como body
-  return authenticatedFetch(`/user/user_role/${email}?role_id=${role_id}`, {
-    method: 'PUT'
-  }).then(res => res.json());
+  try {
+    const response = await authenticatedFetch(`/user/user_role/${email}?role_id=${role_id}`, {
+      method: 'PUT'
+    });
+    
+    if (!response.ok) {
+      throw new Error('Error al actualizar el rol del usuario');
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error al actualizar rol:', error);
+    throw error;
+  }
 }
 
 // Función auxiliar para hacer peticiones autenticadas
@@ -286,14 +306,6 @@ const authenticatedFetch = async (url: string, options: RequestInit = {}) => {
   
   if (!token) {
     throw new Error('No hay token de autenticación');
-  }
-
-  // Verificar token antes de hacer la petición
-  const isValidToken = await verifyToken();
-  if (!isValidToken) {
-    await AsyncStorage.removeItem('token');
-    await AsyncStorage.removeItem('user');
-    throw new Error('Token inválido o expirado');
   }
 
   const headers = {
@@ -316,7 +328,6 @@ const authenticatedFetch = async (url: string, options: RequestInit = {}) => {
       errorData
     });
     
-    // Si el error es de autenticación (401), limpiar el token y redirigir
     if (response.status === 401) {
       await AsyncStorage.removeItem('token');
       await AsyncStorage.removeItem('user');

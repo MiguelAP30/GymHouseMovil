@@ -2,6 +2,7 @@ import React, { createContext, useState, useEffect, ReactNode } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AuthResponseDAO, ProfileDAO, UserDAO } from '../interfaces/interfaces';
 import { getEnvironment } from '../config/env';
+import { router } from 'expo-router';
 
 const API = getEnvironment().API_URL;
 
@@ -14,6 +15,7 @@ interface AuthContextType {
   login: (token: string, userData: UserDAO) => Promise<void>;
   logout: () => Promise<void>;
   fetchUserData: () => Promise<void>;
+  checkAuth: () => Promise<boolean>;
 }
 
 export const AuthContext = createContext<AuthContextType>({
@@ -24,12 +26,21 @@ export const AuthContext = createContext<AuthContextType>({
   profile: null,
   login: async () => {},
   logout: async () => {},
-  fetchUserData: async () => {}
+  fetchUserData: async () => {},
+  checkAuth: async () => false
 });
 
 interface AuthProviderProps {
   children: ReactNode;
 }
+
+export const useAuth = () => {
+  const context = React.useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth debe ser usado dentro de un AuthProvider');
+  }
+  return context;
+};
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -205,7 +216,36 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  
+  const checkAuth = async () => {
+    try {
+      const currentToken = await AsyncStorage.getItem('token');
+      if (!currentToken) {
+        router.replace('/');
+        return false;
+      }
+
+      const response = await fetch(`${API}/user_data`, {
+        headers: {
+          'Authorization': `Bearer ${currentToken}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        await logout();
+        router.replace('/');
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Error checking auth:', error);
+      await logout();
+      router.replace('/');
+      return false;
+    }
+  };
+
   return (
     <AuthContext.Provider value={{ 
       isAuthenticated, 
@@ -215,7 +255,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       profile,
       login, 
       logout,
-      fetchUserData
+      fetchUserData,
+      checkAuth
     }}>
       {children}
     </AuthContext.Provider>

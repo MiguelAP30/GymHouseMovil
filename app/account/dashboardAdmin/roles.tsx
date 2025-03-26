@@ -4,20 +4,34 @@ import { UserDAO, ROLES } from '../../../interfaces/interfaces'
 import { Picker } from '@react-native-picker/picker'
 import { tarjetaForm, tituloForm, parrafoForm, botonGuardar } from '../../../components/tokens'
 import { getAllUsers, updateUserRole } from '../../../lib/api_gymhouse'
+import { useAuth } from '../../../context/AuthStore'
+import { router } from 'expo-router'
 
 const Roles = () => {
+  const { checkAuth } = useAuth()
   const [users, setUsers] = useState<UserDAO[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   const fetchUsers = async () => {
     try {
+      const isAuthenticated = await checkAuth()
+      if (!isAuthenticated) return
+
       const response = await getAllUsers()
+      if (!response || !response.data) {
+        throw new Error('Formato de respuesta inválido')
+      }
+
       setUsers(response.data.filter((user: UserDAO) => user.role_id !== ROLES.admin))
       setError(null)
     } catch (error) {
       console.error('Error:', error)
-      setError('Error al cargar los usuarios. Por favor, intenta de nuevo.')
+      if (error instanceof Error && error.message.includes('Sesión expirada')) {
+        router.replace('/')
+      } else {
+        setError('Error al cargar los usuarios. Por favor, intenta de nuevo.')
+      }
     } finally {
       setLoading(false)
     }
@@ -25,6 +39,9 @@ const Roles = () => {
 
   const handleRoleUpdate = async (email: string, newRoleId: number) => {
     try {
+      const isAuthenticated = await checkAuth()
+      if (!isAuthenticated) return
+
       await updateUserRole(email, newRoleId)
       setUsers(users.map(user => 
         user.email === email ? { ...user, role_id: newRoleId } : user
@@ -32,7 +49,11 @@ const Roles = () => {
       setError(null)
     } catch (error) {
       console.error('Error:', error)
-      setError('Error al actualizar el rol. Por favor, intenta de nuevo.')
+      if (error instanceof Error && error.message.includes('Sesión expirada')) {
+        router.replace('/')
+      } else {
+        setError('Error al actualizar el rol. Por favor, intenta de nuevo.')
+      }
     }
   }
 
@@ -42,7 +63,7 @@ const Roles = () => {
 
   if (loading) {
     return (
-      <View className="flex-1 justify-center items-center">
+      <View className="flex-1 justify-center items-center bg-black">
         <Text className={parrafoForm}>Cargando usuarios...</Text>
       </View>
     )
@@ -50,13 +71,13 @@ const Roles = () => {
 
   if (error) {
     return (
-      <View className="flex-1 justify-center items-center p-4">
+      <View className="flex-1 justify-center items-center p-4 bg-black">
         <Text className={parrafoForm}>{error}</Text>
         <TouchableOpacity 
           className={botonGuardar}
           onPress={fetchUsers}
         >
-          <Text className="text-black text-center">Reintentar</Text>
+          <Text className="text-white text-center">Reintentar</Text>
         </TouchableOpacity>
       </View>
     )
@@ -72,7 +93,7 @@ const Roles = () => {
         users.map((user) => (
           <View key={user.email} className={`${tarjetaForm} mb-4`}>
             <Text className={parrafoForm}>Email: {user.email}</Text>
-            <Text className={parrafoForm}>Usuario: {user.user_name}</Text>
+            <Text className={parrafoForm}>Usuario: {user.user_name || 'No especificado'}</Text>
             <Text className={parrafoForm}>Nombre: {user.name}</Text>
             
             <View className="mt-4">
