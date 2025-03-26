@@ -328,3 +328,13 @@ const authenticatedFetch = async (url: string, options: RequestInit = {}) => {
 
   return response;
 };
+
+
+const getMachines = async () => {
+  return authenticatedFetch('/machine').then(res => res.json());
+}
+
+
+
+
+

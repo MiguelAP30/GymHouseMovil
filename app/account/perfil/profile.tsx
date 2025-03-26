@@ -17,7 +17,7 @@ import {
 } from '../../../components/tokens';
 
 const Profile = () => {
-  const { user, fetchUserData, getProfileByEmail } = useContext(AuthContext);
+  const { profile, fetchUserData } = useContext(AuthContext);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -26,7 +26,6 @@ const Profile = () => {
       setLoading(false);
     };
     loadData();
-    getProfileByEmail(user?.email || '');
   }, []);
 
   if (loading) {
@@ -39,35 +38,35 @@ const Profile = () => {
 
   return (
     <ScrollView className={perfilContainer}>
-      {user ? (
+      {profile ? (
         <View className="p-4">
           <View className={perfilHeader}>
-            <Text className={perfilNombre}>{user.name}</Text>
-            <Text className={perfilUsername}>{user.user_name}</Text>
-            <Text className={perfilEmail}>{user.email}</Text>
+            <Text className={perfilNombre}>{profile.name}</Text>
+            <Text className={perfilUsername}>{profile.user_name}</Text>
+            <Text className={perfilEmail}>{profile.email}</Text>
           </View>
 
           <View className={perfilCard}>
             <Text className={perfilTitulo}>Información Personal</Text>
             <View className={perfilRow}>
               <Text className={perfilLabel}>Documento:</Text>
-              <Text className={perfilValue}>{user.id_number}</Text>
+              <Text className={perfilValue}>{profile.id_number}</Text>
             </View>
             <View className={perfilRow}>
               <Text className={perfilLabel}>Teléfono:</Text>
-              <Text className={perfilValue}>{user.phone}</Text>
+              <Text className={perfilValue}>{profile.phone}</Text>
             </View>
             <View className={perfilRow}>
               <Text className={perfilLabel}>Dirección:</Text>
-              <Text className={perfilValue}>{user.address}</Text>
+              <Text className={perfilValue}>{profile.address}</Text>
             </View>
             <View className={perfilRow}>
               <Text className={perfilLabel}>Fecha de Nacimiento:</Text>
-              <Text className={perfilValue}>{user.birth_date}</Text>
+              <Text className={perfilValue}>{profile.birth_date}</Text>
             </View>
             <View className={perfilRow}>
               <Text className={perfilLabel}>Género:</Text>
-              <Text className={perfilValue}>{user.gender}</Text>
+              <Text className={perfilValue}>{profile.gender}</Text>
             </View>
           </View>
         </View>
