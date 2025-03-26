@@ -1,8 +1,15 @@
 import { View, Text, TouchableOpacity, Modal, TextInput, ScrollView, ActivityIndicator } from 'react-native'
+import { Picker } from '@react-native-picker/picker'
 import React, { useState, useEffect } from 'react'
 import { Ionicons } from '@expo/vector-icons'
-import { ExerciseDAO } from '../../../interfaces/interfaces'
-import { getExercises, postExercise, putExercise, deleteExercise } from '../../../lib/api_gymhouse'
+import { ExerciseDAO, DifficultyDAO } from '../../../interfaces/interfaces'
+import { getExercises, postExercise, putExercise, deleteExercise, getDifficulties, getMachines } from '../../../lib/api_gymhouse'
+
+interface Machine {
+  id: number;
+  name: string;
+  description: string;
+}
 
 const Exercises = () => {
   const [modalVisible, setModalVisible] = useState(false)
@@ -10,6 +17,8 @@ const Exercises = () => {
   const [selectedExercise, setSelectedExercise] = useState<ExerciseDAO | null>(null)
   const [loading, setLoading] = useState(true)
   const [exercises, setExercises] = useState<ExerciseDAO[]>([])
+  const [difficulties, setDifficulties] = useState<DifficultyDAO[]>([])
+  const [machines, setMachines] = useState<Machine[]>([])
   const [newExercise, setNewExercise] = useState<Omit<ExerciseDAO, 'id'>>({
     name: '',
     description: '',
@@ -22,6 +31,8 @@ const Exercises = () => {
 
   useEffect(() => {
     fetchExercises()
+    fetchDifficulties()
+    fetchMachines()
   }, [])
 
   const fetchExercises = async () => {
@@ -33,6 +44,24 @@ const Exercises = () => {
       console.error('Error al obtener ejercicios:', error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const fetchDifficulties = async () => {
+    try {
+      const response = await getDifficulties()
+      setDifficulties(response)
+    } catch (error) {
+      console.error('Error al obtener dificultades:', error)
+    }
+  }
+
+  const fetchMachines = async () => {
+    try {
+      const response = await getMachines()
+      setMachines(response)
+    } catch (error) {
+      console.error('Error al obtener máquinas:', error)
     }
   }
 
@@ -107,7 +136,12 @@ const Exercises = () => {
             <View className="flex-1">
               <Text className="text-lg font-bold">{exercise.name}</Text>
               <Text className="text-gray-600">{exercise.description}</Text>
-              <Text className="text-blue-500 mt-1">Dificultad: {exercise.dificulty_id}</Text>
+              <Text className="text-blue-500 mt-1">
+                Dificultad: {difficulties.find(d => d.id === exercise.dificulty_id)?.name || 'No especificada'}
+              </Text>
+              <Text className="text-blue-500">
+                Máquina: {machines.find(m => m.id === exercise.machine_id)?.name || 'No especificada'}
+              </Text>
             </View>
             <View className="flex-row">
               <TouchableOpacity 
@@ -148,6 +182,36 @@ const Exercises = () => {
               value={newExercise.description}
               onChangeText={(text) => setNewExercise({...newExercise, description: text})}
             />
+            <View className="border border-gray-300 rounded-lg mb-2.5">
+              <Picker
+                selectedValue={newExercise.dificulty_id}
+                onValueChange={(value: number) => setNewExercise({...newExercise, dificulty_id: value})}
+                style={{ height: 50 }}
+              >
+                {difficulties.map(difficulty => (
+                  <Picker.Item 
+                    key={difficulty.id} 
+                    label={difficulty.name} 
+                    value={difficulty.id} 
+                  />
+                ))}
+              </Picker>
+            </View>
+            <View className="border border-gray-300 rounded-lg mb-2.5">
+              <Picker
+                selectedValue={newExercise.machine_id}
+                onValueChange={(value: number) => setNewExercise({...newExercise, machine_id: value})}
+                style={{ height: 50 }}
+              >
+                {machines.map(machine => (
+                  <Picker.Item 
+                    key={machine.id} 
+                    label={machine.name} 
+                    value={machine.id} 
+                  />
+                ))}
+              </Picker>
+            </View>
             <TextInput
               className="border border-gray-300 p-2.5 rounded-lg mb-2.5"
               placeholder="URL de la imagen"
@@ -199,6 +263,36 @@ const Exercises = () => {
               value={selectedExercise?.description}
               onChangeText={(text) => selectedExercise && setSelectedExercise({...selectedExercise, description: text})}
             />
+            <View className="border border-gray-300 rounded-lg mb-2.5">
+              <Picker
+                selectedValue={selectedExercise?.dificulty_id}
+                onValueChange={(value: number) => selectedExercise && setSelectedExercise({...selectedExercise, dificulty_id: value})}
+                style={{ height: 50 }}
+              >
+                {difficulties.map(difficulty => (
+                  <Picker.Item 
+                    key={difficulty.id} 
+                    label={difficulty.name} 
+                    value={difficulty.id} 
+                  />
+                ))}
+              </Picker>
+            </View>
+            <View className="border border-gray-300 rounded-lg mb-2.5">
+              <Picker
+                selectedValue={selectedExercise?.machine_id}
+                onValueChange={(value: number) => selectedExercise && setSelectedExercise({...selectedExercise, machine_id: value})}
+                style={{ height: 50 }}
+              >
+                {machines.map(machine => (
+                  <Picker.Item 
+                    key={machine.id} 
+                    label={machine.name} 
+                    value={machine.id} 
+                  />
+                ))}
+              </Picker>
+            </View>
             <TextInput
               className="border border-gray-300 p-2.5 rounded-lg mb-2.5"
               placeholder="URL de la imagen"

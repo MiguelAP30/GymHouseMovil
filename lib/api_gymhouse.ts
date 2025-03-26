@@ -8,7 +8,11 @@ import {
   TrainingPlanDAO,
   TagOfTrainingPlanDAO,
   UserDAO,
-  ExerciseDAO
+  ExerciseDAO,
+  DifficultyDAO,
+  MuscleDAO,
+  SpecificMuscleDAO,
+  WeekDayDAO
 } from '../interfaces/interfaces';
 import { getEnvironment } from '../config/env';
 
@@ -303,10 +307,16 @@ export const updateUserRole = async (email: string, role_id: number) => {
 
 // Función auxiliar para hacer peticiones autenticadas
 const authenticatedFetch = async (url: string, options: RequestInit = {}) => {
-  const token = await AsyncStorage.getItem('token');
+  let token = await AsyncStorage.getItem('token');
   
   if (!token) {
-    throw new Error('No hay token de autenticación');
+    // Intentar obtener el token nuevamente después de un breve retraso
+    await new Promise(resolve => setTimeout(resolve, 100));
+    token = await AsyncStorage.getItem('token');
+    
+    if (!token) {
+      throw new Error('No hay token de autenticación');
+    }
   }
 
   const headers = {
@@ -319,7 +329,7 @@ const authenticatedFetch = async (url: string, options: RequestInit = {}) => {
     ...options,
     headers,
   });
-  console.log('Respuesta de la petición:', response);
+  
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
     console.error('Error en la petición:', {
@@ -414,6 +424,122 @@ export const putExercise = async (id: number, data: ExerciseDAO) => {
 
 export const deleteExercise = async (id: number) => {
   return authenticatedFetch(`/exercise/${id}`, {
+    method: 'DELETE'
+  }).then(res => res.json());
+}
+
+// Dificultades
+export const getDifficulties = async () => {
+  return authenticatedFetch('/dificulty').then(res => res.json());
+}
+
+export const postDifficulty = async (data: Omit<DifficultyDAO, 'id'>) => {
+  return authenticatedFetch('/dificulty', {
+    method: 'POST',
+    body: JSON.stringify(data)
+  }).then(res => res.json());
+}
+
+export const getDifficultyById = async (id: number) => {
+  return authenticatedFetch(`/dificulty/${id}`).then(res => res.json());
+}
+
+export const putDifficulty = async (id: number, data: DifficultyDAO) => {
+  return authenticatedFetch(`/dificulty/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data)
+  }).then(res => res.json());
+}
+
+export const deleteDifficulty = async (id: number) => {
+  return authenticatedFetch(`/dificulty/${id}`, {
+    method: 'DELETE'
+  }).then(res => res.json());
+}
+
+// Músculos
+export const getMuscles = async () => {
+  return authenticatedFetch('/muscle').then(res => res.json());
+}
+
+export const getMuscleById = async (id: number) => {
+  return authenticatedFetch(`/muscle/${id}`).then(res => res.json());
+}
+
+export const postMuscle = async (data: Omit<MuscleDAO, 'id'>) => {
+  return authenticatedFetch('/muscle', {
+    method: 'POST',
+    body: JSON.stringify(data)
+  }).then(res => res.json());
+}
+
+export const putMuscle = async (id: number, data: MuscleDAO) => {
+  return authenticatedFetch(`/muscle/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data)
+  }).then(res => res.json());
+}
+
+export const deleteMuscle = async (id: number) => {
+  return authenticatedFetch(`/muscle/${id}`, {
+    method: 'DELETE'
+  }).then(res => res.json());
+}
+
+// Músculos Específicos
+export const getSpecificMuscles = async () => {
+  return authenticatedFetch('/specific_muscle').then(res => res.json());
+}
+
+export const getSpecificMuscleById = async (id: number) => {
+  return authenticatedFetch(`/specific_muscle/${id}`).then(res => res.json());
+}
+
+export const postSpecificMuscle = async (data: Omit<SpecificMuscleDAO, 'id'>) => {
+  return authenticatedFetch('/specific_muscle', {
+    method: 'POST',
+    body: JSON.stringify(data)
+  }).then(res => res.json());
+}
+
+export const putSpecificMuscle = async (id: number, data: SpecificMuscleDAO) => {
+  return authenticatedFetch(`/specific_muscle/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data)
+  }).then(res => res.json());
+}
+
+export const deleteSpecificMuscle = async (id: number) => {
+  return authenticatedFetch(`/specific_muscle/${id}`, {
+    method: 'DELETE'
+  }).then(res => res.json());
+}
+
+// Días de la Semana
+export const getWeekDays = async () => {
+  return authenticatedFetch('/week_day').then(res => res.json());
+}
+
+export const getWeekDayById = async (id: number) => {
+  return authenticatedFetch(`/week_day/${id}`).then(res => res.json());
+}
+
+export const postWeekDay = async (data: Omit<WeekDayDAO, 'id'>) => {
+  return authenticatedFetch('/week_day', {
+    method: 'POST',
+    body: JSON.stringify(data)
+  }).then(res => res.json());
+}
+
+export const putWeekDay = async (id: number, data: WeekDayDAO) => {
+  return authenticatedFetch(`/week_day/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data)
+  }).then(res => res.json());
+}
+
+export const deleteWeekDay = async (id: number) => {
+  return authenticatedFetch(`/week_day/${id}`, {
     method: 'DELETE'
   }).then(res => res.json());
 }

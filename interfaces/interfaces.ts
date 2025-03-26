@@ -121,3 +121,26 @@ export interface ExerciseDAO {
     machine_id: number;
     video: string;
 }
+
+export interface DifficultyDAO {
+    id?: number;
+    name: string;
+}
+
+export interface MuscleDAO {
+    id?: number;
+    name: string;
+    description: string;
+}
+
+export interface SpecificMuscleDAO {
+    id?: number;
+    name: string;
+    description: string;
+    muscle_id: number;
+}
+
+export interface WeekDayDAO {
+    id?: number;
+    name: string;
+}

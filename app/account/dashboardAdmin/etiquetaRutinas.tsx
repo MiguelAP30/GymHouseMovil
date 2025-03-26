@@ -1,27 +1,27 @@
 import { View, Text, TouchableOpacity, Modal, TextInput, ScrollView, ActivityIndicator, Alert } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import { Ionicons } from '@expo/vector-icons'
-import { WeekDayDAO } from '../../../interfaces/interfaces'
-import { getWeekDays, putWeekDay, deleteWeekDay, postWeekDay } from '../../../lib/api_gymhouse'
+import { TagOfTrainingPlanDAO } from '../../../interfaces/interfaces'
+import { getTagsOfTrainingPlan, postTagOfTrainingPlan, putTagOfTrainingPlan, deleteTagOfTrainingPlan } from '../../../lib/api_gymhouse'
 import { useAuth } from '../../../context/AuthStore'
 import { router } from 'expo-router'
 
-const DaysWeek = () => {
+const EtiquetaRutinas = () => {
   const { checkAuth } = useAuth()
   const [editModalVisible, setEditModalVisible] = useState(false)
   const [addModalVisible, setAddModalVisible] = useState(false)
-  const [selectedWeekDay, setSelectedWeekDay] = useState<WeekDayDAO | null>(null)
-  const [newWeekDay, setNewWeekDay] = useState<Omit<WeekDayDAO, 'id'>>({
+  const [selectedTag, setSelectedTag] = useState<TagOfTrainingPlanDAO | null>(null)
+  const [newTag, setNewTag] = useState<Omit<TagOfTrainingPlanDAO, 'id'>>({
     name: ''
   })
   const [loading, setLoading] = useState(true)
-  const [weekDays, setWeekDays] = useState<WeekDayDAO[]>([])
+  const [tags, setTags] = useState<TagOfTrainingPlanDAO[]>([])
 
   useEffect(() => {
-    fetchWeekDays()
+    fetchTags()
   }, [])
 
-  const fetchWeekDays = async () => {
+  const fetchTags = async () => {
     try {
       setLoading(true)
       const isAuthenticated = await checkAuth()
@@ -30,60 +30,60 @@ const DaysWeek = () => {
         return
       }
 
-      const response = await getWeekDays()
-      setWeekDays(response)
+      const response = await getTagsOfTrainingPlan()
+      setTags(response)
     } catch (error) {
-      console.error('Error al obtener días de la semana:', error)
+      console.error('Error al obtener etiquetas:', error)
       if (error instanceof Error && error.message.includes('Sesión expirada')) {
         router.replace('/')
       } else {
-        Alert.alert('Error', 'No se pudieron cargar los días de la semana. Por favor, intenta de nuevo.')
+        Alert.alert('Error', 'No se pudieron cargar las etiquetas. Por favor, intenta de nuevo.')
       }
     } finally {
       setLoading(false)
     }
   }
 
-  const handleAddWeekDay = async () => {
+  const handleAddTag = async () => {
     try {
-      await postWeekDay(newWeekDay)
-      await fetchWeekDays()
-      setNewWeekDay({ name: '' })
+      await postTagOfTrainingPlan(newTag)
+      await fetchTags()
+      setNewTag({ name: '' })
       setAddModalVisible(false)
-      Alert.alert('Éxito', 'Día de la semana creado correctamente')
+      Alert.alert('Éxito', 'Etiqueta creada correctamente')
     } catch (error) {
-      console.error('Error al crear día de la semana:', error)
-      Alert.alert('Error', 'No se pudo crear el día de la semana. Por favor, intenta de nuevo.')
+      console.error('Error al crear etiqueta:', error)
+      Alert.alert('Error', 'No se pudo crear la etiqueta. Por favor, intenta de nuevo.')
     }
   }
 
-  const handleDeleteWeekDay = async (id: number) => {
+  const handleDeleteTag = async (id: number) => {
     try {
-      await deleteWeekDay(id)
-      await fetchWeekDays()
-      Alert.alert('Éxito', 'Día de la semana eliminado correctamente')
+      await deleteTagOfTrainingPlan(id)
+      await fetchTags()
+      Alert.alert('Éxito', 'Etiqueta eliminada correctamente')
     } catch (error) {
-      console.error('Error al eliminar día de la semana:', error)
-      Alert.alert('Error', 'No se pudo eliminar el día de la semana. Por favor, intenta de nuevo.')
+      console.error('Error al eliminar etiqueta:', error)
+      Alert.alert('Error', 'No se pudo eliminar la etiqueta. Por favor, intenta de nuevo.')
     }
   }
 
-  const handleEditWeekDay = (weekDay: WeekDayDAO) => {
-    setSelectedWeekDay(weekDay)
+  const handleEditTag = (tag: TagOfTrainingPlanDAO) => {
+    setSelectedTag(tag)
     setEditModalVisible(true)
   }
 
-  const handleUpdateWeekDay = async () => {
-    if (!selectedWeekDay?.id) return
+  const handleUpdateTag = async () => {
+    if (!selectedTag?.id) return
     
     try {
-      await putWeekDay(selectedWeekDay.id, selectedWeekDay)
-      await fetchWeekDays()
+      await putTagOfTrainingPlan(selectedTag.id, selectedTag)
+      await fetchTags()
       setEditModalVisible(false)
-      Alert.alert('Éxito', 'Día de la semana actualizado correctamente')
+      Alert.alert('Éxito', 'Etiqueta actualizada correctamente')
     } catch (error) {
-      console.error('Error al actualizar día de la semana:', error)
-      Alert.alert('Error', 'No se pudo actualizar el día de la semana. Por favor, intenta de nuevo.')
+      console.error('Error al actualizar etiqueta:', error)
+      Alert.alert('Error', 'No se pudo actualizar la etiqueta. Por favor, intenta de nuevo.')
     }
   }
 
@@ -98,30 +98,30 @@ const DaysWeek = () => {
   return (
     <View className="flex-1 p-5 bg-gray-100">
       <View className="flex-row justify-between items-center mb-5">
-        <Text className="text-2xl font-bold">Días de la Semana</Text>
+        <Text className="text-2xl font-bold">Etiquetas de Rutinas</Text>
         <TouchableOpacity 
           className="bg-blue-500 p-2.5 rounded-lg"
           onPress={() => setAddModalVisible(true)}
         >
-          <Text className="text-white font-bold">Agregar Día</Text>
+          <Text className="text-white font-bold">Agregar Etiqueta</Text>
         </TouchableOpacity>
       </View>
 
       <ScrollView className="flex-1">
-        {weekDays.map(weekDay => (
-          <View key={weekDay.id} className="bg-white p-4 rounded-lg mb-2.5 flex-row justify-between items-center shadow-md">
+        {tags.map(tag => (
+          <View key={tag.id} className="bg-white p-4 rounded-lg mb-2.5 flex-row justify-between items-center shadow-md">
             <View className="flex-1">
-              <Text className="text-lg font-bold">{weekDay.name}</Text>
+              <Text className="text-lg font-bold">{tag.name}</Text>
             </View>
             <View className="flex-row">
               <TouchableOpacity 
-                onPress={() => handleEditWeekDay(weekDay)}
+                onPress={() => handleEditTag(tag)}
                 className="mr-2.5"
               >
                 <Ionicons name="pencil" size={24} color="#007AFF" />
               </TouchableOpacity>
               <TouchableOpacity 
-                onPress={() => weekDay.id && handleDeleteWeekDay(weekDay.id)}
+                onPress={() => tag.id && handleDeleteTag(tag.id)}
                 className="ml-2.5"
               >
                 <Ionicons name="trash" size={24} color="#FF3B30" />
@@ -131,7 +131,7 @@ const DaysWeek = () => {
         ))}
       </ScrollView>
 
-      {/* Modal para agregar día de la semana */}
+      {/* Modal para agregar etiqueta */}
       <Modal
         animationType="slide"
         transparent={true}
@@ -139,12 +139,12 @@ const DaysWeek = () => {
       >
         <View className="flex-1 justify-center items-center bg-black/50">
           <View className="bg-white p-5 rounded-lg w-4/5">
-            <Text className="text-xl font-bold mb-4">Nuevo Día de la Semana</Text>
+            <Text className="text-xl font-bold mb-4">Nueva Etiqueta</Text>
             <TextInput
               className="border border-gray-300 p-2.5 rounded-lg mb-2.5"
-              placeholder="Nombre del día"
-              value={newWeekDay.name}
-              onChangeText={(text) => setNewWeekDay({...newWeekDay, name: text})}
+              placeholder="Nombre de la etiqueta"
+              value={newTag.name}
+              onChangeText={(text) => setNewTag({...newTag, name: text})}
             />
             <View className="flex-row justify-end mt-4">
               <TouchableOpacity 
@@ -155,7 +155,7 @@ const DaysWeek = () => {
               </TouchableOpacity>
               <TouchableOpacity 
                 className="bg-blue-500 p-2.5 rounded-lg"
-                onPress={handleAddWeekDay}
+                onPress={handleAddTag}
               >
                 <Text className="text-white font-bold">Guardar</Text>
               </TouchableOpacity>
@@ -164,7 +164,7 @@ const DaysWeek = () => {
         </View>
       </Modal>
 
-      {/* Modal para editar día de la semana */}
+      {/* Modal para editar etiqueta */}
       <Modal
         animationType="slide"
         transparent={true}
@@ -172,12 +172,12 @@ const DaysWeek = () => {
       >
         <View className="flex-1 justify-center items-center bg-black/50">
           <View className="bg-white p-5 rounded-lg w-4/5">
-            <Text className="text-xl font-bold mb-4">Editar Día de la Semana</Text>
+            <Text className="text-xl font-bold mb-4">Editar Etiqueta</Text>
             <TextInput
               className="border border-gray-300 p-2.5 rounded-lg mb-2.5"
-              placeholder="Nombre del día"
-              value={selectedWeekDay?.name}
-              onChangeText={(text) => selectedWeekDay && setSelectedWeekDay({...selectedWeekDay, name: text})}
+              placeholder="Nombre de la etiqueta"
+              value={selectedTag?.name}
+              onChangeText={(text) => selectedTag && setSelectedTag({...selectedTag, name: text})}
             />
             <View className="flex-row justify-end mt-4">
               <TouchableOpacity 
@@ -188,7 +188,7 @@ const DaysWeek = () => {
               </TouchableOpacity>
               <TouchableOpacity 
                 className="bg-blue-500 p-2.5 rounded-lg"
-                onPress={handleUpdateWeekDay}
+                onPress={handleUpdateTag}
               >
                 <Text className="text-white font-bold">Actualizar</Text>
               </TouchableOpacity>
@@ -200,4 +200,4 @@ const DaysWeek = () => {
   )
 }
 
-export default DaysWeek
+export default EtiquetaRutinas

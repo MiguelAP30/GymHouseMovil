@@ -1,27 +1,28 @@
 import { View, Text, TouchableOpacity, Modal, TextInput, ScrollView, ActivityIndicator, Alert } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import { Ionicons } from '@expo/vector-icons'
-import { WeekDayDAO } from '../../../interfaces/interfaces'
-import { getWeekDays, putWeekDay, deleteWeekDay, postWeekDay } from '../../../lib/api_gymhouse'
+import { MuscleDAO } from '../../../interfaces/interfaces'
+import { getMuscles, putMuscle, deleteMuscle, postMuscle } from '../../../lib/api_gymhouse'
 import { useAuth } from '../../../context/AuthStore'
 import { router } from 'expo-router'
 
-const DaysWeek = () => {
+const Muscles = () => {
   const { checkAuth } = useAuth()
   const [editModalVisible, setEditModalVisible] = useState(false)
   const [addModalVisible, setAddModalVisible] = useState(false)
-  const [selectedWeekDay, setSelectedWeekDay] = useState<WeekDayDAO | null>(null)
-  const [newWeekDay, setNewWeekDay] = useState<Omit<WeekDayDAO, 'id'>>({
-    name: ''
+  const [selectedMuscle, setSelectedMuscle] = useState<MuscleDAO | null>(null)
+  const [newMuscle, setNewMuscle] = useState<Omit<MuscleDAO, 'id'>>({
+    name: '',
+    description: ''
   })
   const [loading, setLoading] = useState(true)
-  const [weekDays, setWeekDays] = useState<WeekDayDAO[]>([])
+  const [muscles, setMuscles] = useState<MuscleDAO[]>([])
 
   useEffect(() => {
-    fetchWeekDays()
+    fetchMuscles()
   }, [])
 
-  const fetchWeekDays = async () => {
+  const fetchMuscles = async () => {
     try {
       setLoading(true)
       const isAuthenticated = await checkAuth()
@@ -30,60 +31,60 @@ const DaysWeek = () => {
         return
       }
 
-      const response = await getWeekDays()
-      setWeekDays(response)
+      const response = await getMuscles()
+      setMuscles(response)
     } catch (error) {
-      console.error('Error al obtener días de la semana:', error)
+      console.error('Error al obtener músculos:', error)
       if (error instanceof Error && error.message.includes('Sesión expirada')) {
         router.replace('/')
       } else {
-        Alert.alert('Error', 'No se pudieron cargar los días de la semana. Por favor, intenta de nuevo.')
+        Alert.alert('Error', 'No se pudieron cargar los músculos. Por favor, intenta de nuevo.')
       }
     } finally {
       setLoading(false)
     }
   }
 
-  const handleAddWeekDay = async () => {
+  const handleAddMuscle = async () => {
     try {
-      await postWeekDay(newWeekDay)
-      await fetchWeekDays()
-      setNewWeekDay({ name: '' })
+      await postMuscle(newMuscle)
+      await fetchMuscles()
+      setNewMuscle({ name: '', description: '' })
       setAddModalVisible(false)
-      Alert.alert('Éxito', 'Día de la semana creado correctamente')
+      Alert.alert('Éxito', 'Músculo creado correctamente')
     } catch (error) {
-      console.error('Error al crear día de la semana:', error)
-      Alert.alert('Error', 'No se pudo crear el día de la semana. Por favor, intenta de nuevo.')
+      console.error('Error al crear músculo:', error)
+      Alert.alert('Error', 'No se pudo crear el músculo. Por favor, intenta de nuevo.')
     }
   }
 
-  const handleDeleteWeekDay = async (id: number) => {
+  const handleDeleteMuscle = async (id: number) => {
     try {
-      await deleteWeekDay(id)
-      await fetchWeekDays()
-      Alert.alert('Éxito', 'Día de la semana eliminado correctamente')
+      await deleteMuscle(id)
+      await fetchMuscles()
+      Alert.alert('Éxito', 'Músculo eliminado correctamente')
     } catch (error) {
-      console.error('Error al eliminar día de la semana:', error)
-      Alert.alert('Error', 'No se pudo eliminar el día de la semana. Por favor, intenta de nuevo.')
+      console.error('Error al eliminar músculo:', error)
+      Alert.alert('Error', 'No se pudo eliminar el músculo. Por favor, intenta de nuevo.')
     }
   }
 
-  const handleEditWeekDay = (weekDay: WeekDayDAO) => {
-    setSelectedWeekDay(weekDay)
+  const handleEditMuscle = (muscle: MuscleDAO) => {
+    setSelectedMuscle(muscle)
     setEditModalVisible(true)
   }
 
-  const handleUpdateWeekDay = async () => {
-    if (!selectedWeekDay?.id) return
+  const handleUpdateMuscle = async () => {
+    if (!selectedMuscle?.id) return
     
     try {
-      await putWeekDay(selectedWeekDay.id, selectedWeekDay)
-      await fetchWeekDays()
+      await putMuscle(selectedMuscle.id, selectedMuscle)
+      await fetchMuscles()
       setEditModalVisible(false)
-      Alert.alert('Éxito', 'Día de la semana actualizado correctamente')
+      Alert.alert('Éxito', 'Músculo actualizado correctamente')
     } catch (error) {
-      console.error('Error al actualizar día de la semana:', error)
-      Alert.alert('Error', 'No se pudo actualizar el día de la semana. Por favor, intenta de nuevo.')
+      console.error('Error al actualizar músculo:', error)
+      Alert.alert('Error', 'No se pudo actualizar el músculo. Por favor, intenta de nuevo.')
     }
   }
 
@@ -98,30 +99,31 @@ const DaysWeek = () => {
   return (
     <View className="flex-1 p-5 bg-gray-100">
       <View className="flex-row justify-between items-center mb-5">
-        <Text className="text-2xl font-bold">Días de la Semana</Text>
+        <Text className="text-2xl font-bold">Músculos</Text>
         <TouchableOpacity 
           className="bg-blue-500 p-2.5 rounded-lg"
           onPress={() => setAddModalVisible(true)}
         >
-          <Text className="text-white font-bold">Agregar Día</Text>
+          <Text className="text-white font-bold">Agregar Músculo</Text>
         </TouchableOpacity>
       </View>
 
       <ScrollView className="flex-1">
-        {weekDays.map(weekDay => (
-          <View key={weekDay.id} className="bg-white p-4 rounded-lg mb-2.5 flex-row justify-between items-center shadow-md">
+        {muscles.map(muscle => (
+          <View key={muscle.id} className="bg-white p-4 rounded-lg mb-2.5 flex-row justify-between items-center shadow-md">
             <View className="flex-1">
-              <Text className="text-lg font-bold">{weekDay.name}</Text>
+              <Text className="text-lg font-bold">{muscle.name}</Text>
+              <Text className="text-gray-600">{muscle.description}</Text>
             </View>
             <View className="flex-row">
               <TouchableOpacity 
-                onPress={() => handleEditWeekDay(weekDay)}
+                onPress={() => handleEditMuscle(muscle)}
                 className="mr-2.5"
               >
                 <Ionicons name="pencil" size={24} color="#007AFF" />
               </TouchableOpacity>
               <TouchableOpacity 
-                onPress={() => weekDay.id && handleDeleteWeekDay(weekDay.id)}
+                onPress={() => muscle.id && handleDeleteMuscle(muscle.id)}
                 className="ml-2.5"
               >
                 <Ionicons name="trash" size={24} color="#FF3B30" />
@@ -131,7 +133,7 @@ const DaysWeek = () => {
         ))}
       </ScrollView>
 
-      {/* Modal para agregar día de la semana */}
+      {/* Modal para agregar músculo */}
       <Modal
         animationType="slide"
         transparent={true}
@@ -139,12 +141,20 @@ const DaysWeek = () => {
       >
         <View className="flex-1 justify-center items-center bg-black/50">
           <View className="bg-white p-5 rounded-lg w-4/5">
-            <Text className="text-xl font-bold mb-4">Nuevo Día de la Semana</Text>
+            <Text className="text-xl font-bold mb-4">Nuevo Músculo</Text>
             <TextInput
               className="border border-gray-300 p-2.5 rounded-lg mb-2.5"
-              placeholder="Nombre del día"
-              value={newWeekDay.name}
-              onChangeText={(text) => setNewWeekDay({...newWeekDay, name: text})}
+              placeholder="Nombre del músculo"
+              value={newMuscle.name}
+              onChangeText={(text) => setNewMuscle({...newMuscle, name: text})}
+            />
+            <TextInput
+              className="border border-gray-300 p-2.5 rounded-lg mb-2.5 h-24"
+              placeholder="Descripción"
+              value={newMuscle.description}
+              onChangeText={(text) => setNewMuscle({...newMuscle, description: text})}
+              multiline={true}
+              numberOfLines={4}
             />
             <View className="flex-row justify-end mt-4">
               <TouchableOpacity 
@@ -155,7 +165,7 @@ const DaysWeek = () => {
               </TouchableOpacity>
               <TouchableOpacity 
                 className="bg-blue-500 p-2.5 rounded-lg"
-                onPress={handleAddWeekDay}
+                onPress={handleAddMuscle}
               >
                 <Text className="text-white font-bold">Guardar</Text>
               </TouchableOpacity>
@@ -164,7 +174,7 @@ const DaysWeek = () => {
         </View>
       </Modal>
 
-      {/* Modal para editar día de la semana */}
+      {/* Modal para editar músculo */}
       <Modal
         animationType="slide"
         transparent={true}
@@ -172,12 +182,20 @@ const DaysWeek = () => {
       >
         <View className="flex-1 justify-center items-center bg-black/50">
           <View className="bg-white p-5 rounded-lg w-4/5">
-            <Text className="text-xl font-bold mb-4">Editar Día de la Semana</Text>
+            <Text className="text-xl font-bold mb-4">Editar Músculo</Text>
             <TextInput
               className="border border-gray-300 p-2.5 rounded-lg mb-2.5"
-              placeholder="Nombre del día"
-              value={selectedWeekDay?.name}
-              onChangeText={(text) => selectedWeekDay && setSelectedWeekDay({...selectedWeekDay, name: text})}
+              placeholder="Nombre del músculo"
+              value={selectedMuscle?.name}
+              onChangeText={(text) => selectedMuscle && setSelectedMuscle({...selectedMuscle, name: text})}
+            />
+            <TextInput
+              className="border border-gray-300 p-2.5 rounded-lg mb-2.5 h-24"
+              placeholder="Descripción"
+              value={selectedMuscle?.description}
+              onChangeText={(text) => selectedMuscle && setSelectedMuscle({...selectedMuscle, description: text})}
+              multiline={true}
+              numberOfLines={4}
             />
             <View className="flex-row justify-end mt-4">
               <TouchableOpacity 
@@ -188,7 +206,7 @@ const DaysWeek = () => {
               </TouchableOpacity>
               <TouchableOpacity 
                 className="bg-blue-500 p-2.5 rounded-lg"
-                onPress={handleUpdateWeekDay}
+                onPress={handleUpdateMuscle}
               >
                 <Text className="text-white font-bold">Actualizar</Text>
               </TouchableOpacity>
@@ -200,4 +218,4 @@ const DaysWeek = () => {
   )
 }
 
-export default DaysWeek
+export default Muscles
