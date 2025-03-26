@@ -19,12 +19,39 @@ const SpecificMuscle = () => {
   })
   const [loading, setLoading] = useState(true)
   const [specificMuscles, setSpecificMuscles] = useState<SpecificMuscleDAO[]>([])
+  const [filteredSpecificMuscles, setFilteredSpecificMuscles] = useState<SpecificMuscleDAO[]>([])
   const [muscles, setMuscles] = useState<MuscleDAO[]>([])
+  const [searchName, setSearchName] = useState('')
+  const [selectedMuscle, setSelectedMuscle] = useState<number | null>(null)
 
   useEffect(() => {
     fetchSpecificMuscles()
     fetchMuscles()
   }, [])
+
+  useEffect(() => {
+    filterSpecificMuscles()
+  }, [specificMuscles, searchName, selectedMuscle])
+
+  const filterSpecificMuscles = () => {
+    let filtered = [...specificMuscles]
+
+    // Filter by name
+    if (searchName.trim()) {
+      filtered = filtered.filter(specificMuscle => 
+        specificMuscle.name.toLowerCase().includes(searchName.toLowerCase())
+      )
+    }
+
+    // Filter by muscle
+    if (selectedMuscle) {
+      filtered = filtered.filter(specificMuscle => 
+        specificMuscle.muscle_id === selectedMuscle
+      )
+    }
+
+    setFilteredSpecificMuscles(filtered)
+  }
 
   const fetchSpecificMuscles = async () => {
     try {
@@ -121,12 +148,50 @@ const SpecificMuscle = () => {
           className="bg-blue-500 p-2.5 rounded-lg"
           onPress={() => setAddModalVisible(true)}
         >
-          <Text className="text-white font-bold">Agregar Músculo Específico</Text>
+          <Text className="text-white font-bold">Agregar</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Search Section */}
+      <View className="bg-white p-4 rounded-lg mb-4 shadow-md">
+        <TextInput
+          className="border border-gray-300 p-2.5 rounded-lg mb-2.5"
+          placeholder="Buscar por nombre..."
+          value={searchName}
+          onChangeText={setSearchName}
+        />
+        
+        <View className="border border-gray-300 rounded-lg mb-2.5">
+          <Picker
+            selectedValue={selectedMuscle}
+            onValueChange={(value: number | null) => setSelectedMuscle(value)}
+            style={{ height: 50 }}
+            mode="dropdown"
+          >
+            <Picker.Item label="Todos los músculos" value={null} />
+            {muscles.map(muscle => (
+              <Picker.Item 
+                key={muscle.id} 
+                label={muscle.name} 
+                value={muscle.id} 
+              />
+            ))}
+          </Picker>
+        </View>
+
+        <TouchableOpacity 
+          className="bg-gray-500 p-2.5 rounded-lg"
+          onPress={() => {
+            setSearchName('')
+            setSelectedMuscle(null)
+          }}
+        >
+          <Text className="text-white font-bold text-center">Limpiar filtros</Text>
         </TouchableOpacity>
       </View>
 
       <ScrollView className="flex-1">
-        {specificMuscles.map(specificMuscle => (
+        {filteredSpecificMuscles.map(specificMuscle => (
           <View key={specificMuscle.id} className="bg-white p-4 rounded-lg mb-2.5 flex-row justify-between items-center shadow-md">
             <View className="flex-1">
               <Text className="text-lg font-bold">{specificMuscle.name}</Text>

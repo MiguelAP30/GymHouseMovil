@@ -17,10 +17,29 @@ const Muscles = () => {
   })
   const [loading, setLoading] = useState(true)
   const [muscles, setMuscles] = useState<MuscleDAO[]>([])
+  const [filteredMuscles, setFilteredMuscles] = useState<MuscleDAO[]>([])
+  const [searchName, setSearchName] = useState('')
 
   useEffect(() => {
     fetchMuscles()
   }, [])
+
+  useEffect(() => {
+    filterMuscles()
+  }, [muscles, searchName])
+
+  const filterMuscles = () => {
+    let filtered = [...muscles]
+
+    // Filter by name
+    if (searchName.trim()) {
+      filtered = filtered.filter(muscle => 
+        muscle.name.toLowerCase().includes(searchName.toLowerCase())
+      )
+    }
+
+    setFilteredMuscles(filtered)
+  }
 
   const fetchMuscles = async () => {
     try {
@@ -104,12 +123,29 @@ const Muscles = () => {
           className="bg-blue-500 p-2.5 rounded-lg"
           onPress={() => setAddModalVisible(true)}
         >
-          <Text className="text-white font-bold">Agregar Músculo</Text>
+          <Text className="text-white font-bold">Agregar</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Search Section */}
+      <View className="bg-white p-4 rounded-lg mb-4 shadow-md">
+        <TextInput
+          className="border border-gray-300 p-2.5 rounded-lg mb-2.5"
+          placeholder="Buscar por nombre..."
+          value={searchName}
+          onChangeText={setSearchName}
+        />
+
+        <TouchableOpacity 
+          className="bg-gray-500 p-2.5 rounded-lg"
+          onPress={() => setSearchName('')}
+        >
+          <Text className="text-white font-bold text-center">Limpiar búsqueda</Text>
         </TouchableOpacity>
       </View>
 
       <ScrollView className="flex-1">
-        {muscles.map(muscle => (
+        {filteredMuscles.map(muscle => (
           <View key={muscle.id} className="bg-white p-4 rounded-lg mb-2.5 flex-row justify-between items-center shadow-md">
             <View className="flex-1">
               <Text className="text-lg font-bold">{muscle.name}</Text>
