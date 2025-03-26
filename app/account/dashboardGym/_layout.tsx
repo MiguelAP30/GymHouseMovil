@@ -9,7 +9,7 @@ import { Redirect } from 'expo-router';
 const DashboardGymLayout = () => {
   const { isAuthenticated, role } = useContext(AuthContext);
 
-  if (!isAuthenticated || role !== ROLES.gym) {
+  if (!isAuthenticated || role === null || role < ROLES.gym) {
     return <Redirect href="/unauthorized" />;
   }
 
@@ -37,11 +37,19 @@ const DashboardGymLayout = () => {
         }}
       />
       <Drawer.Screen
-        name="gimnasio"
+        name="myGym"
         options={{
-          title: 'Gimnasio',
+          title: 'Mi Gimnasio',
           headerShown: true,
-          drawerIcon: ({ size }) => <Ionicons name="home" size={size} color={'#fff'} />,
+          drawerIcon: ({ size }) => <Ionicons name="barbell" size={size} color={'#fff'} />,
+        }}
+      />
+      <Drawer.Screen
+        name="createGym"
+        options={{
+          title: 'Crear Gimnasio',
+          headerShown: true,
+          drawerIcon: ({ size }) => <Ionicons name="add-circle" size={size} color={'#fff'} />,
         }}
       />
     </Drawer>

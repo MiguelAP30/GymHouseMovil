@@ -7,11 +7,12 @@ import { ROLES } from '../../interfaces/interfaces';
 export default function AccountLayout() {
   const { isAuthenticated, role } = useContext(AuthContext);
   const isAdmin = role === ROLES.admin;
-  const isGym = role === ROLES.gym;
 
   if (!isAuthenticated || role === null) {
     return <Redirect href="/index" />;
   }
+
+  const canAccessGym = role === ROLES.gym || role === ROLES.admin;
 
   const canAccessRutines = role === ROLES.premium || role === ROLES.gym || role === ROLES.admin;
 
@@ -79,7 +80,7 @@ export default function AccountLayout() {
           title: 'Dashboard',
           headerShown: false,
           tabBarIcon: ({ color, size }) => <Ionicons name="speedometer" size={size} color={color} />,
-          href: isGym ? "/account/dashboardGym" : null,
+          href: canAccessGym ? "/account/dashboardGym" : null,
         }}
       />
       

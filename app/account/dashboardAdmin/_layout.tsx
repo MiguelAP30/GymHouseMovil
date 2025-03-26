@@ -37,7 +37,7 @@ const DashboardAdminLayout = () => {
         }}
       />
       <Drawer.Screen
-        name="crearEtiquetaRutinas"
+        name="etiquetaRutinas"
         options={{
           title: 'Etiquetas Rutinas',
           headerShown: true,
@@ -106,6 +106,14 @@ const DashboardAdminLayout = () => {
           title: 'Roles',
           headerShown: true,
           drawerIcon: ({ size }) => <Ionicons name="people" size={size} color={'#fff'} />,
+        }}
+      />
+      <Drawer.Screen
+        name="muscles"
+        options={{
+          title: 'Musculos',
+          headerShown: true,
+          drawerIcon: ({ size }) => <Ionicons name="body" size={size} color={'#fff'} />,
         }}
       />
     </Drawer>
