@@ -103,7 +103,7 @@ const DifficultyExercise = () => {
           className="bg-blue-500 p-2.5 rounded-lg"
           onPress={() => setAddModalVisible(true)}
         >
-          <Text className="text-white font-bold">Agregar Dificultad</Text>
+          <Text className="text-white font-bold">Agregar</Text>
         </TouchableOpacity>
       </View>
 

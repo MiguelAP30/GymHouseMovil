@@ -17,8 +17,12 @@ const Exercises = () => {
   const [selectedExercise, setSelectedExercise] = useState<ExerciseDAO | null>(null)
   const [loading, setLoading] = useState(true)
   const [exercises, setExercises] = useState<ExerciseDAO[]>([])
+  const [filteredExercises, setFilteredExercises] = useState<ExerciseDAO[]>([])
   const [difficulties, setDifficulties] = useState<DifficultyDAO[]>([])
   const [machines, setMachines] = useState<Machine[]>([])
+  const [searchName, setSearchName] = useState('')
+  const [selectedDifficulty, setSelectedDifficulty] = useState<number | null>(null)
+  const [selectedMachine, setSelectedMachine] = useState<number | null>(null)
   const [newExercise, setNewExercise] = useState<Omit<ExerciseDAO, 'id'>>({
     name: '',
     description: '',
@@ -34,6 +38,37 @@ const Exercises = () => {
     fetchDifficulties()
     fetchMachines()
   }, [])
+
+  useEffect(() => {
+    filterExercises()
+  }, [exercises, searchName, selectedDifficulty, selectedMachine])
+
+  const filterExercises = () => {
+    let filtered = [...exercises]
+
+    // Filter by name
+    if (searchName.trim()) {
+      filtered = filtered.filter(exercise => 
+        exercise.name.toLowerCase().includes(searchName.toLowerCase())
+      )
+    }
+
+    // Filter by difficulty
+    if (selectedDifficulty) {
+      filtered = filtered.filter(exercise => 
+        exercise.dificulty_id === selectedDifficulty
+      )
+    }
+
+    // Filter by machine
+    if (selectedMachine) {
+      filtered = filtered.filter(exercise => 
+        exercise.machine_id === selectedMachine
+      )
+    }
+
+    setFilteredExercises(filtered)
+  }
 
   const fetchExercises = async () => {
     try {
@@ -126,12 +161,75 @@ const Exercises = () => {
           className="bg-blue-500 p-2.5 rounded-lg"
           onPress={() => setModalVisible(true)}
         >
-          <Text className="text-white font-bold">Agregar Ejercicio</Text>
+          <Text className="text-white font-bold">Agregar</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Search Section */}
+      <View className="bg-white p-4 rounded-lg mb-4 shadow-md">
+        <TextInput
+          className="border border-gray-300 p-2.5 rounded-lg mb-2.5"
+          placeholder="Buscar por nombre..."
+          value={searchName}
+          onChangeText={setSearchName}
+        />
+        
+        <View className="flex-row justify-between mb-2.5">
+          <View className="flex-1 mr-2">
+            <View className="border border-gray-300 rounded-lg">
+              <Picker
+                selectedValue={selectedDifficulty}
+                onValueChange={(value: number | null) => setSelectedDifficulty(value)}
+                style={{ height: 50 }}
+                mode="dropdown"
+              >
+                <Picker.Item label="Todas las dificultades" value={null} />
+                {difficulties.map(difficulty => (
+                  <Picker.Item 
+                    key={difficulty.id} 
+                    label={difficulty.name} 
+                    value={difficulty.id} 
+                  />
+                ))}
+              </Picker>
+            </View>
+          </View>
+
+          <View className="flex-1 ml-2">
+            <View className="border border-gray-300 rounded-lg">
+              <Picker
+                selectedValue={selectedMachine}
+                onValueChange={(value: number | null) => setSelectedMachine(value)}
+                style={{ height: 50 }}
+                mode="dropdown"
+              >
+                <Picker.Item label="Todas las máquinas" value={null} />
+                {machines.map(machine => (
+                  <Picker.Item 
+                    key={machine.id} 
+                    label={machine.name} 
+                    value={machine.id} 
+                  />
+                ))}
+              </Picker>
+            </View>
+          </View>
+        </View>
+
+        <TouchableOpacity 
+          className="bg-gray-500 p-2.5 rounded-lg"
+          onPress={() => {
+            setSearchName('')
+            setSelectedDifficulty(null)
+            setSelectedMachine(null)
+          }}
+        >
+          <Text className="text-white font-bold text-center">Limpiar filtros</Text>
         </TouchableOpacity>
       </View>
 
       <ScrollView className="flex-1">
-        {exercises.map(exercise => (
+        {filteredExercises.map(exercise => (
           <View key={exercise.id} className="bg-white p-4 rounded-lg mb-2.5 flex-row justify-between items-center shadow-md">
             <View className="flex-1">
               <Text className="text-lg font-bold">{exercise.name}</Text>

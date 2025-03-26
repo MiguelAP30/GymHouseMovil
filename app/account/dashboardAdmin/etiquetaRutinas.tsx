@@ -16,10 +16,29 @@ const EtiquetaRutinas = () => {
   })
   const [loading, setLoading] = useState(true)
   const [tags, setTags] = useState<TagOfTrainingPlanDAO[]>([])
+  const [filteredTags, setFilteredTags] = useState<TagOfTrainingPlanDAO[]>([])
+  const [searchName, setSearchName] = useState('')
 
   useEffect(() => {
     fetchTags()
   }, [])
+
+  useEffect(() => {
+    filterTags()
+  }, [tags, searchName])
+
+  const filterTags = () => {
+    let filtered = [...tags]
+
+    // Filter by name
+    if (searchName.trim()) {
+      filtered = filtered.filter(tag => 
+        tag.name.toLowerCase().includes(searchName.toLowerCase())
+      )
+    }
+
+    setFilteredTags(filtered)
+  }
 
   const fetchTags = async () => {
     try {
@@ -103,12 +122,29 @@ const EtiquetaRutinas = () => {
           className="bg-blue-500 p-2.5 rounded-lg"
           onPress={() => setAddModalVisible(true)}
         >
-          <Text className="text-white font-bold">Agregar Etiqueta</Text>
+          <Text className="text-white font-bold">Agregar</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Search Section */}
+      <View className="bg-white p-4 rounded-lg mb-4 shadow-md">
+        <TextInput
+          className="border border-gray-300 p-2.5 rounded-lg mb-2.5"
+          placeholder="Buscar por nombre..."
+          value={searchName}
+          onChangeText={setSearchName}
+        />
+
+        <TouchableOpacity 
+          className="bg-gray-500 p-2.5 rounded-lg"
+          onPress={() => setSearchName('')}
+        >
+          <Text className="text-white font-bold text-center">Limpiar búsqueda</Text>
         </TouchableOpacity>
       </View>
 
       <ScrollView className="flex-1">
-        {tags.map(tag => (
+        {filteredTags.map(tag => (
           <View key={tag.id} className="bg-white p-4 rounded-lg mb-2.5 flex-row justify-between items-center shadow-md">
             <View className="flex-1">
               <Text className="text-lg font-bold">{tag.name}</Text>
