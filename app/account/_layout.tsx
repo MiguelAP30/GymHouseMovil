@@ -7,6 +7,7 @@ import { ROLES } from '../../interfaces/interfaces';
 export default function AccountLayout() {
   const { isAuthenticated, role } = useContext(AuthContext);
   const isAdmin = role === ROLES.admin;
+  const isGym = role === ROLES.gym;
 
   if (!isAuthenticated || role === null) {
     return <Redirect href="/index" />;
@@ -72,6 +73,16 @@ export default function AccountLayout() {
           href: isAdmin ? "/account/dashboardAdmin" : null,
         }}
       />
+      <Tabs.Screen
+        name="dashboardGym"
+        options={{
+          title: 'Dashboard',
+          headerShown: false,
+          tabBarIcon: ({ color, size }) => <Ionicons name="speedometer" size={size} color={color} />,
+          href: isGym ? "/account/dashboardGym" : null,
+        }}
+      />
+      
       <Tabs.Screen
         name="perfil"
         options={{

@@ -1,12 +1,11 @@
 import { View, Text, TouchableOpacity, Modal, TextInput, ScrollView } from 'react-native'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Ionicons } from '@expo/vector-icons'
-
+import { getMachines, createMachine, updateMachine, deleteMachine } from '../../../lib/api_gymhouse'
 interface Machine {
   id: number;
   name: string;
   description: string;
-  status: string;
 }
 
 const Machines = () => {
@@ -15,75 +14,102 @@ const Machines = () => {
   const [selectedMachine, setSelectedMachine] = useState<Machine | null>(null)
   const [newMachine, setNewMachine] = useState<Omit<Machine, 'id'>>({
     name: '',
-    description: '',
-    status: 'Available'
+    description: ''
   })
 
-  const [machines, setMachines] = useState<Machine[]>([
-    { id: 1, name: 'Cinta de Correr', description: 'Máquina cardiovascular', status: 'Available' },
-    { id: 2, name: 'Banco de Pesas', description: 'Para ejercicios de fuerza', status: 'In maintenance' },
-    { id: 3, name: 'Bicicleta Estática', description: 'Ejercicio cardiovascular', status: 'Available' },
-    { id: 4, name: 'Máquina Smith', description: 'Para ejercicios compuestos', status: 'Available' }
-  ])
+  const [machines, setMachines] = useState<Machine[]>([])
 
-  const handleAddMachine = () => {
-    setMachines([...machines, { ...newMachine, id: machines.length + 1 }])
-    setNewMachine({ name: '', description: '', status: 'Available' })
-    setModalVisible(false)
+  const fetchMachines = async () => {
+    try {
+      const response = await getMachines()
+      if (response) {
+        setMachines(response)
+      }
+    } catch (error) {
+      console.error('Error al obtener máquinas:', error)
+    }
   }
 
-  const handleDeleteMachine = (id: number) => {
-    setMachines(machines.filter(machine => machine.id !== id))
+  useEffect(() => {
+    fetchMachines()
+  }, [])
+
+  const handleAddMachine = async () => {
+    try {
+      const response = await createMachine(newMachine)
+      await fetchMachines() // Recargar la lista completa
+      setNewMachine({ name: '', description: '' })
+      setModalVisible(false)
+    } catch (error) {
+      console.error('Error al crear máquina:', error)
+    }
+  }
+
+  const handleDeleteMachine = async (id: number) => {
+    try {
+      await deleteMachine(id)
+      await fetchMachines() // Recargar la lista completa
+    } catch (error) {
+      console.error('Error al eliminar máquina:', error)
+    }
   }
 
   const handleEditMachine = (machine: Machine) => {
-    setSelectedMachine(machine)
+    setSelectedMachine({...machine}) // Crear una copia para evitar referencias
     setEditModalVisible(true)
   }
 
-  const handleUpdateMachine = () => {
+  const handleUpdateMachine = async () => {
     if (!selectedMachine) return;
     
-    setMachines(machines.map(machine => 
-      machine.id === selectedMachine.id ? selectedMachine : machine
-    ))
-    setEditModalVisible(false)
+    try {
+      await updateMachine(selectedMachine.id, {
+        name: selectedMachine.name,
+        description: selectedMachine.description
+      })
+      await fetchMachines() // Recargar la lista completa
+      setSelectedMachine(null)
+      setEditModalVisible(false)
+    } catch (error) {
+      console.error('Error al actualizar máquina:', error)
+    }
   }
 
   return (
     <View className="flex-1 p-5 bg-gray-100">
       <View className="flex-row justify-between items-center mb-5">
-        <Text className="text-2xl font-bold">Máquinas de Gimnasio</Text>
+        <Text className="text-2xl font-bold">Máquinas</Text>
         <TouchableOpacity 
           className="bg-blue-500 p-2.5 rounded-lg"
           onPress={() => setModalVisible(true)}
         >
-          <Text className="text-white font-bold">Agregar Máquina</Text>
+          <Text className="text-white font-bold">Agregar</Text>
         </TouchableOpacity>
       </View>
 
       <ScrollView className="flex-1">
         {machines.map(machine => (
-          <View key={machine.id} className="bg-white p-4 rounded-lg mb-2.5 flex-row justify-between items-center shadow-md">
-            <View>
-              <Text className="text-lg font-bold">{machine.name}</Text>
-              <Text className="text-gray-600">{machine.description}</Text>
-              <Text className="text-blue-500 mt-1">Estado: {machine.status}</Text>
+          <View key={`machine-${machine.id}`} className="bg-white p-4 rounded-lg mb-2.5 shadow-md">
+            <View className="flex-row justify-between items-start">
+              <View className="flex-1 mr-4">
+                <Text className="text-lg font-bold">{machine.name}</Text>
+              </View>
+              <View className="flex-row">
+                <TouchableOpacity 
+                  onPress={() => handleEditMachine(machine)}
+                  className="mr-2.5"
+                >
+                  <Ionicons name="pencil" size={24} color="#007AFF" />
+                </TouchableOpacity>
+                <TouchableOpacity 
+                  onPress={() => handleDeleteMachine(machine.id)}
+                  className="ml-2.5"
+                >
+                  <Ionicons name="trash" size={24} color="#FF3B30" />
+                </TouchableOpacity>
+              </View>
             </View>
-            <View className="flex-row">
-              <TouchableOpacity 
-                onPress={() => handleEditMachine(machine)}
-                className="mr-2.5"
-              >
-                <Ionicons name="pencil" size={24} color="#007AFF" />
-              </TouchableOpacity>
-              <TouchableOpacity 
-                onPress={() => handleDeleteMachine(machine.id)}
-                className="ml-2.5"
-              >
-                <Ionicons name="trash" size={24} color="#FF3B30" />
-              </TouchableOpacity>
-            </View>
+            <Text className="text-gray-600 mt-2">{machine.description}</Text>
           </View>
         ))}
       </ScrollView>
@@ -104,11 +130,17 @@ const Machines = () => {
               onChangeText={(text) => setNewMachine({...newMachine, name: text})}
             />
             <TextInput
-              className="border border-gray-300 p-2.5 rounded-lg mb-2.5"
+              className="border border-gray-300 p-2.5 rounded-lg mb-2.5 h-24"
               placeholder="Descripción"
               value={newMachine.description}
-              onChangeText={(text) => setNewMachine({...newMachine, description: text})}
+              onChangeText={(text) => setNewMachine({...newMachine, description: text.slice(0, 200)})}
+              multiline={true}
+              numberOfLines={4}
+              maxLength={200}
             />
+            <Text className="text-gray-500 text-right mb-2">
+              {newMachine.description.length}/200 caracteres
+            </Text>
             <View className="flex-row justify-end mt-4">
               <TouchableOpacity 
                 className="bg-red-500 p-2.5 rounded-lg mr-2.5"
@@ -143,15 +175,24 @@ const Machines = () => {
               onChangeText={(text) => selectedMachine && setSelectedMachine({...selectedMachine, name: text})}
             />
             <TextInput
-              className="border border-gray-300 p-2.5 rounded-lg mb-2.5"
+              className="border border-gray-300 p-2.5 rounded-lg mb-2.5 h-24"
               placeholder="Descripción"
               value={selectedMachine?.description}
-              onChangeText={(text) => selectedMachine && setSelectedMachine({...selectedMachine, description: text})}
+              onChangeText={(text) => selectedMachine && setSelectedMachine({...selectedMachine, description: text.slice(0, 200)})}
+              multiline={true}
+              numberOfLines={4}
+              maxLength={200}
             />
+            <Text className="text-gray-500 text-right mb-2">
+              {selectedMachine?.description?.length || 0}/200 caracteres
+            </Text>
             <View className="flex-row justify-end mt-4">
               <TouchableOpacity 
                 className="bg-red-500 p-2.5 rounded-lg mr-2.5"
-                onPress={() => setEditModalVisible(false)}
+                onPress={() => {
+                  setSelectedMachine(null)
+                  setEditModalVisible(false)
+                }}
               >
                 <Text className="text-white font-bold">Cancelar</Text>
               </TouchableOpacity>
