@@ -271,6 +271,23 @@ export const getGym = async () => {
   return authenticatedFetch('/gym').then(res => res.json());
 }
 
+export const getUserGym = async () => {
+  return authenticatedFetch('/gym/user').then(res => res.json());
+}
+
+export const updateUserGym = async (data: GymDAO) => {
+  return authenticatedFetch('/gym/user', {
+    method: 'PUT',
+    body: JSON.stringify(data)
+  }).then(res => res.json());
+}
+
+export const deleteUserGym = async () => {
+  return authenticatedFetch('/gym/user', {
+    method: 'DELETE'
+  }).then(res => res.json());
+}
+
 // Usuarios y Roles
 export const getAllUsers = async () => {
   try {

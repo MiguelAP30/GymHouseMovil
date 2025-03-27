@@ -68,7 +68,7 @@ export default function AccountLayout() {
       <Tabs.Screen
         name="dashboardAdmin"
         options={{
-          title: 'Dashboard',
+          title: 'Admin',
           headerShown: false,
           tabBarIcon: ({ color, size }) => <Ionicons name="speedometer" size={size} color={color} />,
           href: isAdmin ? "/account/dashboardAdmin" : null,
@@ -77,9 +77,9 @@ export default function AccountLayout() {
       <Tabs.Screen
         name="dashboardGym"
         options={{
-          title: 'Dashboard',
+          title: 'Gym',
           headerShown: false,
-          tabBarIcon: ({ color, size }) => <Ionicons name="speedometer" size={size} color={color} />,
+          tabBarIcon: ({ color, size }) => <Ionicons name="home" size={size} color={color} />,
           href: canAccessGym ? "/account/dashboardGym" : null,
         }}
       />
