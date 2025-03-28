@@ -58,25 +58,36 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const storedToken = await AsyncStorage.getItem('token');
       const storedUser = await AsyncStorage.getItem('user');
       
+      console.log('Token en checkAuthStatus:', storedToken); // Para debug
+      
       if (storedToken && storedUser) {
         setToken(storedToken);
         
         const userData = JSON.parse(storedUser);
         setUser(userData);
-
         setRole(userData.role_id);
         setIsAuthenticated(true);
-        await fetchUserData();
+        
+        // Verificamos que el token sea válido
+        const isValid = await checkAuth();
+        if (!isValid) {
+          await logout();
+        }
       }
     } catch (error) {
       console.error('Error checking auth status:', error);
+      await logout();
     }
   };
 
   const fetchUserData = async () => {
     try {
       const currentToken = await AsyncStorage.getItem('token');
-      if (!currentToken) return;
+      if (!currentToken) {
+        throw new Error('No hay token de autenticación');
+      }
+
+      console.log('Token actual:', currentToken); // Para debug
 
       const response = await fetch(`${API}/user_data`, {
         headers: {
@@ -92,8 +103,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const data = await response.json();
       
       const profileData = await getProfileByEmail(data.data["sub"], currentToken);
-
-      console.log("profileData ",profileData);
 
       //Usuario de migue      
       const userData: UserDAO = {
@@ -131,11 +140,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         final_date: profileData["final_date"]
       };
 
-      
       setUser(userData);
       setProfile(profileUser);
       setRole(data.data["user.role"]);
-      await AsyncStorage.setItem('user', JSON.stringify(userData));
     } catch (error) {
       console.error('Error fetching user data:', error);
       await logout();
@@ -144,26 +151,28 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const login = async (token: string, userData: UserDAO) => {
     try {
-
-      
-      // Primero establecemos el token ya que es necesario para fetchUserData
+      // Primero establecemos el token
       await AsyncStorage.setItem('token', token);
-      console.log("token ", token);
       setToken(token);
+
+      // Guardamos los datos del usuario
+      await AsyncStorage.setItem('user', JSON.stringify(userData));
+      setUser(userData);
+      setRole(userData.role_id);
+      setIsAuthenticated(true);
+
+      // Verificamos que el token se haya guardado correctamente
+      const storedToken = await AsyncStorage.getItem('token');
+      if (!storedToken) {
+        throw new Error('Error al guardar el token');
+      }
 
       // Obtenemos los datos actualizados del usuario
       await fetchUserData();
 
-      // Guardamos los datos del usuario después de obtener la info actualizada
-      await AsyncStorage.setItem('user', JSON.stringify(userData));
-
-      
-      setRole(userData.role_id);
-      setIsAuthenticated(true);
-
     } catch (error) {
       // En caso de error, limpiamos todo
-      //await AsyncStorage.removeItem('token');
+      await AsyncStorage.removeItem('token');
       await AsyncStorage.removeItem('user');
       setToken(null);
       setUser(null);
@@ -219,6 +228,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const checkAuth = async () => {
     try {
       const currentToken = await AsyncStorage.getItem('token');
+      console.log('Token en checkAuth:', currentToken); // Para debug
+
       if (!currentToken) {
         router.replace('/');
         return false;
@@ -237,6 +248,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return false;
       }
 
+      // Solo actualizamos los datos del usuario si la autenticación es exitosa
+      // y no estamos en medio de una actualización
+      if (!isAuthenticated) {
+        await fetchUserData();
+      }
+      
       return true;
     } catch (error) {
       console.error('Error checking auth:', error);

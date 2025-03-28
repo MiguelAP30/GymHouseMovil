@@ -4,7 +4,6 @@ import { Ionicons } from '@expo/vector-icons'
 import { MuscleDAO } from '../../../interfaces/interfaces'
 import { getMuscles, putMuscle, deleteMuscle, postMuscle } from '../../../lib/api_gymhouse'
 import { useAuth } from '../../../context/AuthStore'
-import { router } from 'expo-router'
 
 const Muscles = () => {
   const { checkAuth } = useAuth()
@@ -19,6 +18,7 @@ const Muscles = () => {
   const [muscles, setMuscles] = useState<MuscleDAO[]>([])
   const [filteredMuscles, setFilteredMuscles] = useState<MuscleDAO[]>([])
   const [searchName, setSearchName] = useState('')
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     fetchMuscles()
@@ -31,7 +31,6 @@ const Muscles = () => {
   const filterMuscles = () => {
     let filtered = [...muscles]
 
-    // Filter by name
     if (searchName.trim()) {
       filtered = filtered.filter(muscle => 
         muscle.name.toLowerCase().includes(searchName.toLowerCase())
@@ -42,50 +41,35 @@ const Muscles = () => {
   }
 
   const fetchMuscles = async () => {
-    try {
-      setLoading(true)
-      const isAuthenticated = await checkAuth()
-      if (!isAuthenticated) {
-        router.replace('/')
-        return
-      }
+    const isAuthenticated = await checkAuth()
+    if (!isAuthenticated) return
 
-      const response = await getMuscles()
-      setMuscles(response)
-    } catch (error) {
-      console.error('Error al obtener músculos:', error)
-      if (error instanceof Error && error.message.includes('Sesión expirada')) {
-        router.replace('/')
-      } else {
-        Alert.alert('Error', 'No se pudieron cargar los músculos. Por favor, intenta de nuevo.')
-      }
-    } finally {
-      setLoading(false)
-    }
+    const response = await getMuscles()
+    setMuscles(response)
+    setLoading(false)
   }
 
   const handleAddMuscle = async () => {
-    try {
-      await postMuscle(newMuscle)
-      await fetchMuscles()
-      setNewMuscle({ name: '', description: '' })
-      setAddModalVisible(false)
-      Alert.alert('Éxito', 'Músculo creado correctamente')
-    } catch (error) {
-      console.error('Error al crear músculo:', error)
-      Alert.alert('Error', 'No se pudo crear el músculo. Por favor, intenta de nuevo.')
-    }
+    const isAuthenticated = await checkAuth()
+    if (!isAuthenticated) return
+
+    await postMuscle(newMuscle)
+    await fetchMuscles()
+    setNewMuscle({
+      name: '',
+      description: ''
+    })
+    setAddModalVisible(false)
+    Alert.alert('Éxito', 'Músculo creado correctamente')
   }
 
   const handleDeleteMuscle = async (id: number) => {
-    try {
-      await deleteMuscle(id)
-      await fetchMuscles()
-      Alert.alert('Éxito', 'Músculo eliminado correctamente')
-    } catch (error) {
-      console.error('Error al eliminar músculo:', error)
-      Alert.alert('Error', 'No se pudo eliminar el músculo. Por favor, intenta de nuevo.')
-    }
+    const isAuthenticated = await checkAuth()
+    if (!isAuthenticated) return
+
+    await deleteMuscle(id)
+    await fetchMuscles()
+    Alert.alert('Éxito', 'Músculo eliminado correctamente')
   }
 
   const handleEditMuscle = (muscle: MuscleDAO) => {
@@ -96,21 +80,33 @@ const Muscles = () => {
   const handleUpdateMuscle = async () => {
     if (!selectedMuscle?.id) return
     
-    try {
-      await putMuscle(selectedMuscle.id, selectedMuscle)
-      await fetchMuscles()
-      setEditModalVisible(false)
-      Alert.alert('Éxito', 'Músculo actualizado correctamente')
-    } catch (error) {
-      console.error('Error al actualizar músculo:', error)
-      Alert.alert('Error', 'No se pudo actualizar el músculo. Por favor, intenta de nuevo.')
-    }
+    const isAuthenticated = await checkAuth()
+    if (!isAuthenticated) return
+
+    await putMuscle(selectedMuscle.id, selectedMuscle)
+    await fetchMuscles()
+    setEditModalVisible(false)
+    Alert.alert('Éxito', 'Músculo actualizado correctamente')
   }
 
   if (loading) {
     return (
       <View className="flex-1 justify-center items-center">
         <ActivityIndicator size="large" color="#0000ff" />
+      </View>
+    )
+  }
+
+  if (error) {
+    return (
+      <View className="flex-1 justify-center items-center p-4">
+        <Text className="text-red-500">{error}</Text>
+        <TouchableOpacity 
+          className="bg-blue-500 p-2.5 rounded-lg mt-4"
+          onPress={fetchMuscles}
+        >
+          <Text className="text-white font-bold">Reintentar</Text>
+        </TouchableOpacity>
       </View>
     )
   }
@@ -135,12 +131,12 @@ const Muscles = () => {
           value={searchName}
           onChangeText={setSearchName}
         />
-
+        
         <TouchableOpacity 
           className="bg-gray-500 p-2.5 rounded-lg"
           onPress={() => setSearchName('')}
         >
-          <Text className="text-white font-bold text-center">Limpiar búsqueda</Text>
+          <Text className="text-white font-bold text-center">Limpiar filtros</Text>
         </TouchableOpacity>
       </View>
 

@@ -1,33 +1,37 @@
-import { View, Text, TouchableOpacity, Modal, TextInput, ScrollView } from 'react-native'
+import { View, Text, TouchableOpacity, Modal, ScrollView, ActivityIndicator, TextInput } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { Ionicons } from '@expo/vector-icons'
 import { getMachines, createMachine, updateMachine, deleteMachine } from '../../../lib/api_gymhouse'
+import { useAuth } from '../../../context/AuthStore'
+
 interface Machine {
   id: number;
   name: string;
   description: string;
+  is_active: boolean;
 }
 
 const Machines = () => {
-  const [modalVisible, setModalVisible] = useState(false)
-  const [editModalVisible, setEditModalVisible] = useState(false)
+  const { checkAuth } = useAuth()
+  const [machines, setMachines] = useState<Machine[]>([])
   const [selectedMachine, setSelectedMachine] = useState<Machine | null>(null)
-  const [newMachine, setNewMachine] = useState<Omit<Machine, 'id'>>({
+  const [showModal, setShowModal] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [formData, setFormData] = useState({
     name: '',
     description: ''
   })
 
-  const [machines, setMachines] = useState<Machine[]>([])
-
   const fetchMachines = async () => {
-    try {
-      const response = await getMachines()
-      if (response) {
-        setMachines(response)
-      }
-    } catch (error) {
-      console.error('Error al obtener máquinas:', error)
+    const isAuthenticated = await checkAuth()
+    if (!isAuthenticated) return
+
+    const response = await getMachines()
+    if (response) {
+      setMachines(Array.isArray(response) ? response : [response])
     }
+    setLoading(false)
   }
 
   useEffect(() => {
@@ -35,172 +39,153 @@ const Machines = () => {
   }, [])
 
   const handleAddMachine = async () => {
-    try {
-      const response = await createMachine(newMachine)
-      await fetchMachines() // Recargar la lista completa
-      setNewMachine({ name: '', description: '' })
-      setModalVisible(false)
-    } catch (error) {
-      console.error('Error al crear máquina:', error)
-    }
-  }
+    const isAuthenticated = await checkAuth()
+    if (!isAuthenticated) return
 
-  const handleDeleteMachine = async (id: number) => {
-    try {
-      await deleteMachine(id)
-      await fetchMachines() // Recargar la lista completa
-    } catch (error) {
-      console.error('Error al eliminar máquina:', error)
-    }
-  }
-
-  const handleEditMachine = (machine: Machine) => {
-    setSelectedMachine({...machine}) // Crear una copia para evitar referencias
-    setEditModalVisible(true)
+    await createMachine(formData)
+    setShowModal(false)
+    setFormData({ name: '', description: '' })
+    fetchMachines()
   }
 
   const handleUpdateMachine = async () => {
-    if (!selectedMachine) return;
-    
-    try {
-      await updateMachine(selectedMachine.id, {
-        name: selectedMachine.name,
-        description: selectedMachine.description
-      })
-      await fetchMachines() // Recargar la lista completa
-      setSelectedMachine(null)
-      setEditModalVisible(false)
-    } catch (error) {
-      console.error('Error al actualizar máquina:', error)
-    }
+    if (!selectedMachine) return
+
+    const isAuthenticated = await checkAuth()
+    if (!isAuthenticated) return
+
+    await updateMachine(selectedMachine.id, formData)
+    setShowModal(false)
+    setSelectedMachine(null)
+    setFormData({ name: '', description: '' })
+    fetchMachines()
+  }
+
+  const handleDeleteMachine = async (id: number) => {
+    const isAuthenticated = await checkAuth()
+    if (!isAuthenticated) return
+
+    await deleteMachine(id)
+    fetchMachines()
+  }
+
+  if (loading) {
+    return (
+      <View className="flex-1 justify-center items-center">
+        <ActivityIndicator size="large" color="#0000ff" />
+      </View>
+    )
+  }
+
+  if (error) {
+    return (
+      <View className="flex-1 justify-center items-center p-4">
+        <Text className="text-red-500">{error}</Text>
+        <TouchableOpacity 
+          className="bg-blue-500 p-2.5 rounded-lg mt-4"
+          onPress={fetchMachines}
+        >
+          <Text className="text-white font-bold">Reintentar</Text>
+        </TouchableOpacity>
+      </View>
+    )
   }
 
   return (
-    <View className="flex-1 p-5 bg-gray-100">
-      <View className="flex-row justify-between items-center mb-5">
-        <Text className="text-2xl font-bold">Máquinas</Text>
+    <View className="flex-1 p-5 bg-gray-50">
+      <View className="flex-row justify-between items-center mb-6">
+        <Text className="text-3xl font-bold text-gray-800">Máquinas</Text>
         <TouchableOpacity 
-          className="bg-blue-500 p-2.5 rounded-lg"
-          onPress={() => setModalVisible(true)}
+          className="bg-blue-500 px-4 py-2 rounded-lg"
+          onPress={() => {
+            setSelectedMachine(null)
+            setFormData({ name: '', description: '' })
+            setShowModal(true)
+          }}
         >
-          <Text className="text-white font-bold">Agregar</Text>
+          <Text className="text-white font-bold">Agregar Máquina</Text>
         </TouchableOpacity>
       </View>
 
       <ScrollView className="flex-1">
-        {machines.map(machine => (
-          <View key={`machine-${machine.id}`} className="bg-white p-4 rounded-lg mb-2.5 shadow-md">
-            <View className="flex-row justify-between items-start">
-              <View className="flex-1 mr-4">
-                <Text className="text-lg font-bold">{machine.name}</Text>
+        {machines.map((machine) => (
+          <View key={machine.id} className="bg-white p-6 rounded-xl mb-4 shadow-lg">
+            <View className="flex-row justify-between items-center">
+              <View className="flex-1">
+                <Text className="text-xl font-bold text-gray-800">{machine.name}</Text>
+                <Text className="text-gray-600 mt-1">{machine.description}</Text>
               </View>
-              <View className="flex-row">
+              <View className="flex-row space-x-4">
                 <TouchableOpacity 
-                  onPress={() => handleEditMachine(machine)}
-                  className="mr-2.5"
+                  className="bg-blue-500 px-3 py-1.5 rounded-lg"
+                  onPress={() => {
+                    setSelectedMachine(machine)
+                    setFormData({
+                      name: machine.name,
+                      description: machine.description
+                    })
+                    setShowModal(true)
+                  }}
                 >
-                  <Ionicons name="pencil" size={24} color="#007AFF" />
+                  <Text className="text-white text-sm">Editar</Text>
                 </TouchableOpacity>
                 <TouchableOpacity 
+                  className="bg-red-500 px-3 py-1.5 rounded-lg"
                   onPress={() => handleDeleteMachine(machine.id)}
-                  className="ml-2.5"
                 >
-                  <Ionicons name="trash" size={24} color="#FF3B30" />
+                  <Text className="text-white text-sm">Eliminar</Text>
                 </TouchableOpacity>
               </View>
             </View>
-            <Text className="text-gray-600 mt-2">{machine.description}</Text>
           </View>
         ))}
       </ScrollView>
 
-      {/* Modal para agregar máquina */}
       <Modal
         animationType="slide"
         transparent={true}
-        visible={modalVisible}
+        visible={showModal}
+        onRequestClose={() => setShowModal(false)}
       >
         <View className="flex-1 justify-center items-center bg-black/50">
-          <View className="bg-white p-5 rounded-lg w-4/5">
-            <Text className="text-xl font-bold mb-4">Nueva Máquina</Text>
-            <TextInput
-              className="border border-gray-300 p-2.5 rounded-lg mb-2.5"
-              placeholder="Nombre de la máquina"
-              value={newMachine.name}
-              onChangeText={(text) => setNewMachine({...newMachine, name: text})}
-            />
-            <TextInput
-              className="border border-gray-300 p-2.5 rounded-lg mb-2.5 h-24"
-              placeholder="Descripción"
-              value={newMachine.description}
-              onChangeText={(text) => setNewMachine({...newMachine, description: text.slice(0, 200)})}
-              multiline={true}
-              numberOfLines={4}
-              maxLength={200}
-            />
-            <Text className="text-gray-500 text-right mb-2">
-              {newMachine.description.length}/200 caracteres
+          <View className="bg-white p-6 rounded-xl w-11/12 max-w-md">
+            <Text className="text-2xl font-bold text-gray-800 mb-4">
+              {selectedMachine ? 'Editar Máquina' : 'Agregar Máquina'}
             </Text>
-            <View className="flex-row justify-end mt-4">
-              <TouchableOpacity 
-                className="bg-red-500 p-2.5 rounded-lg mr-2.5"
-                onPress={() => setModalVisible(false)}
-              >
-                <Text className="text-white font-bold">Cancelar</Text>
-              </TouchableOpacity>
-              <TouchableOpacity 
-                className="bg-blue-500 p-2.5 rounded-lg"
-                onPress={handleAddMachine}
-              >
-                <Text className="text-white font-bold">Guardar</Text>
-              </TouchableOpacity>
+            <View className="space-y-4">
+              <View>
+                <Text className="text-gray-600 mb-1">Nombre</Text>
+                <TextInput
+                  className="border border-gray-300 rounded-lg p-2"
+                  value={formData.name}
+                  onChangeText={(text) => setFormData({ ...formData, name: text })}
+                  placeholder="Nombre de la máquina"
+                />
+              </View>
+              <View>
+                <Text className="text-gray-600 mb-1">Descripción</Text>
+                <TextInput
+                  className="border border-gray-300 rounded-lg p-2"
+                  value={formData.description}
+                  onChangeText={(text) => setFormData({ ...formData, description: text })}
+                  placeholder="Descripción de la máquina"
+                />
+              </View>
             </View>
-          </View>
-        </View>
-      </Modal>
-
-      {/* Modal para editar máquina */}
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={editModalVisible}
-      >
-        <View className="flex-1 justify-center items-center bg-black/50">
-          <View className="bg-white p-5 rounded-lg w-4/5">
-            <Text className="text-xl font-bold mb-4">Editar Máquina</Text>
-            <TextInput
-              className="border border-gray-300 p-2.5 rounded-lg mb-2.5"
-              placeholder="Nombre de la máquina"
-              value={selectedMachine?.name}
-              onChangeText={(text) => selectedMachine && setSelectedMachine({...selectedMachine, name: text})}
-            />
-            <TextInput
-              className="border border-gray-300 p-2.5 rounded-lg mb-2.5 h-24"
-              placeholder="Descripción"
-              value={selectedMachine?.description}
-              onChangeText={(text) => selectedMachine && setSelectedMachine({...selectedMachine, description: text.slice(0, 200)})}
-              multiline={true}
-              numberOfLines={4}
-              maxLength={200}
-            />
-            <Text className="text-gray-500 text-right mb-2">
-              {selectedMachine?.description?.length || 0}/200 caracteres
-            </Text>
-            <View className="flex-row justify-end mt-4">
+            <View className="flex-row justify-end space-x-4 mt-6">
               <TouchableOpacity 
-                className="bg-red-500 p-2.5 rounded-lg mr-2.5"
-                onPress={() => {
-                  setSelectedMachine(null)
-                  setEditModalVisible(false)
-                }}
+                className="bg-gray-500 px-4 py-2 rounded-lg"
+                onPress={() => setShowModal(false)}
               >
                 <Text className="text-white font-bold">Cancelar</Text>
               </TouchableOpacity>
               <TouchableOpacity 
-                className="bg-blue-500 p-2.5 rounded-lg"
-                onPress={handleUpdateMachine}
+                className="bg-blue-500 px-4 py-2 rounded-lg"
+                onPress={selectedMachine ? handleUpdateMachine : handleAddMachine}
               >
-                <Text className="text-white font-bold">Actualizar</Text>
+                <Text className="text-white font-bold">
+                  {selectedMachine ? 'Actualizar' : 'Agregar'}
+                </Text>
               </TouchableOpacity>
             </View>
           </View>

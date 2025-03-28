@@ -2,8 +2,10 @@ import { View, Text, TouchableOpacity, Modal, TextInput, ScrollView, ActivityInd
 import { Picker } from '@react-native-picker/picker'
 import React, { useState, useEffect } from 'react'
 import { Ionicons } from '@expo/vector-icons'
-import { ExerciseDAO, DifficultyDAO } from '../../../interfaces/interfaces'
+import { ExerciseDAO, DifficultyDAO, PaginatedResponse } from '../../../interfaces/interfaces'
 import { getExercises, postExercise, putExercise, deleteExercise, getDifficulties, getMachines } from '../../../lib/api_gymhouse'
+import Pagination from '../../../components/organisms/paginacion'
+import { useAuth } from '../../../context/AuthStore'
 
 interface Machine {
   id: number;
@@ -12,17 +14,24 @@ interface Machine {
 }
 
 const Exercises = () => {
+  const { checkAuth } = useAuth()
   const [modalVisible, setModalVisible] = useState(false)
   const [editModalVisible, setEditModalVisible] = useState(false)
   const [selectedExercise, setSelectedExercise] = useState<ExerciseDAO | null>(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [exercises, setExercises] = useState<ExerciseDAO[]>([])
-  const [filteredExercises, setFilteredExercises] = useState<ExerciseDAO[]>([])
   const [difficulties, setDifficulties] = useState<DifficultyDAO[]>([])
   const [machines, setMachines] = useState<Machine[]>([])
   const [searchName, setSearchName] = useState('')
   const [selectedDifficulty, setSelectedDifficulty] = useState<number | null>(null)
   const [selectedMachine, setSelectedMachine] = useState<number | null>(null)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const [pageSize] = useState(10)
+  const [tempSearchName, setTempSearchName] = useState('')
+  const [tempSelectedDifficulty, setTempSelectedDifficulty] = useState<number | null>(null)
+  const [tempSelectedMachine, setTempSelectedMachine] = useState<number | null>(null)
   const [newExercise, setNewExercise] = useState<Omit<ExerciseDAO, 'id'>>({
     name: '',
     description: '',
@@ -34,98 +43,75 @@ const Exercises = () => {
   })
 
   useEffect(() => {
-    fetchExercises()
-    fetchDifficulties()
-    fetchMachines()
-  }, [])
+    const loadData = async () => {
+      const isAuthenticated = await checkAuth()
+      if (!isAuthenticated) return
 
-  useEffect(() => {
-    filterExercises()
-  }, [exercises, searchName, selectedDifficulty, selectedMachine])
-
-  const filterExercises = () => {
-    let filtered = [...exercises]
-
-    // Filter by name
-    if (searchName.trim()) {
-      filtered = filtered.filter(exercise => 
-        exercise.name.toLowerCase().includes(searchName.toLowerCase())
-      )
+      await Promise.all([
+        fetchExercises(),
+        fetchDifficulties(),
+        fetchMachines()
+      ])
     }
-
-    // Filter by difficulty
-    if (selectedDifficulty) {
-      filtered = filtered.filter(exercise => 
-        exercise.dificulty_id === selectedDifficulty
-      )
-    }
-
-    // Filter by machine
-    if (selectedMachine) {
-      filtered = filtered.filter(exercise => 
-        exercise.machine_id === selectedMachine
-      )
-    }
-
-    setFilteredExercises(filtered)
-  }
+    loadData()
+  }, [currentPage, searchName, selectedDifficulty, selectedMachine])
 
   const fetchExercises = async () => {
-    try {
-      setLoading(true)
-      const response = await getExercises()
-      setExercises(response)
-    } catch (error) {
-      console.error('Error al obtener ejercicios:', error)
-    } finally {
-      setLoading(false)
-    }
+    const isAuthenticated = await checkAuth()
+    if (!isAuthenticated) return
+
+    const response: PaginatedResponse<ExerciseDAO> = await getExercises(
+      currentPage,
+      pageSize,
+      searchName.trim() || undefined,
+      selectedDifficulty || undefined,
+      selectedMachine || undefined
+    )
+    setExercises(response.items)
+    setTotalPages(response.pages)
+    setLoading(false)
   }
 
   const fetchDifficulties = async () => {
-    try {
-      const response = await getDifficulties()
-      setDifficulties(response)
-    } catch (error) {
-      console.error('Error al obtener dificultades:', error)
-    }
+    const isAuthenticated = await checkAuth()
+    if (!isAuthenticated) return
+
+    const response = await getDifficulties()
+    setDifficulties(response)
   }
 
   const fetchMachines = async () => {
-    try {
-      const response = await getMachines()
-      setMachines(response)
-    } catch (error) {
-      console.error('Error al obtener máquinas:', error)
-    }
+    const isAuthenticated = await checkAuth()
+    if (!isAuthenticated) return
+
+    const response = await getMachines()
+    setMachines(response)
   }
 
   const handleAddExercise = async () => {
-    try {
-      await postExercise(newExercise)
-      await fetchExercises()
-      setNewExercise({
-        name: '',
-        description: '',
-        dateAdded: new Date().toISOString().split('T')[0],
-        dificulty_id: 1,
-        image: '',
-        machine_id: 1,
-        video: ''
-      })
-      setModalVisible(false)
-    } catch (error) {
-      console.error('Error al agregar ejercicio:', error)
-    }
+    const isAuthenticated = await checkAuth()
+    if (!isAuthenticated) return
+
+    await postExercise(newExercise)
+    await fetchExercises()
+    setNewExercise({
+      name: '',
+      description: '',
+      dateAdded: new Date().toISOString().split('T')[0],
+      dificulty_id: 1,
+      image: '',
+      machine_id: 1,
+      video: ''
+    })
+    setModalVisible(false)
   }
 
   const handleDeleteExercise = async (id: number) => {
-    try {
-      await deleteExercise(id)
-      await fetchExercises()
-    } catch (error) {
-      console.error('Error al eliminar ejercicio:', error)
-    }
+    const isAuthenticated = await checkAuth()
+    if (!isAuthenticated) return
+
+    await deleteExercise(id)
+    await fetchExercises()
   }
 
   const handleEditExercise = (exercise: ExerciseDAO) => {
@@ -136,19 +122,59 @@ const Exercises = () => {
   const handleUpdateExercise = async () => {
     if (!selectedExercise?.id) return
     
-    try {
-      await putExercise(selectedExercise.id, selectedExercise)
-      await fetchExercises()
-      setEditModalVisible(false)
-    } catch (error) {
-      console.error('Error al actualizar ejercicio:', error)
-    }
+    const isAuthenticated = await checkAuth()
+    if (!isAuthenticated) return
+
+    await putExercise(selectedExercise.id, selectedExercise)
+    await fetchExercises()
+    setEditModalVisible(false)
+  }
+
+  const handleSearch = async () => {
+    const isAuthenticated = await checkAuth()
+    if (!isAuthenticated) return
+
+    setLoading(true)
+    setSearchName(tempSearchName)
+    setSelectedDifficulty(tempSelectedDifficulty)
+    setSelectedMachine(tempSelectedMachine)
+    setCurrentPage(1)
+    await fetchExercises()
+  }
+
+  const handleClearFilters = async () => {
+    const isAuthenticated = await checkAuth()
+    if (!isAuthenticated) return
+
+    setLoading(true)
+    setTempSearchName('')
+    setTempSelectedDifficulty(null)
+    setTempSelectedMachine(null)
+    setSearchName('')
+    setSelectedDifficulty(null)
+    setSelectedMachine(null)
+    setCurrentPage(1)
+    await fetchExercises()
   }
 
   if (loading) {
     return (
       <View className="flex-1 justify-center items-center">
         <ActivityIndicator size="large" color="#0000ff" />
+      </View>
+    )
+  }
+
+  if (error) {
+    return (
+      <View className="flex-1 justify-center items-center p-4">
+        <Text className="text-red-500">{error}</Text>
+        <TouchableOpacity 
+          className="bg-blue-500 p-2.5 rounded-lg mt-4"
+          onPress={fetchExercises}
+        >
+          <Text className="text-white font-bold">Reintentar</Text>
+        </TouchableOpacity>
       </View>
     )
   }
@@ -170,16 +196,16 @@ const Exercises = () => {
         <TextInput
           className="border border-gray-300 p-2.5 rounded-lg mb-2.5"
           placeholder="Buscar por nombre..."
-          value={searchName}
-          onChangeText={setSearchName}
+          value={tempSearchName}
+          onChangeText={setTempSearchName}
         />
         
         <View className="flex-row justify-between mb-2.5">
           <View className="flex-1 mr-2">
             <View className="border border-gray-300 rounded-lg">
               <Picker
-                selectedValue={selectedDifficulty}
-                onValueChange={(value: number | null) => setSelectedDifficulty(value)}
+                selectedValue={tempSelectedDifficulty}
+                onValueChange={setTempSelectedDifficulty}
                 style={{ height: 50 }}
                 mode="dropdown"
               >
@@ -198,8 +224,8 @@ const Exercises = () => {
           <View className="flex-1 ml-2">
             <View className="border border-gray-300 rounded-lg">
               <Picker
-                selectedValue={selectedMachine}
-                onValueChange={(value: number | null) => setSelectedMachine(value)}
+                selectedValue={tempSelectedMachine}
+                onValueChange={setTempSelectedMachine}
                 style={{ height: 50 }}
                 mode="dropdown"
               >
@@ -216,20 +242,24 @@ const Exercises = () => {
           </View>
         </View>
 
-        <TouchableOpacity 
-          className="bg-gray-500 p-2.5 rounded-lg"
-          onPress={() => {
-            setSearchName('')
-            setSelectedDifficulty(null)
-            setSelectedMachine(null)
-          }}
-        >
-          <Text className="text-white font-bold text-center">Limpiar filtros</Text>
-        </TouchableOpacity>
+        <View className="flex-row space-x-2">
+          <TouchableOpacity 
+            className="flex-1 bg-blue-500 p-2.5 rounded-lg"
+            onPress={handleSearch}
+          >
+            <Text className="text-white font-bold text-center">Buscar</Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            className="flex-1 bg-gray-500 p-2.5 rounded-lg"
+            onPress={handleClearFilters}
+          >
+            <Text className="text-white font-bold text-center">Limpiar</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       <ScrollView className="flex-1">
-        {filteredExercises.map(exercise => (
+        {exercises.map(exercise => (
           <View key={exercise.id} className="bg-white p-4 rounded-lg mb-2.5 flex-row justify-between items-center shadow-md">
             <View className="flex-1">
               <Text className="text-lg font-bold">{exercise.name}</Text>
@@ -258,6 +288,12 @@ const Exercises = () => {
           </View>
         ))}
       </ScrollView>
+
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={(page) => setCurrentPage(page)}
+      />
 
       {/* Modal para agregar ejercicio */}
       <Modal

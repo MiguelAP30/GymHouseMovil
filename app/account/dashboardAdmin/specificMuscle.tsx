@@ -5,7 +5,6 @@ import { Ionicons } from '@expo/vector-icons'
 import { SpecificMuscleDAO, MuscleDAO } from '../../../interfaces/interfaces'
 import { getSpecificMuscles, putSpecificMuscle, deleteSpecificMuscle, postSpecificMuscle, getMuscles } from '../../../lib/api_gymhouse'
 import { useAuth } from '../../../context/AuthStore'
-import { router } from 'expo-router'
 
 const SpecificMuscle = () => {
   const { checkAuth } = useAuth()
@@ -23,6 +22,7 @@ const SpecificMuscle = () => {
   const [muscles, setMuscles] = useState<MuscleDAO[]>([])
   const [searchName, setSearchName] = useState('')
   const [selectedMuscle, setSelectedMuscle] = useState<number | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     fetchSpecificMuscles()
@@ -36,14 +36,12 @@ const SpecificMuscle = () => {
   const filterSpecificMuscles = () => {
     let filtered = [...specificMuscles]
 
-    // Filter by name
     if (searchName.trim()) {
       filtered = filtered.filter(specificMuscle => 
         specificMuscle.name.toLowerCase().includes(searchName.toLowerCase())
       )
     }
 
-    // Filter by muscle
     if (selectedMuscle) {
       filtered = filtered.filter(specificMuscle => 
         specificMuscle.muscle_id === selectedMuscle
@@ -54,63 +52,44 @@ const SpecificMuscle = () => {
   }
 
   const fetchSpecificMuscles = async () => {
-    try {
-      setLoading(true)
-      const isAuthenticated = await checkAuth()
-      if (!isAuthenticated) {
-        router.replace('/')
-        return
-      }
+    const isAuthenticated = await checkAuth()
+    if (!isAuthenticated) return
 
-      const response = await getSpecificMuscles()
-      setSpecificMuscles(response)
-    } catch (error) {
-      console.error('Error al obtener músculos específicos:', error)
-      if (error instanceof Error && error.message.includes('Sesión expirada')) {
-        router.replace('/')
-      } else {
-        Alert.alert('Error', 'No se pudieron cargar los músculos específicos. Por favor, intenta de nuevo.')
-      }
-    } finally {
-      setLoading(false)
-    }
+    const response = await getSpecificMuscles()
+    setSpecificMuscles(response)
+    setLoading(false)
   }
 
   const fetchMuscles = async () => {
-    try {
-      const response = await getMuscles()
-      setMuscles(response)
-    } catch (error) {
-      console.error('Error al obtener músculos:', error)
-    }
+    const isAuthenticated = await checkAuth()
+    if (!isAuthenticated) return
+
+    const response = await getMuscles()
+    setMuscles(response)
   }
 
   const handleAddSpecificMuscle = async () => {
-    try {
-      await postSpecificMuscle(newSpecificMuscle)
-      await fetchSpecificMuscles()
-      setNewSpecificMuscle({
-        name: '',
-        description: '',
-        muscle_id: 1
-      })
-      setAddModalVisible(false)
-      Alert.alert('Éxito', 'Músculo específico creado correctamente')
-    } catch (error) {
-      console.error('Error al crear músculo específico:', error)
-      Alert.alert('Error', 'No se pudo crear el músculo específico. Por favor, intenta de nuevo.')
-    }
+    const isAuthenticated = await checkAuth()
+    if (!isAuthenticated) return
+
+    await postSpecificMuscle(newSpecificMuscle)
+    await fetchSpecificMuscles()
+    setNewSpecificMuscle({
+      name: '',
+      description: '',
+      muscle_id: 1
+    })
+    setAddModalVisible(false)
+    Alert.alert('Éxito', 'Músculo específico creado correctamente')
   }
 
   const handleDeleteSpecificMuscle = async (id: number) => {
-    try {
-      await deleteSpecificMuscle(id)
-      await fetchSpecificMuscles()
-      Alert.alert('Éxito', 'Músculo específico eliminado correctamente')
-    } catch (error) {
-      console.error('Error al eliminar músculo específico:', error)
-      Alert.alert('Error', 'No se pudo eliminar el músculo específico. Por favor, intenta de nuevo.')
-    }
+    const isAuthenticated = await checkAuth()
+    if (!isAuthenticated) return
+
+    await deleteSpecificMuscle(id)
+    await fetchSpecificMuscles()
+    Alert.alert('Éxito', 'Músculo específico eliminado correctamente')
   }
 
   const handleEditSpecificMuscle = (specificMuscle: SpecificMuscleDAO) => {
@@ -121,21 +100,33 @@ const SpecificMuscle = () => {
   const handleUpdateSpecificMuscle = async () => {
     if (!selectedSpecificMuscle?.id) return
     
-    try {
-      await putSpecificMuscle(selectedSpecificMuscle.id, selectedSpecificMuscle)
-      await fetchSpecificMuscles()
-      setEditModalVisible(false)
-      Alert.alert('Éxito', 'Músculo específico actualizado correctamente')
-    } catch (error) {
-      console.error('Error al actualizar músculo específico:', error)
-      Alert.alert('Error', 'No se pudo actualizar el músculo específico. Por favor, intenta de nuevo.')
-    }
+    const isAuthenticated = await checkAuth()
+    if (!isAuthenticated) return
+
+    await putSpecificMuscle(selectedSpecificMuscle.id, selectedSpecificMuscle)
+    await fetchSpecificMuscles()
+    setEditModalVisible(false)
+    Alert.alert('Éxito', 'Músculo específico actualizado correctamente')
   }
 
   if (loading) {
     return (
       <View className="flex-1 justify-center items-center">
         <ActivityIndicator size="large" color="#0000ff" />
+      </View>
+    )
+  }
+
+  if (error) {
+    return (
+      <View className="flex-1 justify-center items-center p-4">
+        <Text className="text-red-500">{error}</Text>
+        <TouchableOpacity 
+          className="bg-blue-500 p-2.5 rounded-lg mt-4"
+          onPress={fetchSpecificMuscles}
+        >
+          <Text className="text-white font-bold">Reintentar</Text>
+        </TouchableOpacity>
       </View>
     )
   }

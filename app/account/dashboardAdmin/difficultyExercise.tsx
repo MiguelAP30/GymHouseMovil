@@ -16,56 +16,39 @@ const DifficultyExercise = () => {
   })
   const [loading, setLoading] = useState(true)
   const [difficulties, setDifficulties] = useState<DifficultyDAO[]>([])
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     fetchDifficulties()
   }, [])
 
   const fetchDifficulties = async () => {
-    try {
-      setLoading(true)
-      const isAuthenticated = await checkAuth()
-      if (!isAuthenticated) {
-        router.replace('/')
-        return
-      }
+    const isAuthenticated = await checkAuth()
+    if (!isAuthenticated) return
 
-      const response = await getDifficulties()
-      setDifficulties(response)
-    } catch (error) {
-      console.error('Error al obtener dificultades:', error)
-      if (error instanceof Error && error.message.includes('Sesión expirada')) {
-        router.replace('/')
-      } else {
-        Alert.alert('Error', 'No se pudieron cargar las dificultades. Por favor, intenta de nuevo.')
-      }
-    } finally {
-      setLoading(false)
-    }
+    const response = await getDifficulties()
+    setDifficulties(response)
+    setLoading(false)
   }
 
   const handleAddDifficulty = async () => {
-    try {
-      await postDifficulty(newDifficulty)
-      await fetchDifficulties()
-      setNewDifficulty({ name: '' })
-      setAddModalVisible(false)
-      Alert.alert('Éxito', 'Dificultad creada correctamente')
-    } catch (error) {
-      console.error('Error al crear dificultad:', error)
-      Alert.alert('Error', 'No se pudo crear la dificultad. Por favor, intenta de nuevo.')
-    }
+    const isAuthenticated = await checkAuth()
+    if (!isAuthenticated) return
+
+    await postDifficulty(newDifficulty)
+    await fetchDifficulties()
+    setNewDifficulty({ name: '' })
+    setAddModalVisible(false)
+    Alert.alert('Éxito', 'Dificultad creada correctamente')
   }
 
   const handleDeleteDifficulty = async (id: number) => {
-    try {
-      await deleteDifficulty(id)
-      await fetchDifficulties()
-      Alert.alert('Éxito', 'Dificultad eliminada correctamente')
-    } catch (error) {
-      console.error('Error al eliminar dificultad:', error)
-      Alert.alert('Error', 'No se pudo eliminar la dificultad. Por favor, intenta de nuevo.')
-    }
+    const isAuthenticated = await checkAuth()
+    if (!isAuthenticated) return
+
+    await deleteDifficulty(id)
+    await fetchDifficulties()
+    Alert.alert('Éxito', 'Dificultad eliminada correctamente')
   }
 
   const handleEditDifficulty = (difficulty: DifficultyDAO) => {
@@ -76,21 +59,33 @@ const DifficultyExercise = () => {
   const handleUpdateDifficulty = async () => {
     if (!selectedDifficulty?.id) return
     
-    try {
-      await putDifficulty(selectedDifficulty.id, selectedDifficulty)
-      await fetchDifficulties()
-      setEditModalVisible(false)
-      Alert.alert('Éxito', 'Dificultad actualizada correctamente')
-    } catch (error) {
-      console.error('Error al actualizar dificultad:', error)
-      Alert.alert('Error', 'No se pudo actualizar la dificultad. Por favor, intenta de nuevo.')
-    }
+    const isAuthenticated = await checkAuth()
+    if (!isAuthenticated) return
+
+    await putDifficulty(selectedDifficulty.id, selectedDifficulty)
+    await fetchDifficulties()
+    setEditModalVisible(false)
+    Alert.alert('Éxito', 'Dificultad actualizada correctamente')
   }
 
   if (loading) {
     return (
       <View className="flex-1 justify-center items-center">
         <ActivityIndicator size="large" color="#0000ff" />
+      </View>
+    )
+  }
+
+  if (error) {
+    return (
+      <View className="flex-1 justify-center items-center p-4">
+        <Text className="text-red-500">{error}</Text>
+        <TouchableOpacity 
+          className="bg-blue-500 p-2.5 rounded-lg mt-4"
+          onPress={fetchDifficulties}
+        >
+          <Text className="text-white font-bold">Reintentar</Text>
+        </TouchableOpacity>
       </View>
     )
   }

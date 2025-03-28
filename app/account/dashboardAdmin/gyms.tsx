@@ -1,7 +1,8 @@
-import { View, Text, TouchableOpacity, Modal, TextInput, ScrollView } from 'react-native'
+import { View, Text, TouchableOpacity, Modal, ScrollView, ActivityIndicator } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { Ionicons } from '@expo/vector-icons'
 import { getGym } from '../../../lib/api_gymhouse'
+import { useAuth } from '../../../context/AuthStore'
 
 interface Gym {
   email: string;
@@ -20,25 +21,50 @@ interface Gym {
 }
 
 const Gyms = () => {
+  const { checkAuth } = useAuth()
   const [gyms, setGyms] = useState<Gym[]>([])
   const [selectedGym, setSelectedGym] = useState<Gym | null>(null)
   const [showContactModal, setShowContactModal] = useState(false)
   const [showDetailsModal, setShowDetailsModal] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   const fetchGyms = async () => {
-    try {
-      const response = await getGym()
-      if (response) {
-        setGyms(Array.isArray(response) ? response : [response])
-      }
-    } catch (error) {
-      console.error('Error al obtener gimnasios:', error)
+    const isAuthenticated = await checkAuth()
+    if (!isAuthenticated) return
+
+    const response = await getGym()
+    if (response) {
+      setGyms(Array.isArray(response) ? response : [response])
     }
+    setLoading(false)
   }
 
   useEffect(() => {
     fetchGyms()
   }, [])
+
+  if (loading) {
+    return (
+      <View className="flex-1 justify-center items-center">
+        <ActivityIndicator size="large" color="#0000ff" />
+      </View>
+    )
+  }
+
+  if (error) {
+    return (
+      <View className="flex-1 justify-center items-center p-4">
+        <Text className="text-red-500">{error}</Text>
+        <TouchableOpacity 
+          className="bg-blue-500 p-2.5 rounded-lg mt-4"
+          onPress={fetchGyms}
+        >
+          <Text className="text-white font-bold">Reintentar</Text>
+        </TouchableOpacity>
+      </View>
+    )
+  }
 
   const ContactInfoModal = () => (
     <Modal
@@ -99,9 +125,9 @@ const Gyms = () => {
               <Text className="text-gray-600 ml-3 text-lg">Ciudad: {selectedGym?.city}</Text>
             </View>
             <View className="flex-row items-center">
-                <Ionicons name="cash-outline" size={24} color="#4B5563" />
-                <Text className="text-gray-600 ml-3 text-lg">Precio: ${selectedGym?.price}</Text>
-              </View>
+              <Ionicons name="cash-outline" size={24} color="#4B5563" />
+              <Text className="text-gray-600 ml-3 text-lg">Precio: ${selectedGym?.price}</Text>
+            </View>
             <View className="flex-row items-center">
               <Ionicons 
                 name="checkmark-circle" 

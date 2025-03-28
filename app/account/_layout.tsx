@@ -1,12 +1,23 @@
 import { Tabs, Redirect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { useContext } from 'react';
+import { useContext, useEffect } from 'react';
 import { AuthContext } from '../../context/AuthStore';
 import { ROLES } from '../../interfaces/interfaces';
+import { router } from 'expo-router';
 
 export default function AccountLayout() {
-  const { isAuthenticated, role } = useContext(AuthContext);
+  const { isAuthenticated, role, checkAuth } = useContext(AuthContext);
   const isAdmin = role === ROLES.admin;
+
+  useEffect(() => {
+    const validateAuth = async () => {
+      const isValid = await checkAuth();
+      if (!isValid) {
+        router.replace('/');
+      }
+    };
+    validateAuth();
+  }, []);
 
   if (!isAuthenticated || role === null) {
     return <Redirect href="/index" />;

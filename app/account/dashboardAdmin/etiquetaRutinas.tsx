@@ -18,6 +18,7 @@ const EtiquetaRutinas = () => {
   const [tags, setTags] = useState<TagOfTrainingPlanDAO[]>([])
   const [filteredTags, setFilteredTags] = useState<TagOfTrainingPlanDAO[]>([])
   const [searchName, setSearchName] = useState('')
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     fetchTags()
@@ -30,7 +31,6 @@ const EtiquetaRutinas = () => {
   const filterTags = () => {
     let filtered = [...tags]
 
-    // Filter by name
     if (searchName.trim()) {
       filtered = filtered.filter(tag => 
         tag.name.toLowerCase().includes(searchName.toLowerCase())
@@ -41,50 +41,32 @@ const EtiquetaRutinas = () => {
   }
 
   const fetchTags = async () => {
-    try {
-      setLoading(true)
-      const isAuthenticated = await checkAuth()
-      if (!isAuthenticated) {
-        router.replace('/')
-        return
-      }
+    const isAuthenticated = await checkAuth()
+    if (!isAuthenticated) return
 
-      const response = await getTagsOfTrainingPlan()
-      setTags(response)
-    } catch (error) {
-      console.error('Error al obtener etiquetas:', error)
-      if (error instanceof Error && error.message.includes('Sesión expirada')) {
-        router.replace('/')
-      } else {
-        Alert.alert('Error', 'No se pudieron cargar las etiquetas. Por favor, intenta de nuevo.')
-      }
-    } finally {
-      setLoading(false)
-    }
+    const response = await getTagsOfTrainingPlan()
+    setTags(response)
+    setLoading(false)
   }
 
   const handleAddTag = async () => {
-    try {
-      await postTagOfTrainingPlan(newTag)
-      await fetchTags()
-      setNewTag({ name: '' })
-      setAddModalVisible(false)
-      Alert.alert('Éxito', 'Etiqueta creada correctamente')
-    } catch (error) {
-      console.error('Error al crear etiqueta:', error)
-      Alert.alert('Error', 'No se pudo crear la etiqueta. Por favor, intenta de nuevo.')
-    }
+    const isAuthenticated = await checkAuth()
+    if (!isAuthenticated) return
+
+    await postTagOfTrainingPlan(newTag)
+    await fetchTags()
+    setNewTag({ name: '' })
+    setAddModalVisible(false)
+    Alert.alert('Éxito', 'Etiqueta creada correctamente')
   }
 
   const handleDeleteTag = async (id: number) => {
-    try {
-      await deleteTagOfTrainingPlan(id)
-      await fetchTags()
-      Alert.alert('Éxito', 'Etiqueta eliminada correctamente')
-    } catch (error) {
-      console.error('Error al eliminar etiqueta:', error)
-      Alert.alert('Error', 'No se pudo eliminar la etiqueta. Por favor, intenta de nuevo.')
-    }
+    const isAuthenticated = await checkAuth()
+    if (!isAuthenticated) return
+
+    await deleteTagOfTrainingPlan(id)
+    await fetchTags()
+    Alert.alert('Éxito', 'Etiqueta eliminada correctamente')
   }
 
   const handleEditTag = (tag: TagOfTrainingPlanDAO) => {
@@ -95,21 +77,33 @@ const EtiquetaRutinas = () => {
   const handleUpdateTag = async () => {
     if (!selectedTag?.id) return
     
-    try {
-      await putTagOfTrainingPlan(selectedTag.id, selectedTag)
-      await fetchTags()
-      setEditModalVisible(false)
-      Alert.alert('Éxito', 'Etiqueta actualizada correctamente')
-    } catch (error) {
-      console.error('Error al actualizar etiqueta:', error)
-      Alert.alert('Error', 'No se pudo actualizar la etiqueta. Por favor, intenta de nuevo.')
-    }
+    const isAuthenticated = await checkAuth()
+    if (!isAuthenticated) return
+
+    await putTagOfTrainingPlan(selectedTag.id, selectedTag)
+    await fetchTags()
+    setEditModalVisible(false)
+    Alert.alert('Éxito', 'Etiqueta actualizada correctamente')
   }
 
   if (loading) {
     return (
       <View className="flex-1 justify-center items-center">
         <ActivityIndicator size="large" color="#0000ff" />
+      </View>
+    )
+  }
+
+  if (error) {
+    return (
+      <View className="flex-1 justify-center items-center p-4">
+        <Text className="text-red-500">{error}</Text>
+        <TouchableOpacity 
+          className="bg-blue-500 p-2.5 rounded-lg mt-4"
+          onPress={fetchTags}
+        >
+          <Text className="text-white font-bold">Reintentar</Text>
+        </TouchableOpacity>
       </View>
     )
   }

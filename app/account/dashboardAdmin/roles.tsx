@@ -14,47 +14,28 @@ const Roles = () => {
   const [error, setError] = useState<string | null>(null)
 
   const fetchUsers = async () => {
-    try {
-      const isAuthenticated = await checkAuth()
-      if (!isAuthenticated) return
+    const isAuthenticated = await checkAuth()
+    if (!isAuthenticated) return
 
-      const response = await getAllUsers()
-      if (!response || !response.data) {
-        throw new Error('Formato de respuesta inválido')
-      }
-
-      setUsers(response.data.filter((user: UserDAO) => user.role_id !== ROLES.admin))
-      setError(null)
-    } catch (error) {
-      console.error('Error:', error)
-      if (error instanceof Error && error.message.includes('Sesión expirada')) {
-        router.replace('/')
-      } else {
-        setError('Error al cargar los usuarios. Por favor, intenta de nuevo.')
-      }
-    } finally {
-      setLoading(false)
+    const response = await getAllUsers()
+    if (!response || !response.data) {
+      setError('Formato de respuesta inválido')
+      return
     }
+
+    setUsers(response.data.filter((user: UserDAO) => user.role_id !== ROLES.admin))
+    setError(null)
+    setLoading(false)
   }
 
   const handleRoleUpdate = async (email: string, newRoleId: number) => {
-    try {
-      const isAuthenticated = await checkAuth()
-      if (!isAuthenticated) return
+    const isAuthenticated = await checkAuth()
+    if (!isAuthenticated) return
 
-      await updateUserRole(email, newRoleId)
-      setUsers(users.map(user => 
-        user.email === email ? { ...user, role_id: newRoleId } : user
-      ))
-      setError(null)
-    } catch (error) {
-      console.error('Error:', error)
-      if (error instanceof Error && error.message.includes('Sesión expirada')) {
-        router.replace('/')
-      } else {
-        setError('Error al actualizar el rol. Por favor, intenta de nuevo.')
-      }
-    }
+    await updateUserRole(email, newRoleId)
+    setUsers(users.map(user => 
+      user.email === email ? { ...user, role_id: newRoleId } : user
+    ))
   }
 
   useEffect(() => {

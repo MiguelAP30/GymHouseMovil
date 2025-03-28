@@ -111,6 +111,14 @@ export interface ProductDAO {
     state_id: number
 }
 
+export interface PaginatedResponse<T> {
+  items: T[];
+  total: number;
+  page: number;
+  size: number;
+  pages: number;
+}
+
 export interface ExerciseDAO {
     id?: number;
     name: string;

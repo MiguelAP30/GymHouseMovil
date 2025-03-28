@@ -1,6 +1,12 @@
-import { View, Text, TextInput, TouchableOpacity, Image, Alert, ScrollView } from 'react-native';
-import { Link } from 'expo-router';
+import { View, Text, TextInput, TouchableOpacity, Image, Alert, ScrollView, StyleSheet, ActivityIndicator } from 'react-native';
+import { Link, router } from 'expo-router';
 import { useForm, Controller } from 'react-hook-form';
+import { 
+  MaterialCommunityIcons,
+  FontAwesome,
+  Ionicons,
+  MaterialIcons
+} from '@expo/vector-icons';
 import { 
   tituloForm, 
   labelForm, 
@@ -12,30 +18,45 @@ import {
   fondoTotal 
 } from '../components/tokens';
 import { useEffect, useState, useContext } from 'react';
-import { useRouter } from 'expo-router';
+import { useAuth } from '../context/AuthStore';
 import { postLogin } from '../lib/api_gymhouse';
-import { AuthContext } from '../context/AuthStore';
 import { ConnectivityContext } from './_layout';
 
 export default function Index() {
-  const { control, handleSubmit, formState: { errors } } = useForm<{ email: string; password: string }>();
-  const router = useRouter();
-  const { login, logout, isAuthenticated, user, token } = useContext(AuthContext);
   const { isConnected } = useContext(ConnectivityContext);
   const [isLoading, setIsLoading] = useState(false);
+  const { login, logout, isAuthenticated, user, token, checkAuth } = useAuth();
+  const { control, handleSubmit, formState: { errors } } = useForm<{ email: string; password: string }>();
 
   useEffect(() => {
     const checkAuthAndRedirect = async () => {
-      if (isAuthenticated && user && token) {
-        router.push('/account/about');
-      } else if (token) {
-        // Si hay token pero no hay usuario autenticado, limpiamos el estado
+      try {
+        if (isAuthenticated && user && token) {
+          // Solo verificamos el token si no estamos en medio de una actualización
+          const isValid = await checkAuth();
+          if (isValid) {
+            router.push('/account/about');
+          } else {
+            await logout();
+          }
+        } else if (token && !isAuthenticated) {
+          // Si hay token pero no hay usuario autenticado, intentamos recuperar el estado
+          const isValid = await checkAuth();
+          if (!isValid) {
+            await logout();
+          }
+        }
+      } catch (error) {
+        console.error('Error en checkAuthAndRedirect:', error);
         await logout();
       }
     };
 
-    checkAuthAndRedirect();
-  }, [isAuthenticated, user, token]);
+    // Solo ejecutamos la verificación si hay un cambio en el estado de autenticación
+    if (isAuthenticated !== null) {
+      checkAuthAndRedirect();
+    }
+  }, [isAuthenticated]);
 
   const onSubmit = async (data: { email: string; password: string }) => {
     if (!isConnected) {
@@ -49,14 +70,24 @@ export default function Index() {
         ...data,
         email: data.email.toLowerCase()
       };
+      
+      console.log('Intentando login con:', formData.email);
       const response = await postLogin(formData);
       
       if (!response.access_token || !response.user) {
         throw new Error('Respuesta del servidor incompleta');
       }
       
+      console.log('Login exitoso, guardando token y datos del usuario');
       await login(response.access_token, response.user);
-      router.push('/account/about');
+      
+      // Verificamos que la autenticación sea válida antes de redirigir
+      const isValid = await checkAuth();
+      if (isValid) {
+        router.push('/account/about');
+      } else {
+        throw new Error('Error al verificar la autenticación');
+      }
     } catch (error) {
       console.error('Error en login:', error);
       Alert.alert(

@@ -18,25 +18,7 @@ import { getEnvironment } from '../config/env';
 
 const API = getEnvironment().API_URL;
 
-// Verificación de token
-const verifyToken = async () => {
-  try {
-    const token = await AsyncStorage.getItem('token');
-    if (!token) return false;
 
-    const response = await fetch(`${API}/user_data`, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      }
-    });
-
-    return response.ok;
-  } catch (error) {
-    console.error('Error verificando token:', error);
-    return false;
-  }
-};
 
 // Autenticación
 export const postRegister = async (data: RegisterDAO) => {
@@ -324,48 +306,43 @@ export const updateUserRole = async (email: string, role_id: number) => {
 
 // Función auxiliar para hacer peticiones autenticadas
 const authenticatedFetch = async (url: string, options: RequestInit = {}) => {
-  let token = await AsyncStorage.getItem('token');
-  
-  if (!token) {
-    // Intentar obtener el token nuevamente después de un breve retraso
-    await new Promise(resolve => setTimeout(resolve, 100));
-    token = await AsyncStorage.getItem('token');
+  try {
+    const token = await AsyncStorage.getItem('token');
     
     if (!token) {
       throw new Error('No hay token de autenticación');
     }
-  }
 
-  const headers = {
-    ...options.headers,
-    'Authorization': `Bearer ${token}`,
-    'Content-Type': 'application/json',
-  };
+    const headers = {
+      ...options.headers,
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    };
 
-  const response = await fetch(`${API}${url}`, {
-    ...options,
-    headers,
-  });
-  
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    console.error('Error en la petición:', {
-      url,
-      status: response.status,
-      statusText: response.statusText,
-      errorData
+    const response = await fetch(`${API}${url}`, {
+      ...options,
+      headers,
     });
     
-    if (response.status === 401) {
-      await AsyncStorage.removeItem('token');
-      await AsyncStorage.removeItem('user');
-      throw new Error('Sesión expirada');
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      
+      if (response.status === 401) {
+        await AsyncStorage.removeItem('token');
+        await AsyncStorage.removeItem('user');
+        throw new Error('Sesión expirada');
+      }
+      
+      throw new Error(errorData.message || 'Error en la petición');
     }
-    
-    throw new Error(errorData.message || 'Error en la petición');
-  }
 
-  return response;
+    return response;
+  } catch (error) {
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error('Error desconocido en la petición');
+  }
 };
 
 export const getMachines = async () => {
@@ -417,8 +394,29 @@ export const deleteMachine = async (id: number) => {
 }
 
 // Ejercicios
-export const getExercises = async () => {
-  return authenticatedFetch('/exercise').then(res => res.json());
+export const getExercises = async (page: number = 1, size: number = 10, searchName?: string, difficultyId?: number | null, machineId?: number | null) => {
+  try {
+    let url = `/exercise?page=${page}&size=${size}`;
+    
+    if (searchName && searchName.trim()) {
+      url += `&name=${encodeURIComponent(searchName.trim())}`;
+    }
+    if (difficultyId && difficultyId !== null) {
+      url += `&difficulty_id=${difficultyId}`;
+    }
+    if (machineId && machineId !== null) {
+      url += `&machine_id=${machineId}`;
+    }
+    
+    console.log('URL de la petición:', url);
+    const response = await authenticatedFetch(url);
+    const data = await response.json();
+    console.log('Respuesta del servidor:', data);
+    return data;
+  } catch (error) {
+    console.error('Error detallado en getExercises:', error);
+    throw error;
+  }
 }
 
 export const getExerciseById = async (id: number) => {
@@ -560,8 +558,3 @@ export const deleteWeekDay = async (id: number) => {
     method: 'DELETE'
   }).then(res => res.json());
 }
-
-
-
-
-

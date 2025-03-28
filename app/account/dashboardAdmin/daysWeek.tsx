@@ -16,56 +16,39 @@ const DaysWeek = () => {
   })
   const [loading, setLoading] = useState(true)
   const [weekDays, setWeekDays] = useState<WeekDayDAO[]>([])
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     fetchWeekDays()
   }, [])
 
   const fetchWeekDays = async () => {
-    try {
-      setLoading(true)
-      const isAuthenticated = await checkAuth()
-      if (!isAuthenticated) {
-        router.replace('/')
-        return
-      }
+    const isAuthenticated = await checkAuth()
+    if (!isAuthenticated) return
 
-      const response = await getWeekDays()
-      setWeekDays(response)
-    } catch (error) {
-      console.error('Error al obtener días de la semana:', error)
-      if (error instanceof Error && error.message.includes('Sesión expirada')) {
-        router.replace('/')
-      } else {
-        Alert.alert('Error', 'No se pudieron cargar los días de la semana. Por favor, intenta de nuevo.')
-      }
-    } finally {
-      setLoading(false)
-    }
+    const response = await getWeekDays()
+    setWeekDays(response)
+    setLoading(false)
   }
 
   const handleAddWeekDay = async () => {
-    try {
-      await postWeekDay(newWeekDay)
-      await fetchWeekDays()
-      setNewWeekDay({ name: '' })
-      setAddModalVisible(false)
-      Alert.alert('Éxito', 'Día de la semana creado correctamente')
-    } catch (error) {
-      console.error('Error al crear día de la semana:', error)
-      Alert.alert('Error', 'No se pudo crear el día de la semana. Por favor, intenta de nuevo.')
-    }
+    const isAuthenticated = await checkAuth()
+    if (!isAuthenticated) return
+
+    await postWeekDay(newWeekDay)
+    await fetchWeekDays()
+    setNewWeekDay({ name: '' })
+    setAddModalVisible(false)
+    Alert.alert('Éxito', 'Día de la semana creado correctamente')
   }
 
   const handleDeleteWeekDay = async (id: number) => {
-    try {
-      await deleteWeekDay(id)
-      await fetchWeekDays()
-      Alert.alert('Éxito', 'Día de la semana eliminado correctamente')
-    } catch (error) {
-      console.error('Error al eliminar día de la semana:', error)
-      Alert.alert('Error', 'No se pudo eliminar el día de la semana. Por favor, intenta de nuevo.')
-    }
+    const isAuthenticated = await checkAuth()
+    if (!isAuthenticated) return
+
+    await deleteWeekDay(id)
+    await fetchWeekDays()
+    Alert.alert('Éxito', 'Día de la semana eliminado correctamente')
   }
 
   const handleEditWeekDay = (weekDay: WeekDayDAO) => {
@@ -76,21 +59,33 @@ const DaysWeek = () => {
   const handleUpdateWeekDay = async () => {
     if (!selectedWeekDay?.id) return
     
-    try {
-      await putWeekDay(selectedWeekDay.id, selectedWeekDay)
-      await fetchWeekDays()
-      setEditModalVisible(false)
-      Alert.alert('Éxito', 'Día de la semana actualizado correctamente')
-    } catch (error) {
-      console.error('Error al actualizar día de la semana:', error)
-      Alert.alert('Error', 'No se pudo actualizar el día de la semana. Por favor, intenta de nuevo.')
-    }
+    const isAuthenticated = await checkAuth()
+    if (!isAuthenticated) return
+
+    await putWeekDay(selectedWeekDay.id, selectedWeekDay)
+    await fetchWeekDays()
+    setEditModalVisible(false)
+    Alert.alert('Éxito', 'Día de la semana actualizado correctamente')
   }
 
   if (loading) {
     return (
       <View className="flex-1 justify-center items-center">
         <ActivityIndicator size="large" color="#0000ff" />
+      </View>
+    )
+  }
+
+  if (error) {
+    return (
+      <View className="flex-1 justify-center items-center p-4">
+        <Text className="text-red-500">{error}</Text>
+        <TouchableOpacity 
+          className="bg-blue-500 p-2.5 rounded-lg mt-4"
+          onPress={fetchWeekDays}
+        >
+          <Text className="text-white font-bold">Reintentar</Text>
+        </TouchableOpacity>
       </View>
     )
   }
