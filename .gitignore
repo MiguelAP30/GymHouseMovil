@@ -40,3 +40,8 @@ yarn-error.*
 
 
 env.ts
+
+/ios
+/android
+# Firebase
+google-services.json
