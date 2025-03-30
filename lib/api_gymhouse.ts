@@ -12,7 +12,9 @@ import {
   DifficultyDAO,
   MuscleDAO,
   SpecificMuscleDAO,
-  WeekDayDAO
+  WeekDayDAO,
+  NotificationTokenDAO,
+  SendNotificationDAO
 } from '../interfaces/interfaces';
 import { getEnvironment } from '../config/env';
 
@@ -556,5 +558,19 @@ export const putWeekDay = async (id: number, data: WeekDayDAO) => {
 export const deleteWeekDay = async (id: number) => {
   return authenticatedFetch(`/week_day/${id}`, {
     method: 'DELETE'
+  }).then(res => res.json());
+}
+
+export const registerNotificationToken = async (data: NotificationTokenDAO) => {
+  return authenticatedFetch('/notification/token', {
+    method: 'POST',
+    body: JSON.stringify(data)
+  }).then(res => res.json());
+}
+
+export const sendNotification = async (data: SendNotificationDAO) => {
+  return authenticatedFetch('/notification/send', {
+    method: 'POST',
+    body: JSON.stringify(data)
   }).then(res => res.json());
 }

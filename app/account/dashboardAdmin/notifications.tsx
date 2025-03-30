@@ -1,13 +1,39 @@
-import { View, Text, TextInput, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
 import React, { useState } from 'react';
+import { sendNotification } from '../../../lib/api_gymhouse';
 
 export default function Notifications() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSendNotification = () => {
-    // Aquí irá la lógica para enviar la notificación
-    console.log('Enviando notificación:', { title, description });
+  const handleSendNotification = async () => {
+    if (!title.trim() || !description.trim()) {
+      Alert.alert('Error', 'Por favor, complete todos los campos');
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      const response = await sendNotification({
+        title: title.trim(),
+        message: description.trim(),
+        token: "ExponentPushToken[FVBhZHK9iQs0N6c-LzeTx_]"
+      });
+
+      if (response.status === 200) {
+        Alert.alert('Éxito', 'Notificación enviada correctamente');
+        setTitle('');
+        setDescription('');
+      } else {
+        Alert.alert('Error', response.message || 'Error al enviar la notificación');
+      }
+    } catch (error) {
+      console.error('Error al enviar notificación:', error);
+      Alert.alert('Error', 'Error al enviar la notificación');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -40,11 +66,12 @@ export default function Notifications() {
       </View>
 
       <TouchableOpacity 
-        className="bg-blue-500 p-4 rounded-lg items-center"
+        className={`${isLoading ? 'bg-gray-400' : 'bg-blue-500'} p-4 rounded-lg items-center`}
         onPress={handleSendNotification}
+        disabled={isLoading}
       >
         <Text className="text-white text-base font-bold">
-          Enviar Notificación
+          {isLoading ? 'Enviando...' : 'Enviar Notificación'}
         </Text>
       </TouchableOpacity>
     </View>
