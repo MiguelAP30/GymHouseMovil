@@ -1,31 +1,62 @@
-import { View, Text, TextInput, TouchableOpacity, Image, ScrollView, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Image, ScrollView, Alert, Platform } from 'react-native';
 import { Link, useRouter } from 'expo-router';
 import { useForm, Controller } from 'react-hook-form';
 import { useState, useContext } from 'react';
+import * as React from 'react';
 import { 
   tituloForm, labelForm, parrafoForm, inputForm, 
-  botonGeneral, textoBotonGeneral, letraPequeñaForm, fondoTotal 
+  botonGeneral, textoBotonGeneral, letraPequeñaForm, fondoTotal, 
+  inputFormPicker
 } from '../components/tokens';
 import { postRegister } from '../lib/api_gymhouse';
 import { AuthContext } from '../context/AuthStore';
+import { Picker } from '@react-native-picker/picker';
+import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 
 interface RegisterFormData {
-  email: string;
-  password: string;
-  name: string;
-  phone: string;
-  address: string;
-  id_number: string;
-  user_name: string;
-  birth_date: string;
-  gender: string;
+  email: string; // Maximo 250 caracteres
+  password: string; // Maximo 60 caracteres
+  name: string; // Maximo 50 caracteres
+  phone: string; // Maximo 20 caracteres
+  address: string; // Maximo 150 caracteres
+  id_number: string; // Maximo 20 caracteres
+  user_name: string; // Maximo 50 caracteres
+  birth_date: string; // Formato: YYYY-MM-DD
+  gender: string; // 'm' o 'f'
 }
 
 export default function Register() {
   const { control, handleSubmit, formState: { errors } } = useForm<RegisterFormData>();
   const [isLoading, setIsLoading] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState(false);
   const router = useRouter();
   const { login } = useContext(AuthContext);
+
+  const validateAge = (birthDate: string) => {
+    const today = new Date();
+    const birth = new Date(birthDate);
+    let age = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
+    
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+      age--;
+    }
+    
+    return age >= 10;
+  };
+
+  const formatDate = (date: Date): string => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  const getMaxDate = () => {
+    const date = new Date();
+    date.setFullYear(date.getFullYear() - 10);
+    return date;
+  };
 
   const onSubmit = async (data: RegisterFormData) => {
     setIsLoading(true);
@@ -74,7 +105,10 @@ export default function Register() {
           <Controller
             control={control}
             name="name"
-            rules={{ required: "El nombre es obligatorio" }}
+            rules={{ 
+              required: "El nombre es obligatorio",
+              maxLength: { value: 50, message: "Máximo 50 caracteres" }
+            }}
             render={({ field: { onChange, onBlur, value } }) => (
               <TextInput
                 placeholder="Tu nombre completo"
@@ -83,6 +117,7 @@ export default function Register() {
                 onBlur={onBlur}
                 onChangeText={onChange}
                 value={value}
+                maxLength={50}
               />
             )}
           />
@@ -95,7 +130,10 @@ export default function Register() {
           <Controller
             control={control}
             name="user_name"
-            rules={{ required: "El nombre de usuario es obligatorio" }}
+            rules={{ 
+              required: "El nombre de usuario es obligatorio",
+              maxLength: { value: 50, message: "Máximo 50 caracteres" }
+            }}
             render={({ field: { onChange, onBlur, value } }) => (
               <TextInput
                 placeholder="Tu nombre de usuario"
@@ -104,6 +142,7 @@ export default function Register() {
                 onBlur={onBlur}
                 onChangeText={onChange}
                 value={value}
+                maxLength={50}
               />
             )}
           />
@@ -116,7 +155,10 @@ export default function Register() {
           <Controller
             control={control}
             name="id_number"
-            rules={{ required: "El número de identificación es obligatorio" }}
+            rules={{ 
+              required: "El número de identificación es obligatorio",
+              maxLength: { value: 20, message: "Máximo 20 caracteres" }
+            }}
             render={({ field: { onChange, onBlur, value } }) => (
               <TextInput
                 placeholder="Tu número de identificación"
@@ -126,6 +168,7 @@ export default function Register() {
                 onBlur={onBlur}
                 onChangeText={onChange}
                 value={value}
+                maxLength={20}
               />
             )}
           />
@@ -140,7 +183,8 @@ export default function Register() {
             name="email"
             rules={{ 
               required: "El correo es obligatorio",
-              pattern: { value: /\S+@\S+\.\S+/, message: "Correo inválido" }
+              pattern: { value: /\S+@\S+\.\S+/, message: "Correo inválido" },
+              maxLength: { value: 250, message: "Máximo 250 caracteres" }
             }}
             render={({ field: { onChange, onBlur, value } }) => (
               <TextInput
@@ -151,6 +195,7 @@ export default function Register() {
                 onBlur={onBlur}
                 onChangeText={onChange}
                 value={value}
+                maxLength={250}
               />
             )}
           />
@@ -165,7 +210,8 @@ export default function Register() {
             name="password"
             rules={{ 
               required: "La contraseña es obligatoria",
-              minLength: { value: 6, message: "Mínimo 6 caracteres" }
+              minLength: { value: 6, message: "Mínimo 6 caracteres" },
+              maxLength: { value: 60, message: "Máximo 60 caracteres" }
             }}
             render={({ field: { onChange, onBlur, value } }) => (
               <TextInput
@@ -176,6 +222,7 @@ export default function Register() {
                 onBlur={onBlur}
                 onChangeText={onChange}
                 value={value}
+                maxLength={60}
               />
             )}
           />
@@ -188,7 +235,10 @@ export default function Register() {
           <Controller
             control={control}
             name="phone"
-            rules={{ required: "El teléfono es obligatorio" }}
+            rules={{ 
+              required: "El teléfono es obligatorio",
+              maxLength: { value: 20, message: "Máximo 20 caracteres" }
+            }}
             render={({ field: { onChange, onBlur, value } }) => (
               <TextInput
                 placeholder="Tu número de teléfono"
@@ -198,6 +248,7 @@ export default function Register() {
                 onBlur={onBlur}
                 onChangeText={onChange}
                 value={value}
+                maxLength={20}
               />
             )}
           />
@@ -210,7 +261,10 @@ export default function Register() {
           <Controller
             control={control}
             name="address"
-            rules={{ required: "La dirección es obligatoria" }}
+            rules={{ 
+              required: "La dirección es obligatoria",
+              maxLength: { value: 150, message: "Máximo 150 caracteres" }
+            }}
             render={({ field: { onChange, onBlur, value } }) => (
               <TextInput
                 placeholder="Tu dirección"
@@ -219,6 +273,7 @@ export default function Register() {
                 onBlur={onBlur}
                 onChangeText={onChange}
                 value={value}
+                maxLength={150}
               />
             )}
           />
@@ -231,16 +286,35 @@ export default function Register() {
           <Controller
             control={control}
             name="birth_date"
-            rules={{ required: "La fecha de nacimiento es obligatoria" }}
-            render={({ field: { onChange, onBlur, value } }) => (
-              <TextInput
-                placeholder="YYYY-MM-DD"
-                placeholderTextColor="gray"
-                className={inputForm}
-                onBlur={onBlur}
-                onChangeText={onChange}
-                value={value}
-              />
+            rules={{ 
+              required: "La fecha de nacimiento es obligatoria",
+              validate: (value) => validateAge(value) || "Debes ser mayor de 10 años"
+            }}
+            render={({ field: { onChange, value } }) => (
+              <>
+                <TouchableOpacity
+                  onPress={() => setShowDatePicker(true)}
+                  className={inputForm}
+                >
+                  <Text style={{ color: value ? '#fff' : 'gray' }}>
+                    {value ? value : 'YYYY-MM-DD'}
+                  </Text>
+                </TouchableOpacity>
+                {showDatePicker && (
+                  <DateTimePicker
+                    value={value ? new Date(value) : new Date(getMaxDate())}
+                    mode="date"
+                    display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                    onChange={(event: DateTimePickerEvent, selectedDate?: Date) => {
+                      setShowDatePicker(Platform.OS === 'ios');
+                      if (selectedDate) {
+                        onChange(formatDate(selectedDate));
+                      }
+                    }}
+                    maximumDate={getMaxDate()}
+                  />
+                )}
+              </>
             )}
           />
           {errors.birth_date && <Text className="text-red-500">{errors.birth_date.message}</Text>}
@@ -254,14 +328,18 @@ export default function Register() {
             name="gender"
             rules={{ required: "El género es obligatorio" }}
             render={({ field: { onChange, onBlur, value } }) => (
-              <TextInput
-                placeholder="Tu género"
-                placeholderTextColor="gray"
-                className={inputForm}
-                onBlur={onBlur}
-                onChangeText={onChange}
-                value={value}
-              />
+              <View className={inputFormPicker}>
+                <Picker
+                  selectedValue={value}
+                  onValueChange={(itemValue) => onChange(itemValue)}
+                  onBlur={onBlur}
+                  style={{ color: '#fff' }}
+                >
+                  <Picker.Item label="Selecciona un género" value="" enabled={false} style={{ color: 'gray' }} />
+                  <Picker.Item label="Masculino" value="m" style={{ color: '#000' }} />
+                  <Picker.Item label="Femenino" value="f" style={{ color: '#000' }} />
+                </Picker>
+              </View>
             )}
           />
           {errors.gender && <Text className="text-red-500">{errors.gender.message}</Text>}

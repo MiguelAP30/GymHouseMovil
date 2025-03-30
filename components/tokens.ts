@@ -14,6 +14,7 @@ export const labelForm = "text-gray-300 mb-1";
 export const parrafoForm = "text-gray-400 text-center mt-2";
 export const letraPequeñaForm = "text-gray-400 mt-4";
 export const inputForm = "bg-gray-700 text-white px-4 py-3 rounded-lg w-full";
+export const inputFormPicker = "bg-gray-700 text-white rounded-lg w-full";
 export const tarjetaForm="w-full bg-gray-800 p-6 rounded-xl shadow-lg";
 
 // Perfil

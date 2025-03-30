@@ -108,14 +108,23 @@ const DashboardAdminLayout = () => {
           drawerIcon: ({ size }) => <Ionicons name="people" size={size} color={'#fff'} />,
         }}
       />
-      <Drawer.Screen
-        name="muscles"
-        options={{
-          title: 'Musculos',
-          headerShown: true,
-          drawerIcon: ({ size }) => <Ionicons name="body" size={size} color={'#fff'} />,
-        }}
-      />
+        <Drawer.Screen
+          name="muscles"
+          options={{
+            title: 'Musculos',
+            headerShown: true,
+            drawerIcon: ({ size }) => <Ionicons name="body" size={size} color={'#fff'} />,
+          }}
+        />
+        <Drawer.Screen
+          name="notifications"
+          options={{
+            title: 'Notificaciones',
+            headerShown: true,
+            drawerIcon: ({ size }) => <Ionicons name="notifications" size={size} color={'#fff'} />,
+          }}
+        />
+        
     </Drawer>
   );
 }

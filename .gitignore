@@ -36,12 +36,8 @@ yarn-error.*
 *.tsbuildinfo
 
 # Environment Configuration
-!config/env.ts
 
-
-env.ts
 
 /ios
 /android
 # Firebase
-google-services.json

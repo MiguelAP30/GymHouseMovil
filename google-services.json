@@ -1,0 +1,29 @@
+{
+    "project_info": {
+      "project_number": "909499922540",
+      "project_id": "gymhouse-d9d4d",
+      "storage_bucket": "gymhouse-d9d4d.firebasestorage.app"
+    },
+    "client": [
+      {
+        "client_info": {
+          "mobilesdk_app_id": "1:909499922540:android:91cb920129beb236578049",
+          "android_client_info": {
+            "package_name": "com.miguelap.gymhouse"
+          }
+        },
+        "oauth_client": [],
+        "api_key": [
+          {
+            "current_key": "AIzaSyCGJ23x20q4tlnaH4qjpHWx-NsHRbpazEM"
+          }
+        ],
+        "services": {
+          "appinvite_service": {
+            "other_platform_oauth_client": []
+          }
+        }
+      }
+    ],
+    "configuration_version": "1"
+  }
