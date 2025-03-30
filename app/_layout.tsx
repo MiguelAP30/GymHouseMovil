@@ -3,6 +3,8 @@ import NetInfo from '@react-native-community/netinfo'
 import { Stack } from 'expo-router'
 import "../global.css"
 import { AuthProvider } from '../context/AuthStore';
+import { usePushNotifications } from '../hooks/usePushNotifications';
+import { Text } from 'react-native';
 
 export const ConnectivityContext = createContext<{
   isConnected: boolean | null;
@@ -12,8 +14,11 @@ export const ConnectivityContext = createContext<{
 
 const HomeLayout = () => {
   const [isConnected, setIsConnected] = React.useState<boolean | null>(null)
+  const { expoPushToken, notification } = usePushNotifications()
 
   useEffect(() => {
+    console.log('expoPushToken', expoPushToken)
+    console.log("notificacion", notification)
     const unsubscribe = NetInfo.addEventListener(state => {
       setIsConnected(state.isConnected)
     })
@@ -23,6 +28,7 @@ const HomeLayout = () => {
   }, [])
 
   return (
+    //<Text selectable={true}>{expoPushToken?.data}</Text>
     <AuthProvider>
       <ConnectivityContext.Provider value={{ isConnected }}>
         <Stack>
