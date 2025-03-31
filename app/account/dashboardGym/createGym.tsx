@@ -1,31 +1,42 @@
-import { View, Text, TextInput, TouchableOpacity, ScrollView, ActivityIndicator, Alert } from 'react-native'
+import { View, Text, TextInput, TouchableOpacity, ScrollView, ActivityIndicator, Alert, Platform } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '../../../context/AuthStore'
 import { router } from 'expo-router'
 import { postGym, getUserGym } from '../../../lib/api_gymhouse'
 import { GymDAO } from '../../../interfaces/interfaces'
+import DateTimePicker from '@react-native-community/datetimepicker'
 
 const CreateGym = () => {
   const { checkAuth, user } = useAuth()
   const [loading, setLoading] = useState(false)
+  const [showOpenTimePicker, setShowOpenTimePicker] = useState(false)
+  const [showCloseTimePicker, setShowCloseTimePicker] = useState(false)
   const [formData, setFormData] = useState<Partial<GymDAO>>({
-    user_email: user?.email || '',
-    name: '',
-    description: '',
-    address: '',
-    city: '',
-    country: '',
-    open_time: '',
-    close_time: '',
-    phone: '',
-    email: '',
-    website: '',
-    price: 0,
+    user_email: user?.email || '', // maximo 250 caracteres
+    name: '',// Maximo 100 caracteres
+    description: '',// Maximo 200 caracteres
+    address: '',// Maximo 100 caracteres
+    city: '',// Maximo 60 caracteres
+    country: '',// Maximo 60 caracteres
+    open_time: '',// Debe comportarse como un reloj
+    close_time: '',// Debe comportarse como un reloj
+    phone: '',// Maximo 20 caracteres
+    email: '',// Maximo 250 caracteres
+    website: '',// Maximo 250 caracteres
+    price: 0,// Debe ser un numero
     start_date: new Date(),
     final_date: new Date(new Date().setFullYear(new Date().getFullYear() + 1)),
     is_active: true,
     image: ''
   })
+
+  const formatTime = (date: Date): string => {
+    return date.toLocaleTimeString('es-ES', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false
+    })
+  }
 
   useEffect(() => {
     checkExistingGym()
@@ -121,6 +132,7 @@ const CreateGym = () => {
           value={formData.name}
           onChangeText={(text) => setFormData({ ...formData, name: text })}
           placeholder="Ingresa el nombre del gimnasio"
+          maxLength={100}
         />
 
         <Text className="text-gray-600 mb-2">Descripción</Text>
@@ -131,6 +143,7 @@ const CreateGym = () => {
           placeholder="Describe tu gimnasio"
           multiline
           numberOfLines={3}
+          maxLength={200}
         />
 
         <Text className="text-gray-600 mb-2">Dirección</Text>
@@ -139,6 +152,7 @@ const CreateGym = () => {
           value={formData.address}
           onChangeText={(text) => setFormData({ ...formData, address: text })}
           placeholder="Ingresa la dirección"
+          maxLength={100}
         />
 
         <View className="flex-row justify-between mb-4">
@@ -149,6 +163,7 @@ const CreateGym = () => {
               value={formData.city}
               onChangeText={(text) => setFormData({ ...formData, city: text })}
               placeholder="Ciudad"
+              maxLength={60}
             />
           </View>
           <View className="flex-1 ml-2">
@@ -158,6 +173,7 @@ const CreateGym = () => {
               value={formData.country}
               onChangeText={(text) => setFormData({ ...formData, country: text })}
               placeholder="País"
+              maxLength={60}
             />
           </View>
         </View>
@@ -165,21 +181,49 @@ const CreateGym = () => {
         <View className="flex-row justify-between mb-4">
           <View className="flex-1 mr-2">
             <Text className="text-gray-600 mb-2">Hora de Apertura</Text>
-            <TextInput
+            <TouchableOpacity
+              onPress={() => setShowOpenTimePicker(true)}
               className="border border-gray-300 rounded-lg p-2"
-              value={formData.open_time}
-              onChangeText={(text) => setFormData({ ...formData, open_time: text })}
-              placeholder="HH:MM"
-            />
+            >
+              <Text>{formData.open_time || 'HH:MM'}</Text>
+            </TouchableOpacity>
+            {showOpenTimePicker && (
+              <DateTimePicker
+                value={new Date()}
+                mode="time"
+                is24Hour={true}
+                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                onChange={(event, selectedDate) => {
+                  setShowOpenTimePicker(Platform.OS === 'ios');
+                  if (selectedDate && event.type !== 'dismissed') {
+                    setFormData({ ...formData, open_time: formatTime(selectedDate) });
+                  }
+                }}
+              />
+            )}
           </View>
           <View className="flex-1 ml-2">
             <Text className="text-gray-600 mb-2">Hora de Cierre</Text>
-            <TextInput
+            <TouchableOpacity
+              onPress={() => setShowCloseTimePicker(true)}
               className="border border-gray-300 rounded-lg p-2"
-              value={formData.close_time}
-              onChangeText={(text) => setFormData({ ...formData, close_time: text })}
-              placeholder="HH:MM"
-            />
+            >
+              <Text>{formData.close_time || 'HH:MM'}</Text>
+            </TouchableOpacity>
+            {showCloseTimePicker && (
+              <DateTimePicker
+                value={new Date()}
+                mode="time"
+                is24Hour={true}
+                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                onChange={(event, selectedDate) => {
+                  setShowCloseTimePicker(Platform.OS === 'ios');
+                  if (selectedDate && event.type !== 'dismissed') {
+                    setFormData({ ...formData, close_time: formatTime(selectedDate) });
+                  }
+                }}
+              />
+            )}
           </View>
         </View>
 
@@ -190,6 +234,7 @@ const CreateGym = () => {
           onChangeText={(text) => setFormData({ ...formData, phone: text })}
           placeholder="Ingresa el número de teléfono"
           keyboardType="phone-pad"
+          maxLength={20}
         />
 
         <Text className="text-gray-600 mb-2">Email</Text>
@@ -200,6 +245,7 @@ const CreateGym = () => {
           placeholder="Ingresa el email"
           keyboardType="email-address"
           autoCapitalize="none"
+          maxLength={250}
         />
 
         <Text className="text-gray-600 mb-2">Sitio Web</Text>
@@ -209,6 +255,7 @@ const CreateGym = () => {
           onChangeText={(text) => setFormData({ ...formData, website: text })}
           placeholder="Ingresa la URL del sitio web"
           autoCapitalize="none"
+          maxLength={250}
         />
 
         <Text className="text-gray-600 mb-2">Precio</Text>
