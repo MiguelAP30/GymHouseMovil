@@ -20,7 +20,7 @@ export default function AccountLayout() {
   }, []);
 
   if (!isAuthenticated || role === null) {
-    return <Redirect href="/index" />;
+    return <Redirect href="/" />;
   }
 
   const canAccessGym = role === ROLES.gym || role === ROLES.admin;
@@ -50,15 +50,6 @@ export default function AccountLayout() {
         options={{
           title: 'Nosotros',
           tabBarIcon: ({ color, size }) => <Ionicons name="information-circle" size={size} color={color} />,
-        }}
-      />
-      
-      
-      <Tabs.Screen
-        name="(questions)/questions"
-        options={{
-          title: 'Preguntas',
-          tabBarIcon: ({ color, size }) => <Ionicons name="help-circle" size={size} color={color} />,
         }}
       />
 

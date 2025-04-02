@@ -6,7 +6,7 @@ import { AuthContext } from '../../../context/AuthStore';
 import { ROLES } from '../../../interfaces/interfaces';
 import { Redirect } from 'expo-router';
 
-const LayoutRutinas = () => {
+const LayoutAbout = () => {
   const { isAuthenticated, role } = useContext(AuthContext);
   if (!isAuthenticated || (role ?? 0) < ROLES.premium) {
     return <Redirect href="/unauthorized" />;
@@ -25,9 +25,20 @@ const LayoutRutinas = () => {
       }}
     >
       <Drawer.Screen
-        name="crearRutines"
+        name="about"
         options={{
-          title: 'Crear Rutinas',
+          title: 'GymHouse',
+          headerShown: true,
+          drawerIcon: ({ size }) => <Ionicons name="speedometer" size={size} color={'#fff'} />,
+        }}
+        listeners={{
+          drawerItemPress: (e) => e.preventDefault(),
+        }}
+      />
+      <Drawer.Screen
+        name="questions"
+        options={{
+          title: 'Preguntas Frecuentes',
           headerShown: true,
           drawerIcon: ({ size }) => <Ionicons name="speedometer" size={size} color={'#fff'} />,
         }}
@@ -39,4 +50,4 @@ const LayoutRutinas = () => {
   );
 }
 
-export default LayoutRutinas;
+export default LayoutAbout;
