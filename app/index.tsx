@@ -167,7 +167,7 @@ export default function Index() {
 
   if (isResettingPassword) {
     return (
-      <View className={`${fondoTotal} flex-1 px-6`}>
+      <View className={`${fondoTotal} flex-1 px-6 justify-center`}>
         <ScrollView 
           contentContainerStyle={{ alignItems: 'center', paddingBottom: 20 }} 
           showsVerticalScrollIndicator={false} 
@@ -227,9 +227,9 @@ export default function Index() {
   }
 
   return (
-    <View className={`${fondoTotal} flex-1 px-6`}>
+    <View className={`${fondoTotal} flex-1 justify-center px-6`}>
       <ScrollView 
-        contentContainerStyle={{ alignItems: 'center', paddingBottom: 20 }} 
+        contentContainerStyle={{ alignItems: 'center', paddingVertical: 40 }} 
         showsVerticalScrollIndicator={false} 
       >
         {isConnected === false && (
@@ -237,16 +237,19 @@ export default function Index() {
         )}
           
         {/* Logo */}
-        <Image source={require('../assets/logo.png')} className="w-32 h-32 mb-6" />
+        <Image 
+          source={require('../assets/logo.png')} 
+          className="w-48 h-48 mb-8 rounded-3xl" 
+        />
 
         {/* Título */}
         <Text className={tituloForm}>Bienvenido a GymHouse</Text>
-        <Text className={parrafoForm}>
+        <Text className={`${parrafoForm} mb-8`}>
           Inicia sesión para continuar con tu entrenamiento personalizado
         </Text>
 
         {/* Input: Correo */}
-        <View className="w-full mt-6">
+        <View className="w-full">
           <Text className={labelForm}>Correo electrónico</Text>
           <Controller
             control={control}

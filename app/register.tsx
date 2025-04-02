@@ -91,7 +91,10 @@ export default function Register() {
         showsVerticalScrollIndicator={false} 
       >
         {/* Logo */}
-        <Image source={require('../assets/logo.png')} className="w-32 h-32 mt-8 mb-6" />
+        <Image 
+          source={require('../assets/logo.png')} 
+          className="w-40 h-40 mt-8 mb-8 rounded-3xl" 
+        />
 
         {/* Título */}
         <Text className={tituloForm}>Regístrate en GymHouse</Text>

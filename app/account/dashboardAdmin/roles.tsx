@@ -44,7 +44,7 @@ const Roles = () => {
 
   if (loading) {
     return (
-      <View className="flex-1 justify-center items-center bg-black">
+      <View className="flex-1 justify-center items-center bg-[#1F2953]">
         <Text className={parrafoForm}>Cargando usuarios...</Text>
       </View>
     )
@@ -52,7 +52,7 @@ const Roles = () => {
 
   if (error) {
     return (
-      <View className="flex-1 justify-center items-center p-4 bg-black">
+      <View className="flex-1 justify-center items-center p-4 bg-[#1F2953]">
         <Text className={parrafoForm}>{error}</Text>
         <TouchableOpacity 
           className={botonGuardar}
@@ -65,23 +65,29 @@ const Roles = () => {
   }
 
   return (
-    <ScrollView className="flex-1 p-4 bg-black">
+    <ScrollView className="flex-1 p-4 bg-gray-800">
       <Text className={tituloForm}>Gestión de Roles</Text>
       
       {users.length === 0 ? (
         <Text className={parrafoForm}>No hay usuarios para mostrar</Text>
       ) : (
         users.map((user) => (
-          <View key={user.email} className={`${tarjetaForm} mb-4`}>
-            <Text className={parrafoForm}>Email: {user.email}</Text>
-            <Text className={parrafoForm}>Usuario: {user.user_name || 'No especificado'}</Text>
-            <Text className={parrafoForm}>Nombre: {user.name}</Text>
+          <View key={user.email} className="bg-white rounded-lg p-4 mb-4">
+            <View className="items-center">
+              <Text className="text-gray-800 text-base">Email: {user.email}</Text>
+              <Text className="text-gray-800 text-base">Usuario: {user.user_name || 'No especificado'}</Text>
+              <Text className="text-gray-800 text-base">Nombre: {user.name}</Text>
+            </View>
             
-            <View className="mt-4">
+            <View className="mt-4 border-2 border-gray-400 rounded-lg overflow-hidden">
               <Picker
                 selectedValue={user.role_id}
                 onValueChange={(itemValue: number) => handleRoleUpdate(user.email, itemValue)}
-                style={{ backgroundColor: '#374151', color: 'white' }}
+                style={{ 
+                  backgroundColor: 'white',
+                  color: 'black',
+                  height: 50
+                }}
               >
                 <Picker.Item label="Usuario Registrado" value={ROLES.logued} />
                 <Picker.Item label="Usuario Premium" value={ROLES.premium} />
