@@ -55,7 +55,7 @@ const Profile = () => {
 
   useEffect(() => {
     if (profile) {
-      const birthDate = profile.birth_date ? new Date(profile.birth_date).toISOString().split('T')[0] : '';
+      const birthDate = profile.birth_date ? new Date(profile.birth_date + 'T00:00:00') : '';
       
       setFormData({
         id_number: profile.id_number || '',
@@ -63,16 +63,19 @@ const Profile = () => {
         name: profile.name || '',
         phone: profile.phone || '',
         address: profile.address || '',
-        birth_date: birthDate,
+        birth_date: birthDate ? formatDate(birthDate) : '',
         gender: profile.gender === 'Masculino' ? 'm' : 'f'
       });
     }
   }, [profile]);
 
   const formatDate = (date: Date): string => {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
+    const userTimezoneOffset = date.getTimezoneOffset() * 60000;
+    const adjustedDate = new Date(date.getTime() + userTimezoneOffset);
+    
+    const year = adjustedDate.getFullYear();
+    const month = String(adjustedDate.getMonth() + 1).padStart(2, '0');
+    const day = String(adjustedDate.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
   };
 
@@ -196,48 +199,53 @@ const Profile = () => {
         <View className="p-4">
           <Text className={perfilTitulo}>Cambiar Contraseña</Text>
           
-          <View className="mt-4">
-            <Text className={labelForm}>Contraseña Actual</Text>
-            <TextInput
-              className={inputForm}
-              secureTextEntry
-              value={passwordData.current_password}
-              onChangeText={(text) => setPasswordData({ ...passwordData, current_password: text })}
-              placeholder="Tu contraseña actual"
-              maxLength={60}
-            />
-          </View>
+          <View className="mt-4 bg-white p-4 rounded-lg">
+            <View className="mt-4">
+              <Text className="text-gray-600 font-medium mb-1">Contraseña Actual</Text>
+              <TextInput
+                className="bg-white border border-gray-300 rounded-lg p-2 text-gray-800"
+                secureTextEntry
+                value={passwordData.current_password}
+                onChangeText={(text) => setPasswordData({ ...passwordData, current_password: text })}
+                placeholder="Tu contraseña actual"
+                placeholderTextColor="#9CA3AF"
+                maxLength={60}
+              />
+            </View>
 
-          <View className="mt-4">
-            <Text className={labelForm}>Nueva Contraseña</Text>
-            <TextInput
-              className={inputForm}
-              secureTextEntry
-              value={passwordData.new_password}
-              onChangeText={(text) => setPasswordData({ ...passwordData, new_password: text })}
-              placeholder="Tu nueva contraseña"
-              maxLength={60}
-            />
-          </View>
+            <View className="mt-4">
+              <Text className="text-gray-600 font-medium mb-1">Nueva Contraseña</Text>
+              <TextInput
+                className="bg-white border border-gray-300 rounded-lg p-2 text-gray-800"
+                secureTextEntry
+                value={passwordData.new_password}
+                onChangeText={(text) => setPasswordData({ ...passwordData, new_password: text })}
+                placeholder="Tu nueva contraseña"
+                placeholderTextColor="#9CA3AF"
+                maxLength={60}
+              />
+            </View>
 
-          <View className="mt-4">
-            <Text className={labelForm}>Confirmar Nueva Contraseña</Text>
-            <TextInput
-              className={inputForm}
-              secureTextEntry
-              value={passwordData.confirm_password}
-              onChangeText={(text) => setPasswordData({ ...passwordData, confirm_password: text })}
-              placeholder="Confirma tu nueva contraseña"
-              maxLength={60}
-            />
-          </View>
+            <View className="mt-4">
+              <Text className="text-gray-600 font-medium mb-1">Confirmar Nueva Contraseña</Text>
+              <TextInput
+                className="bg-white border border-gray-300 rounded-lg p-2 text-gray-800"
+                secureTextEntry
+                value={passwordData.confirm_password}
+                onChangeText={(text) => setPasswordData({ ...passwordData, confirm_password: text })}
+                placeholder="Confirma tu nueva contraseña"
+                placeholderTextColor="#9CA3AF"
+                maxLength={60}
+              />
+            </View>
 
-          <TouchableOpacity 
-            className={`${botonGeneral} mt-4`}
-            onPress={handleChangePassword}
-          >
-            <Text className={textoBotonGeneral}>Cambiar Contraseña</Text>
-          </TouchableOpacity>
+            <TouchableOpacity 
+              className={`${botonGeneral} mt-6`}
+              onPress={handleChangePassword}
+            >
+              <Text className={textoBotonGeneral}>Cambiar Contraseña</Text>
+            </TouchableOpacity>
+          </View>
 
           <TouchableOpacity 
             onPress={() => setIsChangingPassword(false)}
@@ -271,69 +279,74 @@ const Profile = () => {
             {isEditing ? (
               <>
                 <View className="mt-4">
-                  <Text className={labelForm}>Nombre *</Text>
+                  <Text className="text-gray-700 font-semibold mb-1">Nombre *</Text>
                   <TextInput
-                    className={inputForm}
+                    className="bg-white border border-gray-400 rounded-lg p-2 text-gray-800"
                     value={formData.name}
                     onChangeText={(text) => setFormData({ ...formData, name: text })}
                     placeholder="Tu nombre completo"
+                    placeholderTextColor="gray"
                     maxLength={50}
                   />
                 </View>
 
                 <View className="mt-4">
-                  <Text className={labelForm}>Nombre de Usuario *</Text>
+                  <Text className="text-gray-700 font-semibold mb-1">Nombre de Usuario *</Text>
                   <TextInput
-                    className={inputForm}
+                    className="bg-white border border-gray-400 rounded-lg p-2 text-gray-800"
                     value={formData.user_name}
                     onChangeText={(text) => setFormData({ ...formData, user_name: text })}
                     placeholder="Tu nombre de usuario"
+                    placeholderTextColor="gray"
                     maxLength={50}
                   />
                 </View>
 
                 <View className="mt-4">
-                  <Text className={labelForm}>Documento *</Text>
+                  <Text className="text-gray-700 font-semibold mb-1">Documento *</Text>
                   <TextInput
-                    className={inputForm}
+                    className="bg-white border border-gray-400 rounded-lg p-2 text-gray-800"
                     value={formData.id_number}
                     onChangeText={(text) => setFormData({ ...formData, id_number: text })}
                     placeholder="Tu número de documento"
+                    placeholderTextColor="gray"
                     maxLength={20}
                     keyboardType="numeric"
                   />
                 </View>
 
                 <View className="mt-4">
-                  <Text className={labelForm}>Teléfono</Text>
+                  <Text className="text-gray-700 font-semibold mb-1">Teléfono</Text>
                   <TextInput
-                    className={inputForm}
+                    className="bg-white border border-gray-400 rounded-lg p-2 text-gray-800"
                     value={formData.phone}
                     onChangeText={(text) => setFormData({ ...formData, phone: text })}
                     placeholder="Tu número de teléfono"
+                    placeholderTextColor="gray"
                     maxLength={20}
                     keyboardType="phone-pad"
                   />
                 </View>
 
                 <View className="mt-4">
-                  <Text className={labelForm}>Dirección</Text>
+                  <Text className="text-gray-700 font-semibold mb-1">Dirección</Text>
                   <TextInput
-                    className={inputForm}
+                    className="bg-white border border-gray-400 rounded-lg p-2 text-gray-800"
                     value={formData.address}
                     onChangeText={(text) => setFormData({ ...formData, address: text })}
                     placeholder="Tu dirección"
+                    placeholderTextColor="gray"
                     maxLength={150}
                   />
                 </View>
 
                 <View className="mt-4">
-                  <Text className={labelForm}>Fecha de Nacimiento</Text>
+                  <Text className="text-gray-700 font-semibold mb-1">Fecha de Nacimiento</Text>
                   <TouchableOpacity
                     onPress={() => setShowDatePicker(true)}
-                    className={inputForm}
+                    className="bg-white border border-gray-400 rounded-lg p-2"
                   >
-                    <Text style={{ color: formData.birth_date ? '#fff' : 'gray' }}>
+                    <Text style={{ color: formData.birth_date ? '#1F2937' : 'gray' }}>
                       {formData.birth_date || 'YYYY-MM-DD'}
                     </Text>
                   </TouchableOpacity>
@@ -354,16 +367,16 @@ const Profile = () => {
                 </View>
 
                 <View className="mt-4">
-                  <Text className={labelForm}>Género</Text>
-                  <View className={inputFormPicker}>
+                  <Text className="text-gray-700 font-semibold mb-1">Género</Text>
+                  <View className="bg-white border border-gray-400 rounded-lg">
                     <Picker
                       selectedValue={formData.gender}
                       onValueChange={(itemValue) => setFormData({ ...formData, gender: itemValue })}
-                      style={{ color: '#fff' }}
+                      style={{ color: '#1F2937' }}
                     >
                       <Picker.Item label="Selecciona un género" value="" enabled={false} style={{ color: 'gray' }} />
-                      <Picker.Item label="Masculino" value="m" style={{ color: '#000' }} />
-                      <Picker.Item label="Femenino" value="f" style={{ color: '#000' }} />
+                      <Picker.Item label="Masculino" value="m" style={{ color: '#1F2937' }} />
+                      <Picker.Item label="Femenino" value="f" style={{ color: '#1F2937' }} />
                     </Picker>
                   </View>
                 </View>
