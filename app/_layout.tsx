@@ -100,8 +100,8 @@ const HomeLayout = () => {
   }
 
   return (
-    <Text selectable={true}>{expoPushToken?.data}</Text>
-/*     <AuthProvider>
+    //<Text selectable={true}>{expoPushToken?.data}</Text>
+    <AuthProvider>
       <ConnectivityContext.Provider value={{ isConnected }}>
         <Stack>
           <Stack.Screen name="index" options={{headerShown:false}}/>
@@ -110,7 +110,7 @@ const HomeLayout = () => {
           <Stack.Screen name="unauthorized" options={{headerShown:false}}/>
         </Stack>
       </ConnectivityContext.Provider>
-    </AuthProvider> */
+    </AuthProvider>
   )
 }
 
