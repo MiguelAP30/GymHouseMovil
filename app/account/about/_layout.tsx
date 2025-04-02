@@ -31,9 +31,6 @@ const LayoutAbout = () => {
           headerShown: true,
           drawerIcon: ({ size }) => <Ionicons name="speedometer" size={size} color={'#fff'} />,
         }}
-        listeners={{
-          drawerItemPress: (e) => e.preventDefault(),
-        }}
       />
       <Drawer.Screen
         name="questions"
@@ -41,9 +38,6 @@ const LayoutAbout = () => {
           title: 'Preguntas Frecuentes',
           headerShown: true,
           drawerIcon: ({ size }) => <Ionicons name="speedometer" size={size} color={'#fff'} />,
-        }}
-        listeners={{
-          drawerItemPress: (e) => e.preventDefault(),
         }}
       />
     </Drawer>

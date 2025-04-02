@@ -46,9 +46,10 @@ export default function AccountLayout() {
     >
       {/* Rutas accesibles para todos los usuarios autenticados */}
       <Tabs.Screen
-        name="(about)/about"
+        name="about"
         options={{
           title: 'Nosotros',
+          headerShown: false,
           tabBarIcon: ({ color, size }) => <Ionicons name="information-circle" size={size} color={color} />,
         }}
       />
@@ -58,7 +59,7 @@ export default function AccountLayout() {
         <Tabs.Screen
           name="rutines"
           options={{
-            title: 'Crear Rutina',
+            title: 'Rutinas',
             headerShown: false,
             tabBarIcon: ({ color, size }) => <Ionicons name="barbell" size={size} color={color} />,
             href: canAccessRutines ? "/account/rutines" : null,

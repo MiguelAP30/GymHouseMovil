@@ -31,9 +31,6 @@ const LayoutRutinas = () => {
           headerShown: true,
           drawerIcon: ({ size }) => <Ionicons name="speedometer" size={size} color={'#fff'} />,
         }}
-        listeners={{
-          drawerItemPress: (e) => e.preventDefault(),
-        }}
       />
     </Drawer>
   );
