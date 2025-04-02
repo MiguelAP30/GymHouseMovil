@@ -2,7 +2,7 @@ import { View, Text, ScrollView, TouchableOpacity } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import { UserDAO, ROLES } from '../../../interfaces/interfaces'
 import { Picker } from '@react-native-picker/picker'
-import { tarjetaForm, tituloForm, parrafoForm, botonGuardar } from '../../../components/tokens'
+import { tarjetaForm, tituloForm, parrafoForm, botonGuardar, tituloFormRoles } from '../../../components/tokens'
 import { getAllUsers, updateUserRole } from '../../../lib/api_gymhouse'
 import { useAuth } from '../../../context/AuthStore'
 import { router } from 'expo-router'
@@ -65,37 +65,39 @@ const Roles = () => {
   }
 
   return (
-    <ScrollView className="flex-1 p-4 bg-gray-800">
-      <Text className={tituloForm}>Gestión de Roles</Text>
+    <ScrollView className="flex-1 p-4 bg-white">
+      <Text className={tituloFormRoles}>Gestión de Roles</Text>
       
       {users.length === 0 ? (
-        <Text className={parrafoForm}>No hay usuarios para mostrar</Text>
+        <Text className={`${parrafoForm} mt-8`}>No hay usuarios para mostrar</Text>
       ) : (
-        users.map((user) => (
-          <View key={user.email} className="bg-white rounded-lg p-4 mb-4">
-            <View className="items-center">
-              <Text className="text-gray-800 text-base">Email: {user.email}</Text>
-              <Text className="text-gray-800 text-base">Usuario: {user.user_name || 'No especificado'}</Text>
-              <Text className="text-gray-800 text-base">Nombre: {user.name}</Text>
+        <View className="mt-8">
+          {users.map((user) => (
+            <View key={user.email} className="bg-white rounded-lg p-4 mb-4 border border-gray-300 shadow-lg">
+              <View className="items-center">
+                <Text className="text-gray-800 text-base">Email: {user.email}</Text>
+                <Text className="text-gray-800 text-base">Usuario: {user.user_name || 'No especificado'}</Text>
+                <Text className="text-gray-800 text-base">Nombre: {user.name}</Text>
+              </View>
+              
+              <View className="mt-4 border-2 border-gray-400 rounded-lg overflow-hidden">
+                <Picker
+                  selectedValue={user.role_id}
+                  onValueChange={(itemValue: number) => handleRoleUpdate(user.email, itemValue)}
+                  style={{ 
+                    backgroundColor: 'white',
+                    color: 'black',
+                    height: 50
+                  }}
+                >
+                  <Picker.Item label="Usuario Registrado" value={ROLES.logued} />
+                  <Picker.Item label="Usuario Premium" value={ROLES.premium} />
+                  <Picker.Item label="Gimnasio" value={ROLES.gym} />
+                </Picker>
+              </View>
             </View>
-            
-            <View className="mt-4 border-2 border-gray-400 rounded-lg overflow-hidden">
-              <Picker
-                selectedValue={user.role_id}
-                onValueChange={(itemValue: number) => handleRoleUpdate(user.email, itemValue)}
-                style={{ 
-                  backgroundColor: 'white',
-                  color: 'black',
-                  height: 50
-                }}
-              >
-                <Picker.Item label="Usuario Registrado" value={ROLES.logued} />
-                <Picker.Item label="Usuario Premium" value={ROLES.premium} />
-                <Picker.Item label="Gimnasio" value={ROLES.gym} />
-              </Picker>
-            </View>
-          </View>
-        ))
+          ))}
+        </View>
       )}
     </ScrollView>
   )

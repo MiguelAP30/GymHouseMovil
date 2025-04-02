@@ -30,3 +30,6 @@ export const perfilLabel = "text-base text-gray-600 font-medium";
 export const perfilValue = "text-base text-gray-800";
 export const perfilLoading = "text-white text-lg";
 export const perfilError = "text-white text-base text-center mt-5";
+
+//Roless
+export const tituloFormRoles = "text-black text-3xl font-bold text-center";

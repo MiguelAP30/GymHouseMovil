@@ -8,9 +8,7 @@ import { Redirect } from 'expo-router';
 
 const LayoutAbout = () => {
   const { isAuthenticated, role } = useContext(AuthContext);
-  if (!isAuthenticated || (role ?? 0) < ROLES.premium) {
-    return <Redirect href="/unauthorized" />;
-  }
+
 
   return (
     <Drawer
