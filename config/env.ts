@@ -1,6 +1,6 @@
 export const ENV = {
   development: {
-    API_URL: 'https://apigymhouse.lat/api/v1',
+    API_URL: 'http://192.168.1.2:8000/api/v1',
     //192.168.1.2
     //192.168.80.14
   },

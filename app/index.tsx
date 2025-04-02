@@ -19,12 +19,15 @@ import {
 } from '../components/tokens';
 import { useEffect, useState, useContext } from 'react';
 import { useAuth } from '../context/AuthStore';
-import { postLogin } from '../lib/api_gymhouse';
+import { postLogin, forgotPassword, resetPassword } from '../lib/api_gymhouse';
 import { ConnectivityContext } from './_layout';
 
 export default function Index() {
   const { isConnected } = useContext(ConnectivityContext);
   const [isLoading, setIsLoading] = useState(false);
+  const [isResettingPassword, setIsResettingPassword] = useState(false);
+  const [resetToken, setResetToken] = useState<string | null>(null);
+  const [email, setEmail] = useState<string>('');
   const { login, logout, isAuthenticated, user, token, checkAuth } = useAuth();
   const { control, handleSubmit, formState: { errors } } = useForm<{ email: string; password: string }>();
 
@@ -68,7 +71,7 @@ export default function Index() {
     try {
       const formData = {
         ...data,
-        email: data.email.toLowerCase()
+        email: data.email.toLowerCase().trim()
       };
       
       console.log('Intentando login con:', formData.email);
@@ -98,6 +101,130 @@ export default function Index() {
       setIsLoading(false);
     }
   };
+
+  const handleForgotPassword = async () => {
+    if (!isConnected) {
+      Alert.alert("Error", "No hay conexión a internet");
+      return;
+    }
+
+    const email = control._formValues.email?.toLowerCase().trim();
+    if (!email) {
+      Alert.alert("Error", "Por favor, ingresa tu correo electrónico");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      console.log('Email procesado:', email);
+      const response = await forgotPassword(email);
+      setResetToken(response.reset_token);
+      setEmail(email);
+      setIsResettingPassword(true);
+      Alert.alert(
+        "Éxito",
+        "Se ha enviado un token de recuperación a tu correo electrónico"
+      );
+    } catch (error) {
+      Alert.alert(
+        "Error",
+        error instanceof Error ? error.message : "Error al solicitar recuperación de contraseña"
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleResetPassword = async (newPassword: string) => {
+    if (!resetToken || !email) {
+      Alert.alert("Error", "No hay token de recuperación válido");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      await resetPassword({
+        email,
+        new_password: newPassword,
+        reset_token: resetToken
+      });
+      Alert.alert(
+        "Éxito",
+        "Tu contraseña ha sido restablecida correctamente"
+      );
+      setIsResettingPassword(false);
+      setResetToken(null);
+      setEmail('');
+    } catch (error) {
+      Alert.alert(
+        "Error",
+        error instanceof Error ? error.message : "Error al restablecer la contraseña"
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (isResettingPassword) {
+    return (
+      <View className={`${fondoTotal} flex-1 px-6`}>
+        <ScrollView 
+          contentContainerStyle={{ alignItems: 'center', paddingBottom: 20 }} 
+          showsVerticalScrollIndicator={false} 
+        >
+          <Text className={tituloForm}>Restablecer Contraseña</Text>
+          <Text className={parrafoForm}>
+            Ingresa tu nueva contraseña
+          </Text>
+
+          <View className="w-full mt-6">
+            <Text className={labelForm}>Nueva Contraseña</Text>
+            <Controller
+              control={control}
+              name="password"
+              rules={{ 
+                required: "La contraseña es obligatoria", 
+                minLength: { value: 6, message: "Mínimo 6 caracteres" } 
+              }}
+              render={({ field: { onChange, onBlur, value } }) => (
+                <TextInput
+                  placeholder="********"
+                  placeholderTextColor="gray"
+                  secureTextEntry
+                  className={inputForm}
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  value={value}
+                />
+              )}
+            />
+            {errors.password && <Text className="text-red-500">{errors.password.message?.toString()}</Text>}
+          </View>
+
+          <TouchableOpacity 
+            className={`${botonGeneral} ${isLoading ? 'opacity-50' : ''}`} 
+            onPress={handleSubmit((data) => handleResetPassword(data.password))}
+            disabled={isLoading}
+          >
+            <Text className={textoBotonGeneral}>
+              {isLoading ? 'Restableciendo...' : 'Restablecer Contraseña'}
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            onPress={() => {
+              setIsResettingPassword(false);
+              setResetToken(null);
+              setEmail('');
+            }}
+            className="mt-4"
+          >
+            <Text className="text-blue-400">Volver al inicio de sesión</Text>
+          </TouchableOpacity>
+        </ScrollView>
+      </View>
+    );
+  }
 
   return (
     <View className={`${fondoTotal} flex-1 px-6`}>
@@ -170,6 +297,14 @@ export default function Index() {
           <Text className={textoBotonGeneral}>
             {isLoading ? 'Iniciando sesión...' : 'Iniciar sesión'}
           </Text>
+        </TouchableOpacity>
+
+        {/* Enlace: Recuperar contraseña */}
+        <TouchableOpacity 
+          onPress={handleForgotPassword}
+          className="mt-2"
+        >
+          <Text className="text-blue-400">¿Olvidaste tu contraseña?</Text>
         </TouchableOpacity>
 
         {/* Enlace: Registro */}

@@ -574,3 +574,73 @@ export const sendNotification = async (data: SendNotificationDAO) => {
     body: JSON.stringify(data)
   }).then(res => res.json());
 }
+
+export const forgotPassword = async (email: string) => {
+  try {
+    console.log('Intentando solicitar recuperación de contraseña para:', email);
+    const response = await fetch(`${API}/forgot_password`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(email) // Enviamos el email directamente
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      console.error('Error en la respuesta:', errorData);
+      throw new Error(errorData.message || 'Error al solicitar recuperación de contraseña');
+    }
+
+    const data = await response.json();
+    console.log('Respuesta exitosa:', data);
+    return data;
+  } catch (error) {
+    console.error('Error en forgotPassword:', error);
+    throw error;
+  }
+}
+
+export const resetPassword = async (data: { email: string; new_password: string; reset_token: string }) => {
+  try {
+    const response = await fetch(`${API}/reset_password`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || 'Error al restablecer la contraseña');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error en resetPassword:', error);
+    throw error;
+  }
+}
+
+export const changePassword = async (data: { current_password: string; new_password: string }) => {
+  return authenticatedFetch('/change_password', {
+    method: 'POST',
+    body: JSON.stringify(data)
+  }).then(res => res.json());
+}
+
+export const updateUserData = async (email: string, data: {
+  id_number: string;
+  user_name: string;
+  name: string;
+  phone: string;
+  address: string;
+  birth_date: string;
+  gender: string;
+}) => {
+  return authenticatedFetch(`/user/${encodeURIComponent(email)}`, {
+    method: 'PUT',
+    body: JSON.stringify(data)
+  }).then(res => res.json());
+}
