@@ -54,6 +54,16 @@ export default function AccountLayout() {
         }}
       />
 
+      {/* Rutas accesibles para todos los usuarios autenticados */}
+      <Tabs.Screen
+        name="exercises"
+        options={{
+          title: 'Ejercicios',
+          headerShown: false,
+          tabBarIcon: ({ color, size }) => <Ionicons name="information-circle" size={size} color={color} />,
+        }}
+      />
+
       {/* Rutas para usuarios con roles específicos */}
       
         <Tabs.Screen
