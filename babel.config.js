@@ -13,6 +13,7 @@ module.exports = function(api){
                     extensions: ['.js', '.jsx', '.ts', '.tsx', '.svg'],
                     alias: {
                         '@': './',
+                        'FrontBodySvg': './components/organisms/InteractiveSvg',
                     },
                 },
             ],

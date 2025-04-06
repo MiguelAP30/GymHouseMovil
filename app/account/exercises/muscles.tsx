@@ -1,14 +1,16 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import { View, Text, TouchableOpacity, ScrollView, ActivityIndicator, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import Svg, { SvgProps } from 'react-native-svg';
+import Svg from 'react-native-svg';
 
-// Importar los SVGs
-import FrenteNormal from '../../../assets/Frente Normal path nombrados.svg';
-import EspaldaNormal from '../../../assets/Espalda Normal path nombrados.svg';
-import FrenteAvanzado from '../../../assets/Frente Avanzado path nombrados.svg';
-import EspaldaAvanzado from '../../../assets/Espalda Avanzado path nombrados.svg';
+// Importar los SVGs estáticos
+import EspaldaNormal from '../../../assets/CuerpoTraceroNormal.svg';
+import FrenteAvanzado from '../../../assets/CuerpoFrontalAvanzado.svg';
+import EspaldaAvanzado from '../../../assets/CuerpoTraceroAvanzado.svg';
+
+// Importar el SVG interactivo
+import FrontBodySvg from '../../../components/organisms/InteractiveSvg';
 
 // Tipos para los filtros
 type NivelType = 'normal' | 'avanzado';
@@ -19,25 +21,41 @@ const MusclesScreen = () => {
   const [nivel, setNivel] = useState<NivelType>('normal');
   const [vista, setVista] = useState<VistaType>('frente');
   const [loading, setLoading] = useState(false);
+  const [selectedMuscle, setSelectedMuscle] = useState<string | null>(null);
 
-  // Función para obtener el SVG actual basado en los filtros
-  const getCurrentSvg = () => {
-    if (nivel === 'normal') {
-      return vista === 'frente' ? FrenteNormal : EspaldaNormal;
-    } else {
-      return vista === 'frente' ? FrenteAvanzado : EspaldaAvanzado;
-    }
-  };
+  // Función para manejar la selección de un músculo
+  const handleMusclePress = useCallback((id: string) => {
+    console.log('Músculo presionado en muscles.tsx:', id);
+    setSelectedMuscle(id);
+    Alert.alert('Músculo seleccionado', `Has seleccionado: ${id}`);
+  }, []);
+
+  // Función para obtener el componente SVG actual basado en los filtros
+  const getCurrentSvg = useCallback(() => {
+    console.log('Renderizando SVG con nivel:', nivel, 'y vista:', vista);
+    console.log('Función handleMusclePress:', handleMusclePress);
+    
+    // Asegurarse de que el componente tenga dimensiones adecuadas
+    return (
+      <View style={{ width: '100%', height: '100%', backgroundColor: 'transparent' }}>
+        <FrontBodySvg 
+          width="100%" 
+          height="100%" 
+          onPress={handleMusclePress} 
+        />
+      </View>
+    );
+  }, [nivel, vista, handleMusclePress]);
 
   // Componente para los botones de filtro
-  const FilterButton = ({ 
-    title, 
-    isActive, 
-    onPress 
-  }: { 
-    title: string; 
-    isActive: boolean; 
-    onPress: () => void 
+  const FilterButton = ({
+    title,
+    isActive,
+    onPress,
+  }: {
+    title: string;
+    isActive: boolean;
+    onPress: () => void;
   }) => (
     <TouchableOpacity
       className={`px-4 py-2 rounded-full mr-2 ${isActive ? 'bg-blue-500' : 'bg-gray-200'}`}
@@ -49,14 +67,10 @@ const MusclesScreen = () => {
     </TouchableOpacity>
   );
 
-  // Obtener el SVG actual
-  const CurrentSvg = getCurrentSvg();
-
   // Función para cambiar el nivel
   const handleNivelChange = (newNivel: NivelType) => {
     setLoading(true);
     setNivel(newNivel);
-    // Simular un tiempo de carga para mejorar la experiencia de usuario
     setTimeout(() => {
       setLoading(false);
     }, 300);
@@ -66,7 +80,6 @@ const MusclesScreen = () => {
   const handleVistaChange = (newVista: VistaType) => {
     setLoading(true);
     setVista(newVista);
-    // Simular un tiempo de carga para mejorar la experiencia de usuario
     setTimeout(() => {
       setLoading(false);
     }, 300);
@@ -119,7 +132,7 @@ const MusclesScreen = () => {
           {loading ? (
             <ActivityIndicator size="large" color="#007AFF" />
           ) : (
-            <CurrentSvg width="100%" height="100%" />
+            getCurrentSvg()
           )}
         </View>
       </ScrollView>
