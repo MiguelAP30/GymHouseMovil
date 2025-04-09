@@ -22,6 +22,8 @@ export interface UserDAO {
     start_date: string | null;
     final_date: string | null;
     role_id: number;
+    is_verified?: boolean;
+    verification_code?: string | null;
 }
 
 export interface GymDAO {
@@ -67,6 +69,7 @@ export interface RegisterDAO {
     address: string;
     birth_date: string;
     gender: string;
+    status?: boolean;
 }
 
 export interface RutinaDAO {
@@ -162,4 +165,19 @@ export interface SendNotificationDAO {
     title: string;
     message: string;
     token: string;
+}
+
+export interface VerifyEmailDAO {
+    email: string;
+    verification_code: string;
+}
+
+export interface ResendVerificationDAO {
+    email: string;
+}
+
+export interface ResetPasswordDAO {
+    email: string;
+    new_password: string;
+    reset_code: string;
 }

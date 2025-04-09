@@ -8,7 +8,7 @@ import {
   botonGeneral, textoBotonGeneral, letraPequeñaForm, fondoTotal, 
   inputFormPicker
 } from '../components/tokens';
-import { postRegister } from '../lib/api_gymhouse';
+import { postRegister, resendVerificationCode, verifyEmail } from '../lib/api_gymhouse';
 import { AuthContext } from '../context/AuthStore';
 import { Picker } from '@react-native-picker/picker';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
@@ -25,10 +25,23 @@ interface RegisterFormData {
   gender: string; // 'm' o 'f'
 }
 
+interface VerificationFormData {
+  email: string;
+  verification_code: string;
+}
+
 export default function Register() {
-  const { control, handleSubmit, formState: { errors } } = useForm<RegisterFormData>();
+  const { control, handleSubmit, formState: { errors }, reset } = useForm<RegisterFormData>();
+  const { control: verificationControl, handleSubmit: handleVerificationSubmit, formState: { errors: verificationErrors }, setValue: setVerificationValue, reset: resetVerification } = useForm<VerificationFormData>({
+    defaultValues: {
+      verification_code: '',
+      email: ''
+    }
+  });
   const [isLoading, setIsLoading] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [isVerificationMode, setIsVerificationMode] = useState(false);
+  const [registeredEmail, setRegisteredEmail] = useState('');
   const router = useRouter();
   const { login } = useContext(AuthContext);
 
@@ -58,21 +71,111 @@ export default function Register() {
     return date;
   };
 
+  const onVerificationSubmit = async (data: VerificationFormData) => {
+    setIsLoading(true);
+    try {
+      // Asegurar que el email esté en minúsculas y sin espacios
+      const cleanEmail = registeredEmail.toLowerCase().trim();
+      
+      const response = await verifyEmail({
+        email: cleanEmail,
+        verification_code: data.verification_code
+      });
+      
+      if (response.status === 200) {
+        Alert.alert(
+          "Verificación exitosa",
+          "Tu correo ha sido verificado. Ahora puedes iniciar sesión.",
+          [
+            {
+              text: "OK",
+              onPress: () => router.push('/')
+            }
+          ]
+        );
+      } else {
+        throw new Error('Error en la verificación');
+      }
+    } catch (error) {
+      console.error('Error en verificación:', error);
+      Alert.alert(
+        "Error",
+        error instanceof Error ? error.message : "Error al verificar el código"
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleResendCode = async () => {
+    setIsLoading(true);
+    try {
+      // Asegurar que el email esté en minúsculas y sin espacios
+      const cleanEmail = registeredEmail.toLowerCase().trim();
+      
+      await resendVerificationCode({ email: cleanEmail });
+      Alert.alert(
+        "Código reenviado",
+        "Se ha enviado un nuevo código de verificación a tu correo electrónico."
+      );
+    } catch (error) {
+      console.error('Error al reenviar código:', error);
+      Alert.alert(
+        "Error",
+        error instanceof Error ? error.message : "Error al reenviar el código de verificación"
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Función para limpiar los campos del formulario
+  const resetForm = () => {
+    reset({
+      email: '',
+      password: '',
+      name: '',
+      phone: '',
+      address: '',
+      id_number: '',
+      user_name: '',
+      birth_date: '',
+      gender: ''
+    });
+  };
+
   const onSubmit = async (data: RegisterFormData) => {
     setIsLoading(true);
     try {
       const formData = {
         ...data,
-        email: data.email.toLowerCase()
+        email: data.email.toLowerCase().trim(),
+        name: data.name.toLowerCase().trim(),
+        user_name: data.user_name.toLowerCase().trim(),
+        id_number: data.id_number.toLowerCase().trim(),
+        phone: data.phone.toLowerCase().trim(),
+        address: data.address.toLowerCase().trim()
       };
+      
       const response = await postRegister(formData);
       
-      if (!response.access_token || !response.user) {
-        throw new Error('Respuesta del servidor incompleta');
+      if (response.status === 201) {
+        // Limpiar todos los campos del formulario
+        resetForm();
+        
+        Alert.alert(
+          "Registro exitoso",
+          "Por favor verifica tu correo electrónico para continuar. Ve a la página de inicio y haz clic en 'Verificar código'.",
+          [
+            {
+              text: "OK",
+              onPress: () => router.push('/')
+            }
+          ]
+        );
+      } else {
+        throw new Error('Error en el registro');
       }
-      
-      await login(response.access_token, response.user);
-      router.push('/account/about');
     } catch (error) {
       console.error('Error en registro:', error);
       Alert.alert(
@@ -83,6 +186,93 @@ export default function Register() {
       setIsLoading(false);
     }
   };
+
+  if (isVerificationMode) {
+    return (
+      <View className={`${fondoTotal} flex-1 px-6`}>
+        <ScrollView 
+          contentContainerStyle={{ alignItems: 'center', paddingBottom: 20 }} 
+          showsVerticalScrollIndicator={false} 
+        >
+          {/* Logo */}
+          <Image 
+            source={require('../assets/logo.png')} 
+            className="w-40 h-40 mt-8 mb-8 rounded-3xl" 
+          />
+
+          {/* Título */}
+          <Text className={tituloForm}>Verifica tu correo electrónico</Text>
+          <Text className={parrafoForm}>
+            Ingresa el código de verificación enviado a {registeredEmail}
+          </Text>
+
+          {/* Input: Código de verificación */}
+          <View className="w-full mt-6">
+            <Text className={labelForm}>Código de verificación</Text>
+            <Controller
+              control={verificationControl}
+              name="verification_code"
+              rules={{ 
+                required: "El código de verificación es obligatorio",
+                minLength: { value: 6, message: "El código debe tener al menos 6 caracteres" },
+                maxLength: { value: 10, message: "El código no puede tener más de 10 caracteres" },
+                pattern: { value: /^[0-9]+$/, message: "Solo se permiten números" }
+              }}
+              render={({ field: { onChange, onBlur, value } }) => (
+                <TextInput
+                  placeholder="Ingresa el código (hasta 10 dígitos)"
+                  placeholderTextColor="gray"
+                  className={inputForm}
+                  onBlur={onBlur}
+                  onChangeText={(text) => {
+                    // Solo permitir números
+                    const numericValue = text.replace(/[^0-9]/g, '');
+                    onChange(numericValue);
+                  }}
+                  value={value}
+                  keyboardType="number-pad"
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  maxLength={10}
+                />
+              )}
+            />
+            {verificationErrors.verification_code && (
+              <Text className="text-red-500">{verificationErrors.verification_code.message}</Text>
+            )}
+          </View>
+
+          {/* Botón: Verificar */}
+          <TouchableOpacity 
+            className={`${botonGeneral} mt-6 ${isLoading ? 'opacity-50' : ''}`}
+            onPress={handleVerificationSubmit(onVerificationSubmit)}
+            disabled={isLoading}
+          >
+            <Text className={textoBotonGeneral}>
+              {isLoading ? 'Verificando...' : 'Verificar'}
+            </Text>
+          </TouchableOpacity>
+
+          {/* Botón: Reenviar código */}
+          <TouchableOpacity 
+            onPress={handleResendCode}
+            className="mt-4"
+            disabled={isLoading}
+          >
+            <Text className="text-blue-400">Reenviar código de verificación</Text>
+          </TouchableOpacity>
+
+          {/* Enlace: Volver al registro */}
+          <TouchableOpacity 
+            onPress={() => setIsVerificationMode(false)}
+            className="mt-4"
+          >
+            <Text className="text-blue-400">Volver al registro</Text>
+          </TouchableOpacity>
+        </ScrollView>
+      </View>
+    );
+  }
 
   return (
     <View className={`${fondoTotal} flex-1 px-6`}>

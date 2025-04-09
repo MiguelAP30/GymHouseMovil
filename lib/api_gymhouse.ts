@@ -14,7 +14,10 @@ import {
   SpecificMuscleDAO,
   WeekDayDAO,
   NotificationTokenDAO,
-  SendNotificationDAO
+  SendNotificationDAO,
+  VerifyEmailDAO,
+  ResendVerificationDAO,
+  ResetPasswordDAO
 } from '../interfaces/interfaces';
 import { getEnvironment } from '../config/env';
 
@@ -44,59 +47,15 @@ export const postRegister = async (data: RegisterDAO) => {
       throw new Error(errorData.message || 'Error en el registro');
     }
 
-    // Después del registro exitoso, intentar hacer login automáticamente
-    const loginResponse = await fetch(`${API}/login`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        email: data.email,
-        password: data.password
-      })
-    });
-
-    if (!loginResponse.ok) {
-      throw new Error('Registro exitoso pero error al iniciar sesión automáticamente');
-    }
-
-    const rawData = await loginResponse.json();
+    const responseData = await response.json();
     
-    if (!rawData.access_token) {
-      console.error('Respuesta del servidor inválida:', rawData);
-      throw new Error('La respuesta del servidor no tiene el formato esperado');
-    }
-
-    // Decodificar el token JWT para obtener la información del usuario
-    const tokenParts = rawData.access_token.split('.');
-    if (tokenParts.length !== 3) {
-      throw new Error('Token JWT inválido');
-    }
-
-    const payload = JSON.parse(atob(tokenParts[1]));
+    // Ya no intentamos hacer login automáticamente después del registro
+    // ya que el usuario necesita verificar su correo primero
     
-    // Construir el objeto usuario usando los datos del registro
-    const user = {
-      email: data.email,
-      name: data.name,
-      id_number: data.id_number,
-      user_name: data.user_name,
-      phone: data.phone,
-      birth_date: new Date(data.birth_date).getTime(),
-      gender: data.gender,
-      address: data.address,
-      password: '',
-      status: true,
-      start_date: null,
-      final_date: null,
-      role_id: payload['user.role'] || 1 // rol por defecto: logued
-    };
-
     return {
-      access_token: rawData.access_token,
-      user: user,
       status: 201,
-      message: 'Registro exitoso'
+      message: responseData.message || 'Registro exitoso. Por favor verifica tu email.',
+      data: responseData.data
     };
   } catch (error) {
     console.error('Error en el registro:', error);
@@ -126,6 +85,7 @@ export const postLogin = async (data: LoginDAO) => {
     }
 
     const rawData = await response.json();
+    console.log('Respuesta raw del servidor:', rawData);
     
     if (!rawData.access_token) {
       console.error('Respuesta del servidor inválida:', rawData);
@@ -139,6 +99,7 @@ export const postLogin = async (data: LoginDAO) => {
     }
 
     const payload = JSON.parse(atob(tokenParts[1]));
+    console.log('Payload del token:', payload);
     
     // Construir el objeto usuario a partir de los claims del token
     const user = {
@@ -147,15 +108,19 @@ export const postLogin = async (data: LoginDAO) => {
       id_number: payload['user.id_number'],
       role_id: payload['user.role'],
       status: payload['user.status'],
-      user_name: payload['user.name'], // Usando el mismo nombre como username por ahora
-      phone: '',  // Valores por defecto para campos requeridos
+      user_name: payload['user.name'],
+      phone: '',
       birth_date: 0,
       gender: '',
       address: '',
       password: '',
       start_date: null,
-      final_date: null
+      final_date: null,
+      // Ahora usamos el valor real del token
+      is_verified: payload['user.is_verified'] === true
     };
+
+    console.log('Usuario construido:', user);
 
     return {
       access_token: rawData.access_token,
@@ -167,7 +132,7 @@ export const postLogin = async (data: LoginDAO) => {
     console.error('Error en el inicio de sesión:', error);
     throw error;
   }
-}
+};
 
 // Perfiles
 export const postProfile = async (data: ProfileDAO) => {
@@ -626,8 +591,9 @@ export const forgotPassword = async (email: string) => {
   }
 }
 
-export const resetPassword = async (data: { email: string; new_password: string; reset_token: string }) => {
+export const resetPassword = async (data: ResetPasswordDAO) => {
   try {
+    console.log('Intentando restablecer contraseña con URL:', `${API}/reset_password`);
     const response = await fetch(`${API}/reset_password`, {
       method: 'POST',
       headers: {
@@ -638,12 +604,22 @@ export const resetPassword = async (data: { email: string; new_password: string;
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || 'Error al restablecer la contraseña');
+      console.error('Error al restablecer contraseña:', {
+        status: response.status,
+        statusText: response.statusText,
+        errorData
+      });
+      throw new Error(errorData.message || 'Error al restablecer contraseña');
     }
 
-    return await response.json();
+    const responseData = await response.json();
+    return {
+      status: 200,
+      message: responseData.message || 'Contraseña restablecida exitosamente',
+      data: responseData.data
+    };
   } catch (error) {
-    console.error('Error en resetPassword:', error);
+    console.error('Error al restablecer contraseña:', error);
     throw error;
   }
 }
@@ -668,4 +644,71 @@ export const updateUserData = async (email: string, data: {
     method: 'PUT',
     body: JSON.stringify(data)
   }).then(res => res.json());
+}
+
+// Verificación de correo electrónico
+export const verifyEmail = async (data: VerifyEmailDAO) => {
+  try {
+    console.log('Intentando verificar email con URL:', `${API}/verify_email`);
+    const response = await fetch(`${API}/verify_email`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      console.error('Error en verificación de email:', {
+        status: response.status,
+        statusText: response.statusText,
+        errorData
+      });
+      throw new Error(errorData.message || 'Error en la verificación de email');
+    }
+
+    const responseData = await response.json();
+    return {
+      status: 200,
+      message: responseData.message || 'Email verificado exitosamente',
+      data: responseData.data
+    };
+  } catch (error) {
+    console.error('Error en verificación de email:', error);
+    throw error;
+  }
+}
+
+export const resendVerificationCode = async (data: ResendVerificationDAO) => {
+  try {
+    console.log('Intentando reenviar código de verificación con URL:', `${API}/resend-verification`);
+    const response = await fetch(`${API}/resend-verification`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data.email)
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      console.error('Error al reenviar código de verificación:', {
+        status: response.status,
+        statusText: response.statusText,
+        errorData
+      });
+      throw new Error(errorData.message || 'Error al reenviar código de verificación');
+    }
+
+    const responseData = await response.json();
+    return {
+      status: 200,
+      message: responseData.message || 'Código de verificación reenviado exitosamente',
+      data: responseData.data
+    };
+  } catch (error) {
+    console.error('Error al reenviar código de verificación:', error);
+    throw error;
+  }
 }
