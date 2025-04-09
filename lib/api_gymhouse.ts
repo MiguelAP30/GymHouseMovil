@@ -13,8 +13,6 @@ import {
   MuscleDAO,
   SpecificMuscleDAO,
   WeekDayDAO,
-  NotificationTokenDAO,
-  SendNotificationDAO,
   VerifyEmailDAO,
   ResendVerificationDAO,
   ResetPasswordDAO
@@ -23,7 +21,12 @@ import { getEnvironment } from '../config/env';
 
 const API = getEnvironment().API_URL;
 
-
+// Interfaz para enviar notificaciones
+interface SendNotificationDAO {
+  title: string;
+  message: string;
+  token: string;
+}
 
 // Autenticación
 export const postRegister = async (data: RegisterDAO) => {
@@ -586,41 +589,68 @@ export const deleteWeekDay = async (id: number) => {
   }).then(res => res.json());
 }
 
-export const registerNotificationToken = async (data: NotificationTokenDAO) => {
-  return authenticatedFetch('/notification/token', {
-    method: 'POST',
-    body: JSON.stringify(data)
-  }).then(res => res.json());
-}
-
-export const sendNotification = async (data: SendNotificationDAO) => {
+export const verifyEmail = async (data: VerifyEmailDAO) => {
   try {
-    console.log('Intentando enviar notificación al token:', data.token);
-    
-    const response = await authenticatedFetch('/notification/send', {
+    console.log('Intentando verificar email con URL:', `${API}/verify_email`);
+    const response = await fetch(`${API}/verify_email`, {
       method: 'POST',
-      body: JSON.stringify({
-        title: data.title,
-        message: data.message,
-        token: data.token
-      })
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
     });
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      console.error('Error en la respuesta del servidor:', {
+      console.error('Error en verificación de email:', {
         status: response.status,
         statusText: response.statusText,
         errorData
       });
-      throw new Error(errorData.message || 'Error al enviar la notificación');
+      throw new Error(errorData.message || 'Error en la verificación de email');
     }
 
     const responseData = await response.json();
-    console.log('Notificación enviada exitosamente:', responseData);
-    return responseData;
+    return {
+      status: 200,
+      message: responseData.message || 'Email verificado exitosamente',
+      data: responseData.data
+    };
   } catch (error) {
-    console.error('Error detallado en sendNotification:', error);
+    console.error('Error en verificación de email:', error);
+    throw error;
+  }
+}
+
+export const resendVerificationCode = async (data: ResendVerificationDAO) => {
+  try {
+    console.log('Intentando reenviar código de verificación con URL:', `${API}/resend-verification`);
+    const response = await fetch(`${API}/resend-verification`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data.email)
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      console.error('Error al reenviar código de verificación:', {
+        status: response.status,
+        statusText: response.statusText,
+        errorData
+      });
+      throw new Error(errorData.message || 'Error al reenviar código de verificación');
+    }
+
+    const responseData = await response.json();
+    return {
+      status: 200,
+      message: responseData.message || 'Código de verificación reenviado exitosamente',
+      data: responseData.data
+    };
+  } catch (error) {
+    console.error('Error al reenviar código de verificación:', error);
     throw error;
   }
 }
@@ -706,69 +736,34 @@ export const updateUserData = async (email: string, data: {
   }).then(res => res.json());
 }
 
-// Verificación de correo electrónico
-export const verifyEmail = async (data: VerifyEmailDAO) => {
+export const sendNotification = async (data: SendNotificationDAO) => {
   try {
-    console.log('Intentando verificar email con URL:', `${API}/verify_email`);
-    const response = await fetch(`${API}/verify_email`, {
+    console.log('Intentando enviar notificación al token:', data.token);
+    
+    const response = await authenticatedFetch('/notification/send', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(data)
+      body: JSON.stringify({
+        title: data.title,
+        message: data.message,
+        token: data.token
+      })
     });
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      console.error('Error en verificación de email:', {
+      console.error('Error en la respuesta del servidor:', {
         status: response.status,
         statusText: response.statusText,
         errorData
       });
-      throw new Error(errorData.message || 'Error en la verificación de email');
+      throw new Error(errorData.message || 'Error al enviar la notificación');
     }
 
     const responseData = await response.json();
-    return {
-      status: 200,
-      message: responseData.message || 'Email verificado exitosamente',
-      data: responseData.data
-    };
+    console.log('Notificación enviada exitosamente:', responseData);
+    return responseData;
   } catch (error) {
-    console.error('Error en verificación de email:', error);
-    throw error;
-  }
-}
-
-export const resendVerificationCode = async (data: ResendVerificationDAO) => {
-  try {
-    console.log('Intentando reenviar código de verificación con URL:', `${API}/resend-verification`);
-    const response = await fetch(`${API}/resend-verification`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(data.email)
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      console.error('Error al reenviar código de verificación:', {
-        status: response.status,
-        statusText: response.statusText,
-        errorData
-      });
-      throw new Error(errorData.message || 'Error al reenviar código de verificación');
-    }
-
-    const responseData = await response.json();
-    return {
-      status: 200,
-      message: responseData.message || 'Código de verificación reenviado exitosamente',
-      data: responseData.data
-    };
-  } catch (error) {
-    console.error('Error al reenviar código de verificación:', error);
+    console.error('Error detallado en sendNotification:', error);
     throw error;
   }
 }

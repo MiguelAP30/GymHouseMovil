@@ -156,17 +156,6 @@ export interface WeekDayDAO {
     name: string;
 }
 
-export interface NotificationTokenDAO {
-    token: string;
-    is_active: boolean;
-}
-
-export interface SendNotificationDAO {
-    title: string;
-    message: string;
-    token: string;
-}
-
 export interface VerifyEmailDAO {
     email: string;
     verification_code: string;

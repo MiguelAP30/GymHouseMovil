@@ -3,8 +3,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AuthResponseDAO, ProfileDAO, UserDAO } from '../interfaces/interfaces';
 import { getEnvironment } from '../config/env';
 import { router } from 'expo-router';
-import { registerNotificationToken } from '../lib/api_gymhouse';
-import * as Notifications from 'expo-notifications';
 
 const API = getEnvironment().API_URL;
 
@@ -167,15 +165,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const storedToken = await AsyncStorage.getItem('token');
       if (!storedToken) {
         throw new Error('Error al guardar el token');
-      }
-
-      // Registramos el token de notificaciones
-      const pushToken = await Notifications.getExpoPushTokenAsync();
-      if (pushToken) {
-        await registerNotificationToken({
-          token: "ExponentPushToken[FVBhZHK9iQs0N6c-LzeTx_]",
-          is_active: true
-        });
       }
 
       // Obtenemos los datos actualizados del usuario
