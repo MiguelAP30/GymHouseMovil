@@ -441,60 +441,120 @@ export const deleteDifficulty = async (id: number) => {
 
 // Músculos
 export const getMuscles = async () => {
-  return authenticatedFetch('/muscle').then(res => res.json());
+  try {
+    const response = await authenticatedFetch('/muscle');
+    return await response.json();
+  } catch (error) {
+    console.error('Error al obtener músculos:', error);
+    throw error;
+  }
 }
 
 export const getMuscleById = async (id: number) => {
-  return authenticatedFetch(`/muscle/${id}`).then(res => res.json());
+  try {
+    const response = await authenticatedFetch(`/muscle/${id}`);
+    return await response.json();
+  } catch (error) {
+    console.error(`Error al obtener músculo con ID ${id}:`, error);
+    throw error;
+  }
 }
 
 export const postMuscle = async (data: Omit<MuscleDAO, 'id'>) => {
-  return authenticatedFetch('/muscle', {
-    method: 'POST',
-    body: JSON.stringify(data)
-  }).then(res => res.json());
+  try {
+    const response = await authenticatedFetch('/muscle', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    });
+    return await response.json();
+  } catch (error) {
+    console.error('Error al crear músculo:', error);
+    throw error;
+  }
 }
 
 export const putMuscle = async (id: number, data: MuscleDAO) => {
-  return authenticatedFetch(`/muscle/${id}`, {
-    method: 'PUT',
-    body: JSON.stringify(data)
-  }).then(res => res.json());
+  try {
+    const response = await authenticatedFetch(`/muscle/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data)
+    });
+    return await response.json();
+  } catch (error) {
+    console.error(`Error al actualizar músculo con ID ${id}:`, error);
+    throw error;
+  }
 }
 
 export const deleteMuscle = async (id: number) => {
-  return authenticatedFetch(`/muscle/${id}`, {
-    method: 'DELETE'
-  }).then(res => res.json());
+  try {
+    const response = await authenticatedFetch(`/muscle/${id}`, {
+      method: 'DELETE'
+    });
+    return await response.json();
+  } catch (error) {
+    console.error(`Error al eliminar músculo con ID ${id}:`, error);
+    throw error;
+  }
 }
 
 // Músculos Específicos
 export const getSpecificMuscles = async () => {
-  return authenticatedFetch('/specific_muscle').then(res => res.json());
+  try {
+    const response = await authenticatedFetch('/specific_muscle');
+    return await response.json();
+  } catch (error) {
+    console.error('Error al obtener músculos específicos:', error);
+    throw error;
+  }
 }
 
 export const getSpecificMuscleById = async (id: number) => {
-  return authenticatedFetch(`/specific_muscle/${id}`).then(res => res.json());
+  try {
+    const response = await authenticatedFetch(`/specific_muscle/${id}`);
+    return await response.json();
+  } catch (error) {
+    console.error(`Error al obtener músculo específico con ID ${id}:`, error);
+    throw error;
+  }
 }
 
 export const postSpecificMuscle = async (data: Omit<SpecificMuscleDAO, 'id'>) => {
-  return authenticatedFetch('/specific_muscle', {
-    method: 'POST',
-    body: JSON.stringify(data)
-  }).then(res => res.json());
+  try {
+    const response = await authenticatedFetch('/specific_muscle', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    });
+    return await response.json();
+  } catch (error) {
+    console.error('Error al crear músculo específico:', error);
+    throw error;
+  }
 }
 
 export const putSpecificMuscle = async (id: number, data: SpecificMuscleDAO) => {
-  return authenticatedFetch(`/specific_muscle/${id}`, {
-    method: 'PUT',
-    body: JSON.stringify(data)
-  }).then(res => res.json());
+  try {
+    const response = await authenticatedFetch(`/specific_muscle/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data)
+    });
+    return await response.json();
+  } catch (error) {
+    console.error(`Error al actualizar músculo específico con ID ${id}:`, error);
+    throw error;
+  }
 }
 
 export const deleteSpecificMuscle = async (id: number) => {
-  return authenticatedFetch(`/specific_muscle/${id}`, {
-    method: 'DELETE'
-  }).then(res => res.json());
+  try {
+    const response = await authenticatedFetch(`/specific_muscle/${id}`, {
+      method: 'DELETE'
+    });
+    return await response.json();
+  } catch (error) {
+    console.error(`Error al eliminar músculo específico con ID ${id}:`, error);
+    throw error;
+  }
 }
 
 // Días de la Semana

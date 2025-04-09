@@ -19,6 +19,9 @@ const EtiquetaRutinas = () => {
   const [filteredTags, setFilteredTags] = useState<TagOfTrainingPlanDAO[]>([])
   const [searchName, setSearchName] = useState('')
   const [error, setError] = useState<string | null>(null)
+  const [errors, setErrors] = useState({
+    name: ''
+  });
 
   useEffect(() => {
     fetchTags()
@@ -49,7 +52,25 @@ const EtiquetaRutinas = () => {
     setLoading(false)
   }
 
+  const validateTag = (tag: Partial<TagOfTrainingPlanDAO>) => {
+    const newErrors = {
+      name: ''
+    };
+
+    if (!tag.name) {
+      newErrors.name = 'El nombre es requerido';
+    } else if (tag.name.length > 50) {
+      newErrors.name = 'El nombre no puede exceder 50 caracteres';
+    }
+
+    setErrors(newErrors);
+    return !Object.values(newErrors).some(error => error !== '');
+  };
+
   const handleAddTag = async () => {
+    if (!validateTag(newTag)) {
+      return;
+    }
     const isAuthenticated = await checkAuth()
     if (!isAuthenticated) return
 
@@ -75,8 +96,9 @@ const EtiquetaRutinas = () => {
   }
 
   const handleUpdateTag = async () => {
-    if (!selectedTag?.id) return
-    
+    if (!selectedTag || !validateTag(selectedTag)) {
+      return;
+    }
     const isAuthenticated = await checkAuth()
     if (!isAuthenticated) return
 
@@ -171,15 +193,20 @@ const EtiquetaRutinas = () => {
           <View className="bg-white p-5 rounded-lg w-4/5">
             <Text className="text-xl font-bold mb-4">Nueva Etiqueta</Text>
             <TextInput
-              className="border border-gray-300 p-2.5 rounded-lg mb-2.5"
+              className="border border-gray-300 p-2.5 rounded-lg mb-1"
               placeholder="Nombre de la etiqueta"
               value={newTag.name}
               onChangeText={(text) => setNewTag({...newTag, name: text})}
+              maxLength={50}
             />
+            {errors.name ? <Text className="text-red-500 text-sm mb-2">{errors.name}</Text> : null}
             <View className="flex-row justify-end mt-4">
               <TouchableOpacity 
                 className="bg-red-500 p-2.5 rounded-lg mr-2.5"
-                onPress={() => setAddModalVisible(false)}
+                onPress={() => {
+                  setAddModalVisible(false);
+                  setErrors({ name: '' });
+                }}
               >
                 <Text className="text-white font-bold">Cancelar</Text>
               </TouchableOpacity>
@@ -204,15 +231,20 @@ const EtiquetaRutinas = () => {
           <View className="bg-white p-5 rounded-lg w-4/5">
             <Text className="text-xl font-bold mb-4">Editar Etiqueta</Text>
             <TextInput
-              className="border border-gray-300 p-2.5 rounded-lg mb-2.5"
+              className="border border-gray-300 p-2.5 rounded-lg mb-1"
               placeholder="Nombre de la etiqueta"
               value={selectedTag?.name}
               onChangeText={(text) => selectedTag && setSelectedTag({...selectedTag, name: text})}
+              maxLength={50}
             />
+            {errors.name ? <Text className="text-red-500 text-sm mb-2">{errors.name}</Text> : null}
             <View className="flex-row justify-end mt-4">
               <TouchableOpacity 
                 className="bg-red-500 p-2.5 rounded-lg mr-2.5"
-                onPress={() => setEditModalVisible(false)}
+                onPress={() => {
+                  setEditModalVisible(false);
+                  setErrors({ name: '' });
+                }}
               >
                 <Text className="text-white font-bold">Cancelar</Text>
               </TouchableOpacity>

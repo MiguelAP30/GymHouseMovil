@@ -17,6 +17,9 @@ const DaysWeek = () => {
   const [loading, setLoading] = useState(true)
   const [weekDays, setWeekDays] = useState<WeekDayDAO[]>([])
   const [error, setError] = useState<string | null>(null)
+  const [errors, setErrors] = useState({
+    name: ''
+  });
 
   useEffect(() => {
     fetchWeekDays()
@@ -31,7 +34,25 @@ const DaysWeek = () => {
     setLoading(false)
   }
 
+  const validateWeekDay = (weekDay: Partial<WeekDayDAO>) => {
+    const newErrors = {
+      name: ''
+    };
+
+    if (!weekDay.name) {
+      newErrors.name = 'El nombre es requerido';
+    } else if (weekDay.name.length > 20) {
+      newErrors.name = 'El nombre no puede exceder 20 caracteres';
+    }
+
+    setErrors(newErrors);
+    return !Object.values(newErrors).some(error => error !== '');
+  };
+
   const handleAddWeekDay = async () => {
+    if (!validateWeekDay(newWeekDay)) {
+      return;
+    }
     const isAuthenticated = await checkAuth()
     if (!isAuthenticated) return
 
@@ -57,6 +78,9 @@ const DaysWeek = () => {
   }
 
   const handleUpdateWeekDay = async () => {
+    if (!selectedWeekDay || !validateWeekDay(selectedWeekDay)) {
+      return;
+    }
     if (!selectedWeekDay?.id) return
     
     const isAuthenticated = await checkAuth()
@@ -136,15 +160,20 @@ const DaysWeek = () => {
           <View className="bg-white p-5 rounded-lg w-4/5">
             <Text className="text-xl font-bold mb-4">Nuevo Día de la Semana</Text>
             <TextInput
-              className="border border-gray-300 p-2.5 rounded-lg mb-2.5"
+              className="border border-gray-300 p-2.5 rounded-lg mb-1"
               placeholder="Nombre del día"
               value={newWeekDay.name}
               onChangeText={(text) => setNewWeekDay({...newWeekDay, name: text})}
+              maxLength={20}
             />
+            {errors.name ? <Text className="text-red-500 text-sm mb-2">{errors.name}</Text> : null}
             <View className="flex-row justify-end mt-4">
               <TouchableOpacity 
                 className="bg-red-500 p-2.5 rounded-lg mr-2.5"
-                onPress={() => setAddModalVisible(false)}
+                onPress={() => {
+                  setAddModalVisible(false);
+                  setErrors({ name: '' });
+                }}
               >
                 <Text className="text-white font-bold">Cancelar</Text>
               </TouchableOpacity>
@@ -169,15 +198,20 @@ const DaysWeek = () => {
           <View className="bg-white p-5 rounded-lg w-4/5">
             <Text className="text-xl font-bold mb-4">Editar Día de la Semana</Text>
             <TextInput
-              className="border border-gray-300 p-2.5 rounded-lg mb-2.5"
+              className="border border-gray-300 p-2.5 rounded-lg mb-1"
               placeholder="Nombre del día"
               value={selectedWeekDay?.name}
               onChangeText={(text) => selectedWeekDay && setSelectedWeekDay({...selectedWeekDay, name: text})}
+              maxLength={20}
             />
+            {errors.name ? <Text className="text-red-500 text-sm mb-2">{errors.name}</Text> : null}
             <View className="flex-row justify-end mt-4">
               <TouchableOpacity 
                 className="bg-red-500 p-2.5 rounded-lg mr-2.5"
-                onPress={() => setEditModalVisible(false)}
+                onPress={() => {
+                  setEditModalVisible(false);
+                  setErrors({ name: '' });
+                }}
               >
                 <Text className="text-white font-bold">Cancelar</Text>
               </TouchableOpacity>

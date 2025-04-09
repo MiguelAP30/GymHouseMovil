@@ -19,6 +19,10 @@ const Muscles = () => {
   const [filteredMuscles, setFilteredMuscles] = useState<MuscleDAO[]>([])
   const [searchName, setSearchName] = useState('')
   const [error, setError] = useState<string | null>(null)
+  const [errors, setErrors] = useState({
+    name: '',
+    description: ''
+  });
 
   useEffect(() => {
     fetchMuscles()
@@ -49,7 +53,32 @@ const Muscles = () => {
     setLoading(false)
   }
 
+  const validateMuscle = (muscle: MuscleDAO) => {
+    const newErrors = {
+      name: '',
+      description: ''
+    };
+
+    if (!muscle.name) {
+      newErrors.name = 'El nombre es requerido';
+    } else if (muscle.name.length > 50) {
+      newErrors.name = 'El nombre no puede exceder 50 caracteres';
+    }
+
+    if (!muscle.description) {
+      newErrors.description = 'La descripción es requerida';
+    } else if (muscle.description.length > 200) {
+      newErrors.description = 'La descripción no puede exceder 200 caracteres';
+    }
+
+    setErrors(newErrors);
+    return !Object.values(newErrors).some(error => error !== '');
+  };
+
   const handleAddMuscle = async () => {
+    if (!validateMuscle(newMuscle)) {
+      return;
+    }
     const isAuthenticated = await checkAuth()
     if (!isAuthenticated) return
 
@@ -78,6 +107,9 @@ const Muscles = () => {
   }
 
   const handleUpdateMuscle = async () => {
+    if (!selectedMuscle || !validateMuscle(selectedMuscle)) {
+      return;
+    }
     if (!selectedMuscle?.id) return
     
     const isAuthenticated = await checkAuth()
@@ -175,23 +207,30 @@ const Muscles = () => {
           <View className="bg-white p-5 rounded-lg w-4/5">
             <Text className="text-xl font-bold mb-4">Nuevo Músculo</Text>
             <TextInput
-              className="border border-gray-300 p-2.5 rounded-lg mb-2.5"
+              className="border border-gray-300 p-2.5 rounded-lg mb-1"
               placeholder="Nombre del músculo"
               value={newMuscle.name}
               onChangeText={(text) => setNewMuscle({...newMuscle, name: text})}
+              maxLength={50}
             />
+            {errors.name ? <Text className="text-red-500 text-sm mb-2">{errors.name}</Text> : null}
             <TextInput
-              className="border border-gray-300 p-2.5 rounded-lg mb-2.5 h-24"
+              className="border border-gray-300 p-2.5 rounded-lg mb-1 h-24"
               placeholder="Descripción"
               value={newMuscle.description}
               onChangeText={(text) => setNewMuscle({...newMuscle, description: text})}
               multiline={true}
               numberOfLines={4}
+              maxLength={200}
             />
+            {errors.description ? <Text className="text-red-500 text-sm mb-2">{errors.description}</Text> : null}
             <View className="flex-row justify-end mt-4">
               <TouchableOpacity 
                 className="bg-red-500 p-2.5 rounded-lg mr-2.5"
-                onPress={() => setAddModalVisible(false)}
+                onPress={() => {
+                  setAddModalVisible(false);
+                  setErrors({ name: '', description: '' });
+                }}
               >
                 <Text className="text-white font-bold">Cancelar</Text>
               </TouchableOpacity>
@@ -216,23 +255,30 @@ const Muscles = () => {
           <View className="bg-white p-5 rounded-lg w-4/5">
             <Text className="text-xl font-bold mb-4">Editar Músculo</Text>
             <TextInput
-              className="border border-gray-300 p-2.5 rounded-lg mb-2.5"
+              className="border border-gray-300 p-2.5 rounded-lg mb-1"
               placeholder="Nombre del músculo"
               value={selectedMuscle?.name}
               onChangeText={(text) => selectedMuscle && setSelectedMuscle({...selectedMuscle, name: text})}
+              maxLength={50}
             />
+            {errors.name ? <Text className="text-red-500 text-sm mb-2">{errors.name}</Text> : null}
             <TextInput
-              className="border border-gray-300 p-2.5 rounded-lg mb-2.5 h-24"
+              className="border border-gray-300 p-2.5 rounded-lg mb-1 h-24"
               placeholder="Descripción"
               value={selectedMuscle?.description}
               onChangeText={(text) => selectedMuscle && setSelectedMuscle({...selectedMuscle, description: text})}
               multiline={true}
               numberOfLines={4}
+              maxLength={200}
             />
+            {errors.description ? <Text className="text-red-500 text-sm mb-2">{errors.description}</Text> : null}
             <View className="flex-row justify-end mt-4">
               <TouchableOpacity 
                 className="bg-red-500 p-2.5 rounded-lg mr-2.5"
-                onPress={() => setEditModalVisible(false)}
+                onPress={() => {
+                  setEditModalVisible(false);
+                  setErrors({ name: '', description: '' });
+                }}
               >
                 <Text className="text-white font-bold">Cancelar</Text>
               </TouchableOpacity>

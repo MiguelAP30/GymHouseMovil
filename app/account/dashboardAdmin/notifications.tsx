@@ -73,6 +73,7 @@ export default function Notifications() {
           value={title}
           onChangeText={setTitle}
           placeholder="Ingrese el título de la notificación"
+          maxLength = {100}
         />
       </View>
 
@@ -86,6 +87,7 @@ export default function Notifications() {
           multiline
           numberOfLines={4}
           textAlignVertical="top"
+          maxLength = {200}
         />
       </View>
 

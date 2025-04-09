@@ -22,6 +22,10 @@ const Machines = () => {
     name: '',
     description: ''
   })
+  const [errors, setErrors] = useState({
+    name: '',
+    description: ''
+  });
 
   const fetchMachines = async () => {
     const isAuthenticated = await checkAuth()
@@ -38,7 +42,32 @@ const Machines = () => {
     fetchMachines()
   }, [])
 
+  const validateMachine = (machine: Partial<Machine>) => {
+    const newErrors = {
+      name: '',
+      description: ''
+    };
+
+    if (!machine.name) {
+      newErrors.name = 'El nombre es requerido';
+    } else if (machine.name.length > 50) {
+      newErrors.name = 'El nombre no puede exceder 50 caracteres';
+    }
+
+    if (!machine.description) {
+      newErrors.description = 'La descripción es requerida';
+    } else if (machine.description.length > 200) {
+      newErrors.description = 'La descripción no puede exceder 200 caracteres';
+    }
+
+    setErrors(newErrors);
+    return !Object.values(newErrors).some(error => error !== '');
+  };
+
   const handleAddMachine = async () => {
+    if (!validateMachine(formData)) {
+      return;
+    }
     const isAuthenticated = await checkAuth()
     if (!isAuthenticated) return
 
@@ -49,8 +78,9 @@ const Machines = () => {
   }
 
   const handleUpdateMachine = async () => {
-    if (!selectedMachine) return
-
+    if (!selectedMachine || !validateMachine(formData)) {
+      return;
+    }
     const isAuthenticated = await checkAuth()
     if (!isAuthenticated) return
 
@@ -103,7 +133,7 @@ const Machines = () => {
             setShowModal(true)
           }}
         >
-          <Text className="text-white font-bold">Agregar Máquina</Text>
+          <Text className="text-white font-bold">Agregar</Text>
         </TouchableOpacity>
       </View>
 
@@ -160,7 +190,9 @@ const Machines = () => {
                   value={formData.name}
                   onChangeText={(text) => setFormData({ ...formData, name: text })}
                   placeholder="Nombre de la máquina"
+                  maxLength={50}
                 />
+                {errors.name ? <Text className="text-red-500 text-sm mt-1">{errors.name}</Text> : null}
               </View>
               <View>
                 <Text className="text-gray-600 mb-1">Descripción</Text>
@@ -169,13 +201,20 @@ const Machines = () => {
                   value={formData.description}
                   onChangeText={(text) => setFormData({ ...formData, description: text })}
                   placeholder="Descripción de la máquina"
+                  multiline
+                  numberOfLines={3}
+                  maxLength={200}
                 />
+                {errors.description ? <Text className="text-red-500 text-sm mt-1">{errors.description}</Text> : null}
               </View>
             </View>
             <View className="flex-row justify-end space-x-4 mt-6">
               <TouchableOpacity 
                 className="bg-gray-500 px-4 py-2 rounded-lg"
-                onPress={() => setShowModal(false)}
+                onPress={() => {
+                  setShowModal(false);
+                  setErrors({ name: '', description: '' });
+                }}
               >
                 <Text className="text-white font-bold">Cancelar</Text>
               </TouchableOpacity>

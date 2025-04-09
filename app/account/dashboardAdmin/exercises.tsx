@@ -41,6 +41,12 @@ const Exercises = () => {
     machine_id: 1,
     video: ''
   })
+  const [errors, setErrors] = useState({
+    name: '',
+    description: '',
+    video: '',
+    image: ''
+  });
 
   useEffect(() => {
     const loadData = async () => {
@@ -88,7 +94,42 @@ const Exercises = () => {
     setMachines(response)
   }
 
+  const validateExercise = (exercise: ExerciseDAO) => {
+    const newErrors = {
+      name: '',
+      description: '',
+      video: '',
+      image: ''
+    };
+
+    if (!exercise.name) {
+      newErrors.name = 'El nombre es requerido';
+    } else if (exercise.name.length > 60) {
+      newErrors.name = 'El nombre no puede exceder 60 caracteres';
+    }
+
+    if (!exercise.description) {
+      newErrors.description = 'La descripción es requerida';
+    } else if (exercise.description.length > 200) {
+      newErrors.description = 'La descripción no puede exceder 200 caracteres';
+    }
+
+    if (exercise.video && exercise.video.length > 200) {
+      newErrors.video = 'La URL del video no puede exceder 200 caracteres';
+    }
+
+    if (exercise.image && exercise.image.length > 200) {
+      newErrors.image = 'La URL de la imagen no puede exceder 200 caracteres';
+    }
+
+    setErrors(newErrors);
+    return !Object.values(newErrors).some(error => error !== '');
+  };
+
   const handleAddExercise = async () => {
+    if (!validateExercise(newExercise)) {
+      return;
+    }
     const isAuthenticated = await checkAuth()
     if (!isAuthenticated) return
 
@@ -120,11 +161,13 @@ const Exercises = () => {
   }
 
   const handleUpdateExercise = async () => {
-    if (!selectedExercise?.id) return
-    
+    if (!selectedExercise || !validateExercise(selectedExercise)) {
+      return;
+    }
     const isAuthenticated = await checkAuth()
     if (!isAuthenticated) return
 
+    if (typeof selectedExercise.id !== 'number') return;
     await putExercise(selectedExercise.id, selectedExercise)
     await fetchExercises()
     setEditModalVisible(false)
@@ -305,17 +348,23 @@ const Exercises = () => {
           <View className="bg-white p-5 rounded-lg w-4/5">
             <Text className="text-xl font-bold mb-4">Nuevo Ejercicio</Text>
             <TextInput
-              className="border border-gray-300 p-2.5 rounded-lg mb-2.5"
+              className="border border-gray-300 p-2.5 rounded-lg mb-1"
               placeholder="Nombre del ejercicio"
               value={newExercise.name}
               onChangeText={(text) => setNewExercise({...newExercise, name: text})}
+              maxLength={60}
             />
+            {errors.name ? <Text className="text-red-500 text-sm mb-2">{errors.name}</Text> : null}
             <TextInput
-              className="border border-gray-300 p-2.5 rounded-lg mb-2.5"
+              className="border border-gray-300 p-2.5 rounded-lg mb-1"
               placeholder="Descripción"
               value={newExercise.description}
               onChangeText={(text) => setNewExercise({...newExercise, description: text})}
+              multiline
+              numberOfLines={3}
+              maxLength={200}
             />
+            {errors.description ? <Text className="text-red-500 text-sm mb-2">{errors.description}</Text> : null}
             <View className="border border-gray-300 rounded-lg mb-2.5">
               <Picker
                 selectedValue={newExercise.dificulty_id}
@@ -347,21 +396,28 @@ const Exercises = () => {
               </Picker>
             </View>
             <TextInput
-              className="border border-gray-300 p-2.5 rounded-lg mb-2.5"
+              className="border border-gray-300 p-2.5 rounded-lg mb-1"
               placeholder="URL de la imagen"
               value={newExercise.image}
               onChangeText={(text) => setNewExercise({...newExercise, image: text})}
+              maxLength={200}
             />
+            {errors.image ? <Text className="text-red-500 text-sm mb-2">{errors.image}</Text> : null}
             <TextInput
-              className="border border-gray-300 p-2.5 rounded-lg mb-2.5"
+              className="border border-gray-300 p-2.5 rounded-lg mb-1"
               placeholder="URL del video"
               value={newExercise.video}
               onChangeText={(text) => setNewExercise({...newExercise, video: text})}
+              maxLength={200}
             />
+            {errors.video ? <Text className="text-red-500 text-sm mb-2">{errors.video}</Text> : null}
             <View className="flex-row justify-end mt-4">
               <TouchableOpacity 
                 className="bg-red-500 p-2.5 rounded-lg mr-2.5"
-                onPress={() => setModalVisible(false)}
+                onPress={() => {
+                  setModalVisible(false);
+                  setErrors({ name: '', description: '', video: '', image: '' });
+                }}
               >
                 <Text className="text-white font-bold">Cancelar</Text>
               </TouchableOpacity>
@@ -386,17 +442,23 @@ const Exercises = () => {
           <View className="bg-white p-5 rounded-lg w-4/5">
             <Text className="text-xl font-bold mb-4">Editar Ejercicio</Text>
             <TextInput
-              className="border border-gray-300 p-2.5 rounded-lg mb-2.5"
+              className="border border-gray-300 p-2.5 rounded-lg mb-1"
               placeholder="Nombre del ejercicio"
               value={selectedExercise?.name}
               onChangeText={(text) => selectedExercise && setSelectedExercise({...selectedExercise, name: text})}
+              maxLength={60}
             />
+            {errors.name ? <Text className="text-red-500 text-sm mb-2">{errors.name}</Text> : null}
             <TextInput
-              className="border border-gray-300 p-2.5 rounded-lg mb-2.5"
+              className="border border-gray-300 p-2.5 rounded-lg mb-1"
               placeholder="Descripción"
               value={selectedExercise?.description}
               onChangeText={(text) => selectedExercise && setSelectedExercise({...selectedExercise, description: text})}
+              multiline
+              numberOfLines={3}
+              maxLength={200}
             />
+            {errors.description ? <Text className="text-red-500 text-sm mb-2">{errors.description}</Text> : null}
             <View className="border border-gray-300 rounded-lg mb-2.5">
               <Picker
                 selectedValue={selectedExercise?.dificulty_id}
@@ -428,21 +490,28 @@ const Exercises = () => {
               </Picker>
             </View>
             <TextInput
-              className="border border-gray-300 p-2.5 rounded-lg mb-2.5"
+              className="border border-gray-300 p-2.5 rounded-lg mb-1"
               placeholder="URL de la imagen"
               value={selectedExercise?.image}
               onChangeText={(text) => selectedExercise && setSelectedExercise({...selectedExercise, image: text})}
+              maxLength={200}
             />
+            {errors.image ? <Text className="text-red-500 text-sm mb-2">{errors.image}</Text> : null}
             <TextInput
-              className="border border-gray-300 p-2.5 rounded-lg mb-2.5"
+              className="border border-gray-300 p-2.5 rounded-lg mb-1"
               placeholder="URL del video"
               value={selectedExercise?.video}
               onChangeText={(text) => selectedExercise && setSelectedExercise({...selectedExercise, video: text})}
+              maxLength={200}
             />
+            {errors.video ? <Text className="text-red-500 text-sm mb-2">{errors.video}</Text> : null}
             <View className="flex-row justify-end mt-4">
               <TouchableOpacity 
                 className="bg-red-500 p-2.5 rounded-lg mr-2.5"
-                onPress={() => setEditModalVisible(false)}
+                onPress={() => {
+                  setEditModalVisible(false);
+                  setErrors({ name: '', description: '', video: '', image: '' });
+                }}
               >
                 <Text className="text-white font-bold">Cancelar</Text>
               </TouchableOpacity>

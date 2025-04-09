@@ -30,6 +30,19 @@ const CreateGym = () => {
     image: ''
   })
 
+  const [errors, setErrors] = useState({
+    name: '',
+    description: '',
+    address: '',
+    phone: '',
+    email: '',
+    website: '',
+    open_time: '',
+    close_time: '',
+    city: '',
+    country: ''
+  });
+
   const formatTime = (date: Date): string => {
     return date.toLocaleTimeString('es-ES', {
       hour: '2-digit',
@@ -62,7 +75,86 @@ const CreateGym = () => {
     }
   }
 
+  const validateGym = (gym: Partial<GymDAO>) => {
+    const newErrors = {
+      name: '',
+      description: '',
+      address: '',
+      phone: '',
+      email: '',
+      website: '',
+      open_time: '',
+      close_time: '',
+      city: '',
+      country: ''
+    };
+
+    if (!gym.name) {
+      newErrors.name = 'El nombre es requerido';
+    } else if (gym.name.length > 100) {
+      newErrors.name = 'El nombre no puede exceder 100 caracteres';
+    }
+
+    if (!gym.description) {
+      newErrors.description = 'La descripción es requerida';
+    } else if (gym.description.length > 200) {
+      newErrors.description = 'La descripción no puede exceder 200 caracteres';
+    }
+
+    if (!gym.address) {
+      newErrors.address = 'La dirección es requerida';
+    } else if (gym.address.length > 100) {
+      newErrors.address = 'La dirección no puede exceder 100 caracteres';
+    }
+
+    if (!gym.phone) {
+      newErrors.phone = 'El teléfono es requerido';
+    } else if (gym.phone.length > 20) {
+      newErrors.phone = 'El teléfono no puede exceder 20 caracteres';
+    }
+
+    if (!gym.email) {
+      newErrors.email = 'El email es requerido';
+    } else if (gym.email.length > 250) {
+      newErrors.email = 'El email no puede exceder 250 caracteres';
+    }
+
+    if (gym.website && gym.website.length > 100) {
+      newErrors.website = 'El sitio web no puede exceder 100 caracteres';
+    }
+
+    if (!gym.open_time) {
+      newErrors.open_time = 'La hora de apertura es requerida';
+    } else if (gym.open_time.length > 10) {
+      newErrors.open_time = 'La hora de apertura no puede exceder 10 caracteres';
+    }
+
+    if (!gym.close_time) {
+      newErrors.close_time = 'La hora de cierre es requerida';
+    } else if (gym.close_time.length > 10) {
+      newErrors.close_time = 'La hora de cierre no puede exceder 10 caracteres';
+    }
+
+    if (!gym.city) {
+      newErrors.city = 'La ciudad es requerida';
+    } else if (gym.city.length > 60) {
+      newErrors.city = 'La ciudad no puede exceder 60 caracteres';
+    }
+
+    if (!gym.country) {
+      newErrors.country = 'El país es requerido';
+    } else if (gym.country.length > 60) {
+      newErrors.country = 'El país no puede exceder 60 caracteres';
+    }
+
+    setErrors(newErrors);
+    return !Object.values(newErrors).some(error => error !== '');
+  };
+
   const handleSubmit = async () => {
+    if (!validateGym(formData)) {
+      return;
+    }
     try {
       setLoading(true)
       const isAuthenticated = await checkAuth()
@@ -128,16 +220,17 @@ const CreateGym = () => {
       <View className="bg-white p-4 rounded-lg shadow-md mb-4">
         <Text className="text-gray-600 mb-2">Nombre del Gimnasio</Text>
         <TextInput
-          className="border border-gray-300 rounded-lg p-2 mb-4"
+          className="border border-gray-300 rounded-lg p-2 mb-1"
           value={formData.name}
           onChangeText={(text) => setFormData({ ...formData, name: text })}
           placeholder="Ingresa el nombre del gimnasio"
           maxLength={100}
         />
+        {errors.name ? <Text className="text-red-500 text-sm mb-2">{errors.name}</Text> : null}
 
         <Text className="text-gray-600 mb-2">Descripción</Text>
         <TextInput
-          className="border border-gray-300 rounded-lg p-2 mb-4"
+          className="border border-gray-300 rounded-lg p-2 mb-1"
           value={formData.description}
           onChangeText={(text) => setFormData({ ...formData, description: text })}
           placeholder="Describe tu gimnasio"
@@ -145,15 +238,17 @@ const CreateGym = () => {
           numberOfLines={3}
           maxLength={200}
         />
+        {errors.description ? <Text className="text-red-500 text-sm mb-2">{errors.description}</Text> : null}
 
         <Text className="text-gray-600 mb-2">Dirección</Text>
         <TextInput
-          className="border border-gray-300 rounded-lg p-2 mb-4"
+          className="border border-gray-300 rounded-lg p-2 mb-1"
           value={formData.address}
           onChangeText={(text) => setFormData({ ...formData, address: text })}
           placeholder="Ingresa la dirección"
           maxLength={100}
         />
+        {errors.address ? <Text className="text-red-500 text-sm mb-2">{errors.address}</Text> : null}
 
         <View className="flex-row justify-between mb-4">
           <View className="flex-1 mr-2">
@@ -165,6 +260,7 @@ const CreateGym = () => {
               placeholder="Ciudad"
               maxLength={60}
             />
+            {errors.city ? <Text className="text-red-500 text-sm mt-1">{errors.city}</Text> : null}
           </View>
           <View className="flex-1 ml-2">
             <Text className="text-gray-600 mb-2">País</Text>

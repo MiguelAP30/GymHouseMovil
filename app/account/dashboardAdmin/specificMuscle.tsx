@@ -23,6 +23,11 @@ const SpecificMuscle = () => {
   const [searchName, setSearchName] = useState('')
   const [selectedMuscle, setSelectedMuscle] = useState<number | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [errors, setErrors] = useState({
+    name: '',
+    description: '',
+    muscle_id: ''
+  });
 
   useEffect(() => {
     fetchSpecificMuscles()
@@ -68,7 +73,37 @@ const SpecificMuscle = () => {
     setMuscles(response)
   }
 
+  const validateSpecificMuscle = (muscle: Partial<SpecificMuscleDAO>) => {
+    const newErrors = {
+      name: '',
+      description: '',
+      muscle_id: ''
+    };
+
+    if (!muscle.name) {
+      newErrors.name = 'El nombre es requerido';
+    } else if (muscle.name.length > 40) {
+      newErrors.name = 'El nombre no puede exceder 40 caracteres';
+    }
+
+    if (!muscle.description) {
+      newErrors.description = 'La descripción es requerida';
+    } else if (muscle.description.length > 200) {
+      newErrors.description = 'La descripción no puede exceder 200 caracteres';
+    }
+
+    if (!muscle.muscle_id) {
+      newErrors.muscle_id = 'Debe seleccionar un músculo';
+    }
+
+    setErrors(newErrors);
+    return !Object.values(newErrors).some(error => error !== '');
+  };
+
   const handleAddSpecificMuscle = async () => {
+    if (!validateSpecificMuscle(newSpecificMuscle)) {
+      return;
+    }
     const isAuthenticated = await checkAuth()
     if (!isAuthenticated) return
 
@@ -98,11 +133,13 @@ const SpecificMuscle = () => {
   }
 
   const handleUpdateSpecificMuscle = async () => {
-    if (!selectedSpecificMuscle?.id) return
-    
+    if (!selectedSpecificMuscle || !validateSpecificMuscle(selectedSpecificMuscle)) {
+      return;
+    }
     const isAuthenticated = await checkAuth()
     if (!isAuthenticated) return
 
+    if (typeof selectedSpecificMuscle.id !== 'number') return;
     await putSpecificMuscle(selectedSpecificMuscle.id, selectedSpecificMuscle)
     await fetchSpecificMuscles()
     setEditModalVisible(false)
@@ -219,20 +256,24 @@ const SpecificMuscle = () => {
           <View className="bg-white p-5 rounded-lg w-4/5">
             <Text className="text-xl font-bold mb-4">Nuevo Músculo Específico</Text>
             <TextInput
-              className="border border-gray-300 p-2.5 rounded-lg mb-2.5"
+              className="border border-gray-300 p-2.5 rounded-lg mb-1"
               placeholder="Nombre del músculo específico"
               value={newSpecificMuscle.name}
               onChangeText={(text) => setNewSpecificMuscle({...newSpecificMuscle, name: text})}
+              maxLength={40}
             />
+            {errors.name ? <Text className="text-red-500 text-sm mb-2">{errors.name}</Text> : null}
             <TextInput
-              className="border border-gray-300 p-2.5 rounded-lg mb-2.5 h-24"
+              className="border border-gray-300 p-2.5 rounded-lg mb-1 h-24"
               placeholder="Descripción"
               value={newSpecificMuscle.description}
               onChangeText={(text) => setNewSpecificMuscle({...newSpecificMuscle, description: text})}
               multiline={true}
               numberOfLines={4}
+              maxLength={200}
             />
-            <View className="border border-gray-300 rounded-lg mb-2.5">
+            {errors.description ? <Text className="text-red-500 text-sm mb-2">{errors.description}</Text> : null}
+            <View className="border border-gray-300 rounded-lg mb-1">
               <Picker
                 selectedValue={newSpecificMuscle.muscle_id}
                 onValueChange={(value: number) => setNewSpecificMuscle({...newSpecificMuscle, muscle_id: value})}
@@ -247,10 +288,14 @@ const SpecificMuscle = () => {
                 ))}
               </Picker>
             </View>
+            {errors.muscle_id ? <Text className="text-red-500 text-sm mb-2">{errors.muscle_id}</Text> : null}
             <View className="flex-row justify-end mt-4">
               <TouchableOpacity 
                 className="bg-red-500 p-2.5 rounded-lg mr-2.5"
-                onPress={() => setAddModalVisible(false)}
+                onPress={() => {
+                  setAddModalVisible(false);
+                  setErrors({ name: '', description: '', muscle_id: '' });
+                }}
               >
                 <Text className="text-white font-bold">Cancelar</Text>
               </TouchableOpacity>
@@ -275,20 +320,24 @@ const SpecificMuscle = () => {
           <View className="bg-white p-5 rounded-lg w-4/5">
             <Text className="text-xl font-bold mb-4">Editar Músculo Específico</Text>
             <TextInput
-              className="border border-gray-300 p-2.5 rounded-lg mb-2.5"
+              className="border border-gray-300 p-2.5 rounded-lg mb-1"
               placeholder="Nombre del músculo específico"
               value={selectedSpecificMuscle?.name}
               onChangeText={(text) => selectedSpecificMuscle && setSelectedSpecificMuscle({...selectedSpecificMuscle, name: text})}
+              maxLength={40}
             />
+            {errors.name ? <Text className="text-red-500 text-sm mb-2">{errors.name}</Text> : null}
             <TextInput
-              className="border border-gray-300 p-2.5 rounded-lg mb-2.5 h-24"
+              className="border border-gray-300 p-2.5 rounded-lg mb-1 h-24"
               placeholder="Descripción"
               value={selectedSpecificMuscle?.description}
               onChangeText={(text) => selectedSpecificMuscle && setSelectedSpecificMuscle({...selectedSpecificMuscle, description: text})}
               multiline={true}
               numberOfLines={4}
+              maxLength={200}
             />
-            <View className="border border-gray-300 rounded-lg mb-2.5">
+            {errors.description ? <Text className="text-red-500 text-sm mb-2">{errors.description}</Text> : null}
+            <View className="border border-gray-300 rounded-lg mb-1">
               <Picker
                 selectedValue={selectedSpecificMuscle?.muscle_id}
                 onValueChange={(value: number) => selectedSpecificMuscle && setSelectedSpecificMuscle({...selectedSpecificMuscle, muscle_id: value})}
@@ -303,10 +352,14 @@ const SpecificMuscle = () => {
                 ))}
               </Picker>
             </View>
+            {errors.muscle_id ? <Text className="text-red-500 text-sm mb-2">{errors.muscle_id}</Text> : null}
             <View className="flex-row justify-end mt-4">
               <TouchableOpacity 
                 className="bg-red-500 p-2.5 rounded-lg mr-2.5"
-                onPress={() => setEditModalVisible(false)}
+                onPress={() => {
+                  setEditModalVisible(false);
+                  setErrors({ name: '', description: '', muscle_id: '' });
+                }}
               >
                 <Text className="text-white font-bold">Cancelar</Text>
               </TouchableOpacity>

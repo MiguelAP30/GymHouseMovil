@@ -1,0 +1,13 @@
+
+PENDIENTES
+- Implementacion de ejercicios
+- Implementacion de usuarios
+- Implementacion de maquinas
+- Implementacion de dificultades
+- Implementacion de musculos
+- Implementacion de musculos especificos
+- Implementacion del perfil
+- Implementacion de dias de la semana
+- Implementacion de dias de la semana   
+- Proteccion de rutas
+

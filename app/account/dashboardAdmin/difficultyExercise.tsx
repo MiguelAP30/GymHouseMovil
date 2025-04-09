@@ -17,6 +17,9 @@ const DifficultyExercise = () => {
   const [loading, setLoading] = useState(true)
   const [difficulties, setDifficulties] = useState<DifficultyDAO[]>([])
   const [error, setError] = useState<string | null>(null)
+  const [errors, setErrors] = useState({
+    name: ''
+  });
 
   useEffect(() => {
     fetchDifficulties()
@@ -31,7 +34,25 @@ const DifficultyExercise = () => {
     setLoading(false)
   }
 
+  const validateDifficulty = (difficulty: Partial<DifficultyDAO>) => {
+    const newErrors = {
+      name: ''
+    };
+
+    if (!difficulty.name) {
+      newErrors.name = 'El nombre es requerido';
+    } else if (difficulty.name.length > 20) {
+      newErrors.name = 'El nombre no puede exceder 20 caracteres';
+    }
+
+    setErrors(newErrors);
+    return !Object.values(newErrors).some(error => error !== '');
+  };
+
   const handleAddDifficulty = async () => {
+    if (!validateDifficulty(newDifficulty)) {
+      return;
+    }
     const isAuthenticated = await checkAuth()
     if (!isAuthenticated) return
 
@@ -57,11 +78,13 @@ const DifficultyExercise = () => {
   }
 
   const handleUpdateDifficulty = async () => {
-    if (!selectedDifficulty?.id) return
-    
+    if (!selectedDifficulty || !validateDifficulty(selectedDifficulty)) {
+      return;
+    }
     const isAuthenticated = await checkAuth()
     if (!isAuthenticated) return
 
+    if (typeof selectedDifficulty.id !== 'number') return;
     await putDifficulty(selectedDifficulty.id, selectedDifficulty)
     await fetchDifficulties()
     setEditModalVisible(false)
@@ -136,15 +159,20 @@ const DifficultyExercise = () => {
           <View className="bg-white p-5 rounded-lg w-4/5">
             <Text className="text-xl font-bold mb-4">Nueva Dificultad</Text>
             <TextInput
-              className="border border-gray-300 p-2.5 rounded-lg mb-2.5"
+              className="border border-gray-300 p-2.5 rounded-lg mb-1"
               placeholder="Nombre de la dificultad"
               value={newDifficulty.name}
               onChangeText={(text) => setNewDifficulty({...newDifficulty, name: text})}
+              maxLength={20}
             />
+            {errors.name ? <Text className="text-red-500 text-sm mb-2">{errors.name}</Text> : null}
             <View className="flex-row justify-end mt-4">
               <TouchableOpacity 
                 className="bg-red-500 p-2.5 rounded-lg mr-2.5"
-                onPress={() => setAddModalVisible(false)}
+                onPress={() => {
+                  setAddModalVisible(false);
+                  setErrors({ name: '' });
+                }}
               >
                 <Text className="text-white font-bold">Cancelar</Text>
               </TouchableOpacity>
@@ -169,15 +197,20 @@ const DifficultyExercise = () => {
           <View className="bg-white p-5 rounded-lg w-4/5">
             <Text className="text-xl font-bold mb-4">Editar Dificultad</Text>
             <TextInput
-              className="border border-gray-300 p-2.5 rounded-lg mb-2.5"
+              className="border border-gray-300 p-2.5 rounded-lg mb-1"
               placeholder="Nombre de la dificultad"
               value={selectedDifficulty?.name}
               onChangeText={(text) => selectedDifficulty && setSelectedDifficulty({...selectedDifficulty, name: text})}
+              maxLength={20}
             />
+            {errors.name ? <Text className="text-red-500 text-sm mb-2">{errors.name}</Text> : null}
             <View className="flex-row justify-end mt-4">
               <TouchableOpacity 
                 className="bg-red-500 p-2.5 rounded-lg mr-2.5"
-                onPress={() => setEditModalVisible(false)}
+                onPress={() => {
+                  setEditModalVisible(false);
+                  setErrors({ name: '' });
+                }}
               >
                 <Text className="text-white font-bold">Cancelar</Text>
               </TouchableOpacity>

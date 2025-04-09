@@ -55,6 +55,7 @@ const CrearRutina = () => {
                 onBlur={onBlur}
                 onChangeText={onChange}
                 value={value}
+                maxLength={50}
               />
             )}
           />
@@ -77,6 +78,7 @@ const CrearRutina = () => {
                 onBlur={onBlur}
                 onChangeText={onChange}
                 value={value}
+                maxLength={200}
               />
             )}
           />
