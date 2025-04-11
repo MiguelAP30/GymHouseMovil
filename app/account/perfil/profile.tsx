@@ -100,46 +100,94 @@ const Profile = () => {
 
   const handleUpdateProfile = async () => {
     try {
-      // Validar que los campos requeridos no estén vacíos
-      if (!formData.name || !formData.user_name || !formData.id_number) {
-        Alert.alert('Error', 'Por favor, completa todos los campos obligatorios');
+      // Validar id_number (obligatorio, min_length=6, max_length=20)
+      if (!formData.id_number || formData.id_number.trim() === '') {
+        Alert.alert('Error', 'El número de identificación es obligatorio');
+        return;
+      }
+      if (formData.id_number.length < 6) {
+        Alert.alert('Error', 'El número de identificación debe tener al menos 6 caracteres');
+        return;
+      }
+      if (formData.id_number.length > 20) {
+        Alert.alert('Error', 'El número de identificación no puede exceder los 20 caracteres');
         return;
       }
 
-      // Validar el formato del género
-      if (!['m', 'f'].includes(formData.gender.toLowerCase())) {
-        Alert.alert('Error', 'El género debe ser "m" o "f"');
-        return;
-      }
-
-      // Validar la fecha de nacimiento
-      if (formData.birth_date) {
-        if (!validateAge(formData.birth_date)) {
-          Alert.alert('Error', 'Debes ser mayor de 10 años');
+      // Validar user_name (opcional, min_length=6, max_length=50)
+      if (formData.user_name && formData.user_name.trim() !== '') {
+        if (formData.user_name.length < 6) {
+          Alert.alert('Error', 'El nombre de usuario debe tener al menos 6 caracteres');
+          return;
+        }
+        if (formData.user_name.length > 50) {
+          Alert.alert('Error', 'El nombre de usuario no puede exceder los 50 caracteres');
           return;
         }
       }
 
-      // Validar longitudes máximas
+      // Validar name (obligatorio, min_length=2, max_length=50)
+      if (!formData.name || formData.name.trim() === '') {
+        Alert.alert('Error', 'El nombre es obligatorio');
+        return;
+      }
+      if (formData.name.length < 2) {
+        Alert.alert('Error', 'El nombre debe tener al menos 2 caracteres');
+        return;
+      }
       if (formData.name.length > 50) {
         Alert.alert('Error', 'El nombre no puede exceder los 50 caracteres');
         return;
       }
-      if (formData.user_name.length > 50) {
-        Alert.alert('Error', 'El nombre de usuario no puede exceder los 50 caracteres');
+
+      // Validar phone (obligatorio, min_length=8, max_length=20)
+      if (!formData.phone || formData.phone.trim() === '') {
+        Alert.alert('Error', 'El teléfono es obligatorio');
         return;
       }
-      if (formData.id_number.length > 20) {
-        Alert.alert('Error', 'El número de documento no puede exceder los 20 caracteres');
+      if (formData.phone.length < 8) {
+        Alert.alert('Error', 'El teléfono debe tener al menos 8 caracteres');
         return;
       }
       if (formData.phone.length > 20) {
         Alert.alert('Error', 'El teléfono no puede exceder los 20 caracteres');
         return;
       }
-      if (formData.address.length > 150) {
-        Alert.alert('Error', 'La dirección no puede exceder los 150 caracteres');
+
+      // Validar address (opcional, min_length=8, max_length=150)
+      if (formData.address && formData.address.trim() !== '') {
+        if (formData.address.length < 8) {
+          Alert.alert('Error', 'La dirección debe tener al menos 8 caracteres');
+          return;
+        }
+        if (formData.address.length > 150) {
+          Alert.alert('Error', 'La dirección no puede exceder los 150 caracteres');
+          return;
+        }
+      }
+
+      // Validar birth_date (obligatorio)
+      if (!formData.birth_date || formData.birth_date.trim() === '') {
+        Alert.alert('Error', 'La fecha de nacimiento es obligatoria');
         return;
+      }
+
+      // Validar gender (obligatorio, min_length=1, max_length=1)
+      if (!formData.gender || formData.gender.trim() === '') {
+        Alert.alert('Error', 'El género es obligatorio');
+        return;
+      }
+      if (!['m', 'f'].includes(formData.gender.toLowerCase())) {
+        Alert.alert('Error', 'El género debe ser "m" o "f"');
+        return;
+      }
+
+      // Validar la edad mínima
+      if (formData.birth_date) {
+        if (!validateAge(formData.birth_date)) {
+          Alert.alert('Error', 'Debes ser mayor de 10 años');
+          return;
+        }
       }
 
       await updateUserData(profile!.email, formData);
@@ -291,7 +339,7 @@ const Profile = () => {
                 </View>
 
                 <View className="mt-4">
-                  <Text className="text-gray-700 font-semibold mb-1">Nombre de Usuario *</Text>
+                  <Text className="text-gray-700 font-semibold mb-1">Nombre de Usuario</Text>
                   <TextInput
                     className="bg-white border border-gray-400 rounded-lg p-2 text-gray-800"
                     value={formData.user_name}
@@ -316,7 +364,7 @@ const Profile = () => {
                 </View>
 
                 <View className="mt-4">
-                  <Text className="text-gray-700 font-semibold mb-1">Teléfono</Text>
+                  <Text className="text-gray-700 font-semibold mb-1">Teléfono *</Text>
                   <TextInput
                     className="bg-white border border-gray-400 rounded-lg p-2 text-gray-800"
                     value={formData.phone}
@@ -341,7 +389,7 @@ const Profile = () => {
                 </View>
 
                 <View className="mt-4">
-                  <Text className="text-gray-700 font-semibold mb-1">Fecha de Nacimiento</Text>
+                  <Text className="text-gray-700 font-semibold mb-1">Fecha de Nacimiento *</Text>
                   <TouchableOpacity
                     onPress={() => setShowDatePicker(true)}
                     className="bg-white border border-gray-400 rounded-lg p-2"
@@ -367,7 +415,7 @@ const Profile = () => {
                 </View>
 
                 <View className="mt-4">
-                  <Text className="text-gray-700 font-semibold mb-1">Género</Text>
+                  <Text className="text-gray-700 font-semibold mb-1">Género *</Text>
                   <View className="bg-white border border-gray-400 rounded-lg">
                     <Picker
                       selectedValue={formData.gender}

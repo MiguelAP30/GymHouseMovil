@@ -23,14 +23,6 @@ const LayoutExercises = () => {
       }}
     >
       <Drawer.Screen
-        name="exercises"
-        options={{
-          title: 'Ejercicios',
-          headerShown: true,
-          drawerIcon: ({ size }) => <Ionicons name="speedometer" size={size} color={'#fff'} />,
-        }}
-      />
-      <Drawer.Screen
         name="muscles"
         options={{
           title: 'Musculos',

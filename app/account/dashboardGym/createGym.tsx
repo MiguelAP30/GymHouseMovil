@@ -40,7 +40,8 @@ const CreateGym = () => {
     open_time: '',
     close_time: '',
     city: '',
-    country: ''
+    country: '',
+    price: ''
   });
 
   const formatTime = (date: Date): string => {
@@ -57,6 +58,7 @@ const CreateGym = () => {
 
   const checkExistingGym = async () => {
     try {
+      setLoading(true)
       const isAuthenticated = await checkAuth()
       if (!isAuthenticated) {
         router.replace('/')
@@ -65,13 +67,27 @@ const CreateGym = () => {
 
       const existingGym = await getUserGym()
       if (existingGym) {
+        Alert.alert(
+          'Gimnasio existente',
+          'Ya tienes un gimnasio registrado. Cada usuario solo puede crear un gimnasio.',
+          [
+            {
+              text: 'Ver mi gimnasio',
+              onPress: () => router.replace('/account/dashboardGym/myGym')
+            }
+          ]
+        )
         router.replace('/account/dashboardGym/myGym')
       }
     } catch (error) {
       console.error('Error al verificar gimnasio existente:', error)
       if (error instanceof Error && error.message.includes('Sesión expirada')) {
         router.replace('/')
+      } else {
+        Alert.alert('Error', 'No se pudo verificar si ya tienes un gimnasio registrado. Por favor, intenta de nuevo.')
       }
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -86,65 +102,81 @@ const CreateGym = () => {
       open_time: '',
       close_time: '',
       city: '',
-      country: ''
+      country: '',
+      price: ''
     };
 
-    if (!gym.name) {
+    // Validar nombre (obligatorio)
+    if (!gym.name || gym.name.trim() === '') {
       newErrors.name = 'El nombre es requerido';
     } else if (gym.name.length > 100) {
       newErrors.name = 'El nombre no puede exceder 100 caracteres';
     }
 
-    if (!gym.description) {
+    // Validar descripción (obligatorio)
+    if (!gym.description || gym.description.trim() === '') {
       newErrors.description = 'La descripción es requerida';
     } else if (gym.description.length > 200) {
       newErrors.description = 'La descripción no puede exceder 200 caracteres';
     }
 
-    if (!gym.address) {
+    // Validar dirección (obligatorio)
+    if (!gym.address || gym.address.trim() === '') {
       newErrors.address = 'La dirección es requerida';
     } else if (gym.address.length > 100) {
       newErrors.address = 'La dirección no puede exceder 100 caracteres';
     }
 
-    if (!gym.phone) {
+    // Validar teléfono (obligatorio)
+    if (!gym.phone || gym.phone.trim() === '') {
       newErrors.phone = 'El teléfono es requerido';
     } else if (gym.phone.length > 20) {
       newErrors.phone = 'El teléfono no puede exceder 20 caracteres';
     }
 
-    if (!gym.email) {
+    // Validar email (obligatorio)
+    if (!gym.email || gym.email.trim() === '') {
       newErrors.email = 'El email es requerido';
     } else if (gym.email.length > 250) {
       newErrors.email = 'El email no puede exceder 250 caracteres';
     }
 
+    // Validar website (opcional, pero con límite de caracteres)
     if (gym.website && gym.website.length > 100) {
       newErrors.website = 'El sitio web no puede exceder 100 caracteres';
     }
 
-    if (!gym.open_time) {
+    // Validar hora de apertura (obligatorio)
+    if (!gym.open_time || gym.open_time.trim() === '') {
       newErrors.open_time = 'La hora de apertura es requerida';
     } else if (gym.open_time.length > 10) {
       newErrors.open_time = 'La hora de apertura no puede exceder 10 caracteres';
     }
 
-    if (!gym.close_time) {
+    // Validar hora de cierre (obligatorio)
+    if (!gym.close_time || gym.close_time.trim() === '') {
       newErrors.close_time = 'La hora de cierre es requerida';
     } else if (gym.close_time.length > 10) {
       newErrors.close_time = 'La hora de cierre no puede exceder 10 caracteres';
     }
 
-    if (!gym.city) {
+    // Validar ciudad (obligatorio)
+    if (!gym.city || gym.city.trim() === '') {
       newErrors.city = 'La ciudad es requerida';
     } else if (gym.city.length > 60) {
       newErrors.city = 'La ciudad no puede exceder 60 caracteres';
     }
 
-    if (!gym.country) {
+    // Validar país (obligatorio)
+    if (!gym.country || gym.country.trim() === '') {
       newErrors.country = 'El país es requerido';
     } else if (gym.country.length > 60) {
       newErrors.country = 'El país no puede exceder 60 caracteres';
+    }
+
+    // Validar precio (obligatorio)
+    if (gym.price === undefined || gym.price === null || gym.price <= 0) {
+      newErrors.price = 'El precio es requerido y debe ser mayor a 0';
     }
 
     setErrors(newErrors);
@@ -152,6 +184,7 @@ const CreateGym = () => {
   };
 
   const handleSubmit = async () => {
+    // Validar todos los campos obligatorios
     if (!validateGym(formData)) {
       return;
     }
@@ -163,12 +196,20 @@ const CreateGym = () => {
         return
       }
 
-      // Validar campos requeridos
-      const requiredFields = ['name', 'description', 'address', 'city', 'country', 'open_time', 'close_time', 'phone', 'email', 'price']
-      const missingFields = requiredFields.filter(field => !formData[field as keyof GymDAO])
-      
-      if (missingFields.length > 0) {
-        Alert.alert('Error', 'Por favor, completa todos los campos requeridos')
+      // Verificar nuevamente si el usuario ya tiene un gimnasio
+      const existingGym = await getUserGym()
+      if (existingGym) {
+        Alert.alert(
+          'Gimnasio existente',
+          'Ya tienes un gimnasio registrado. Cada usuario solo puede crear un gimnasio.',
+          [
+            {
+              text: 'Ver mi gimnasio',
+              onPress: () => router.replace('/account/dashboardGym/myGym')
+            }
+          ]
+        )
+        router.replace('/account/dashboardGym/myGym')
         return
       }
 
@@ -193,14 +234,25 @@ const CreateGym = () => {
       }
 
       // Asegurarse de que user_email esté actualizado con el email del usuario actual
+      // y que el sitio web sea "indefinido" si no se proporciona
       const gymData = {
         ...formData,
-        user_email: user?.email || ''
+        user_email: user?.email || '',
+        website: formData.website || 'indefinido'
       }
 
       await postGym(gymData as GymDAO)
       Alert.alert('Éxito', 'Gimnasio creado correctamente')
+      
+      // Recargar las pantallas para reflejar los cambios
+      // Primero navegamos a la pantalla de MyGym
       router.replace('/account/dashboardGym/myGym')
+      
+      // Luego, si el usuario es admin, también actualizamos la lista de gimnasios
+      if (user?.role_id === 4) { // 4 es el rol de admin según la interfaz ROLES
+        // Forzamos una recarga de la pantalla de gimnasios
+        router.push('/account/dashboardAdmin/gyms')
+      }
     } catch (error) {
       console.error('Error al crear gimnasio:', error)
       if (error instanceof Error && error.message.includes('Sesión expirada')) {
@@ -271,6 +323,7 @@ const CreateGym = () => {
               placeholder="País"
               maxLength={60}
             />
+            {errors.country ? <Text className="text-red-500 text-sm mt-1">{errors.country}</Text> : null}
           </View>
         </View>
 
@@ -297,6 +350,7 @@ const CreateGym = () => {
                 }}
               />
             )}
+            {errors.open_time ? <Text className="text-red-500 text-sm mt-1">{errors.open_time}</Text> : null}
           </View>
           <View className="flex-1 ml-2">
             <Text className="text-gray-600 mb-2">Hora de Cierre</Text>
@@ -320,22 +374,24 @@ const CreateGym = () => {
                 }}
               />
             )}
+            {errors.close_time ? <Text className="text-red-500 text-sm mt-1">{errors.close_time}</Text> : null}
           </View>
         </View>
 
         <Text className="text-gray-600 mb-2">Teléfono</Text>
         <TextInput
-          className="border border-gray-300 rounded-lg p-2 mb-4"
+          className="border border-gray-300 rounded-lg p-2 mb-1"
           value={formData.phone}
           onChangeText={(text) => setFormData({ ...formData, phone: text })}
           placeholder="Ingresa el número de teléfono"
           keyboardType="phone-pad"
           maxLength={20}
         />
+        {errors.phone ? <Text className="text-red-500 text-sm mb-2">{errors.phone}</Text> : null}
 
         <Text className="text-gray-600 mb-2">Email</Text>
         <TextInput
-          className="border border-gray-300 rounded-lg p-2 mb-4"
+          className="border border-gray-300 rounded-lg p-2 mb-1"
           value={formData.email}
           onChangeText={(text) => setFormData({ ...formData, email: text })}
           placeholder="Ingresa el email"
@@ -343,25 +399,28 @@ const CreateGym = () => {
           autoCapitalize="none"
           maxLength={250}
         />
+        {errors.email ? <Text className="text-red-500 text-sm mb-2">{errors.email}</Text> : null}
 
         <Text className="text-gray-600 mb-2">Sitio Web</Text>
         <TextInput
-          className="border border-gray-300 rounded-lg p-2 mb-4"
+          className="border border-gray-300 rounded-lg p-2 mb-1"
           value={formData.website}
           onChangeText={(text) => setFormData({ ...formData, website: text })}
           placeholder="Ingresa la URL del sitio web"
           autoCapitalize="none"
           maxLength={250}
         />
+        {errors.website ? <Text className="text-red-500 text-sm mb-2">{errors.website}</Text> : null}
 
         <Text className="text-gray-600 mb-2">Precio</Text>
         <TextInput
-          className="border border-gray-300 rounded-lg p-2 mb-4"
+          className="border border-gray-300 rounded-lg p-2 mb-1"
           value={formData.price?.toString()}
           onChangeText={(text) => setFormData({ ...formData, price: Number(text) || 0 })}
           placeholder="Ingresa el precio"
           keyboardType="numeric"
         />
+        {errors.price ? <Text className="text-red-500 text-sm mb-2">{errors.price}</Text> : null}
 
         <TouchableOpacity
           className="bg-blue-500 p-4 rounded-lg"

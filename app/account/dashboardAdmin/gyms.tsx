@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react'
 import { Ionicons } from '@expo/vector-icons'
 import { getGym } from '../../../lib/api_gymhouse'
 import { useAuth } from '../../../context/AuthStore'
+import { useFocusEffect } from 'expo-router'
 
 interface Gym {
   email: string;
@@ -40,9 +41,11 @@ const Gyms = () => {
     setLoading(false)
   }
 
-  useEffect(() => {
-    fetchGyms()
-  }, [])
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchGyms()
+    }, [])
+  )
 
   if (loading) {
     return (

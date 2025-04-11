@@ -4,16 +4,18 @@ import { Ionicons } from '@expo/vector-icons'
 import { GymDAO } from '../../../interfaces/interfaces'
 import { getUserGym, deleteUserGym } from '../../../lib/api_gymhouse'
 import { useAuth } from '../../../context/AuthStore'
-import { router } from 'expo-router'
+import { router, useFocusEffect } from 'expo-router'
 
 const MyGym = () => {
   const { checkAuth } = useAuth()
   const [loading, setLoading] = useState(true)
   const [gym, setGym] = useState<GymDAO | null>(null)
 
-  useEffect(() => {
-    fetchGym()
-  }, [])
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchGym()
+    }, [])
+  )
 
   const fetchGym = async () => {
     try {

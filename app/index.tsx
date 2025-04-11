@@ -26,7 +26,7 @@ export default function Index() {
   const { isConnected } = useContext(ConnectivityContext);
   const [isLoading, setIsLoading] = useState(false);
   const [isResettingPassword, setIsResettingPassword] = useState(false);
-  const [resetToken, setResetToken] = useState<string | null>(null);
+  const [resetCode, setResetCode] = useState<string>('');
   const [email, setEmail] = useState<string>('');
   const [isVerificationMode, setIsVerificationMode] = useState(false);
   const [verificationCode, setVerificationCode] = useState<string>('');
@@ -36,6 +36,7 @@ export default function Index() {
   const [forgotPasswordEmail, setForgotPasswordEmail] = useState<string>('');
   const { login, logout, isAuthenticated, user, token, checkAuth } = useAuth();
   const { control, handleSubmit, formState: { errors } } = useForm<{ email: string; password: string }>();
+  const { control: resetControl, handleSubmit: handleResetSubmit, formState: { errors: resetErrors } } = useForm<{ password: string }>();
 
   useEffect(() => {
     const checkAuthAndRedirect = async () => {
@@ -150,14 +151,13 @@ export default function Index() {
     setIsLoading(true);
     try {
       console.log('Email procesado:', cleanEmail);
-      const response = await forgotPassword(cleanEmail);
-      setResetToken(response.reset_token);
+      await forgotPassword(cleanEmail);
       setEmail(cleanEmail);
       setIsResettingPassword(true);
       setIsForgotPasswordMode(false);
       Alert.alert(
         "Éxito",
-        "Se ha enviado un token de recuperación a tu correo electrónico"
+        "Se ha enviado un código de recuperación a tu correo electrónico"
       );
     } catch (error) {
       Alert.alert(
@@ -169,9 +169,9 @@ export default function Index() {
     }
   };
 
-  const handleResetPassword = async (newPassword: string) => {
-    if (!resetToken || !email) {
-      Alert.alert("Error", "No hay token de recuperación válido");
+  const handleResetPassword = async (data: { password: string }) => {
+    if (!resetCode || !email) {
+      Alert.alert("Error", "Por favor, ingresa el código de recuperación");
       return;
     }
 
@@ -179,15 +179,15 @@ export default function Index() {
     try {
       await resetPassword({
         email,
-        new_password: newPassword,
-        reset_code: resetToken
+        new_password: data.password,
+        reset_code: resetCode
       });
       Alert.alert(
         "Éxito",
         "Tu contraseña ha sido restablecida correctamente"
       );
       setIsResettingPassword(false);
-      setResetToken(null);
+      setResetCode('');
       setEmail('');
     } catch (error) {
       Alert.alert(
@@ -395,13 +395,27 @@ export default function Index() {
         >
           <Text className={tituloForm}>Restablecer Contraseña</Text>
           <Text className={parrafoForm}>
-            Ingresa tu nueva contraseña
+            Ingresa el código de recuperación y tu nueva contraseña
           </Text>
 
           <View className="w-full mt-6">
+            <Text className={labelForm}>Código de recuperación</Text>
+            <TextInput
+              placeholder="Ingresa el código enviado a tu correo"
+              placeholderTextColor="gray"
+              className={inputForm}
+              onChangeText={setResetCode}
+              value={resetCode}
+              keyboardType="number-pad"
+              autoCapitalize="none"
+              autoCorrect={false}
+            />
+          </View>
+
+          <View className="w-full mt-4">
             <Text className={labelForm}>Nueva Contraseña</Text>
             <Controller
-              control={control}
+              control={resetControl}
               name="password"
               rules={{ 
                 required: "La contraseña es obligatoria", 
@@ -419,12 +433,12 @@ export default function Index() {
                 />
               )}
             />
-            {errors.password && <Text className="text-red-500">{errors.password.message?.toString()}</Text>}
+            {resetErrors.password && <Text className="text-red-500">{resetErrors.password.message?.toString()}</Text>}
           </View>
 
           <TouchableOpacity 
             className={`${botonGeneral} ${isLoading ? 'opacity-50' : ''}`} 
-            onPress={handleSubmit((data) => handleResetPassword(data.password))}
+            onPress={handleResetSubmit(handleResetPassword)}
             disabled={isLoading}
           >
             <Text className={textoBotonGeneral}>
@@ -435,7 +449,7 @@ export default function Index() {
           <TouchableOpacity 
             onPress={() => {
               setIsResettingPassword(false);
-              setResetToken(null);
+              setResetCode('');
               setEmail('');
             }}
             className="mt-4"

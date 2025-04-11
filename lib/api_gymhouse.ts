@@ -663,7 +663,7 @@ export const forgotPassword = async (email: string) => {
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(email) // Enviamos el email directamente
+      body: JSON.stringify(email) // Enviamos el email directamente como string
     });
 
     if (!response.ok) {
