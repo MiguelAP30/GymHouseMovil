@@ -72,27 +72,7 @@ export interface RegisterDAO {
     status?: boolean;
 }
 
-export interface RutinaDAO {
-    name: string;
-    description: string;
-    tag_of_training_plan_id: number;
-    user_email: string;
-    is_visible: boolean;
-}
 
-export interface TagOfTrainingPlanDAO {
-    id: number;
-    name: string;
-}
-
-export interface TrainingPlanDAO {
-    id: number;
-    name: string;
-    description: string;
-    tag_of_training_plan_id: number;
-    user_email: string;
-    is_visible: boolean;
-}
 
 export const ROLES = {
     admin: 4,
@@ -101,18 +81,6 @@ export const ROLES = {
     logued: 1
 } as const;
 
-export interface GetProductsServiceDAO extends StandardResponseDAO {
-    data: ProductDAO[]
-}
-
-export interface ProductDAO {
-    id_product: number
-    title: string
-    value: number
-    description: string
-    stock: number
-    state_id: number
-}
 
 export interface PaginatedResponse<T> {
   items: T[];
@@ -169,4 +137,37 @@ export interface ResetPasswordDAO {
     email: string;
     new_password: string;
     reset_code: string;
+}
+
+export interface TrainingPlanDAO {
+    id?: number;
+    name: string;
+    description: string;
+    is_visible: boolean;
+    tag_of_training_plan_id: number;
+    user_email?: string;
+    created_at?: string;
+    updated_at?: string;
+}
+
+export interface TagOfTrainingPlanDAO {
+    id?: number;
+    name: string;
+    description?: string;
+}
+
+export interface WorkoutDayExerciseDAO {
+    id?: number;
+    week_day_id: number;
+    training_plan_id: number;
+    exercise_configurations?: number[];
+}
+
+export interface ExerciseConfigurationDAO {
+    id?: number;
+    exercise_id: number;
+    reps: number;
+    rest: number;
+    sets: number;
+    workout_day_exercise_id: number;
 }
