@@ -3,6 +3,7 @@ import NetInfo from '@react-native-community/netinfo'
 import { Stack } from 'expo-router'
 import "../global.css"
 import { AuthProvider } from '../context/AuthStore';
+import { usePushNotifications } from '../hooks/usePushNotifications';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Onboarding from 'react-native-onboarding-swiper';
 import { View, ActivityIndicator, Text } from 'react-native';
@@ -16,6 +17,8 @@ export const ConnectivityContext = createContext<{
 const HomeLayout = () => {
   const [isConnected, setIsConnected] = React.useState<boolean | null>(null)
   const [isFirstLaunch, setIsFirstLaunch] = useState<boolean | null>(null)
+  const { expoPushToken, notification} = usePushNotifications()
+
 
   useEffect(() => {
     const checkFirstLaunch = async () => {
@@ -37,6 +40,9 @@ const HomeLayout = () => {
   }, []);
 
   useEffect(() => {
+    console.log('expoPushToken', expoPushToken);
+    console.log('notification', notification)
+    
     const unsubscribe = NetInfo.addEventListener(state => {
       setIsConnected(state.isConnected)
     })

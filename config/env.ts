@@ -1,6 +1,6 @@
 export const ENV = {
   development: {
-    API_URL: 'http://192.168.80.17:8000/api/v1',
+    API_URL: 'http://192.168.58.125:8000/api/v1',
     //http://192.168.1.2:8000
     //http://192.168.1.1:8000
     //http://192.168.80.14:8000
