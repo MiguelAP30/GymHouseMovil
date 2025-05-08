@@ -8,6 +8,8 @@ import {
   ExerciseDAO,
   DifficultyDAO,
   MuscleDAO,
+  NotificationTokenDAO,
+  SendNotificationDAO,
   SpecificMuscleDAO,
   WeekDayDAO,
   VerifyEmailDAO,
@@ -23,11 +25,6 @@ import { getEnvironment } from '../config/env';
 const API = getEnvironment().API_URL;
 
 // Interfaz para enviar notificaciones
-interface SendNotificationDAO {
-  title: string;
-  message: string;
-  token: string;
-}
 
 // Autenticación
 export const postRegister = async (data: RegisterDAO) => {
@@ -597,6 +594,14 @@ export const resendVerificationCode = async (data: ResendVerificationDAO) => {
     console.error('Error al reenviar código de verificación:', error);
     throw error;
   }
+}
+
+
+export const registerNotificationToken = async (data: NotificationTokenDAO) =>{
+  return authenticatedFetch('/notification/token', {
+    method:'POST',
+    body: JSON.stringify(data)
+  }).then(res => res.json())
 }
 
 export const forgotPassword = async (email: string) => {

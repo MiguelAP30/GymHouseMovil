@@ -46,6 +46,18 @@ export interface GymDAO {
     is_active: boolean;
 }
 
+export interface NotificationTokenDAO{
+    token:string;
+    is_active: boolean;
+}
+
+
+export interface SendNotificationDAO{
+    title: string;
+    message: string;
+    token:string
+}
+
 export interface ProfileDAO {
     user_email: string;
     weight: number;
