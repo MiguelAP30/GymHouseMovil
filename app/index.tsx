@@ -22,6 +22,13 @@ import { useAuth } from '../context/AuthStore';
 import { postLogin, forgotPassword, resetPassword, resendVerificationCode, verifyEmail } from '../lib/api_gymhouse';
 import { ConnectivityContext } from './_layout';
 
+import { Suspense } from 'react';
+import { SQLiteProvider, openDatabaseSync, } from 'expo-sqlite';
+import { drizzle } from 'drizzle-orm/expo-sqlite';
+import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator';
+import migrations  from '../drizzle/migrations';
+import { addDummyData } from '../db/addDummyData';
+
 export default function Index() {
   const { isConnected } = useContext(ConnectivityContext);
   const [isLoading, setIsLoading] = useState(false);
