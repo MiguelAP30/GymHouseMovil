@@ -46,8 +46,10 @@ const TrainingPlanDetail = () => {
   const [newExercise, setNewExercise] = useState({
     exercise_id: 0,
     sets: 3,
-    reps: 10,
-    rest: 60
+    repsHigh: 10,
+    repsLow: 8,
+    rest: 60,
+    notes: ''
   })
   const [weekDays, setWeekDays] = useState<WeekDayDAO[]>([])
   const [editingRoutine, setEditingRoutine] = useState({
@@ -99,9 +101,9 @@ const TrainingPlanDetail = () => {
       setLoading(true)
       console.log('Cargando detalles del plan...')
       
-      const plan = await getTrainingPlanById(Number(id))
-      console.log('Plan cargado:', plan)
-      setTrainingPlan(plan)
+      const response = await getTrainingPlanById(Number(id))
+      console.log('Plan cargado:', response)
+      setTrainingPlan(response.data)
 
       // Obtener los días de entrenamiento
       const workoutDays = await getWorkoutDayExercisesByTrainingPlan(Number(id))
@@ -187,8 +189,10 @@ const TrainingPlanDetail = () => {
       setNewExercise({
         exercise_id: 0,
         sets: 3,
-        reps: 10,
-        rest: 60
+        repsHigh: 10,
+        repsLow: 8,
+        rest: 60,
+        notes: ''
       })
     } catch (error) {
       console.error('Error al agregar ejercicio:', error)
@@ -358,7 +362,7 @@ const TrainingPlanDetail = () => {
               ) : (
                 <View>
                   <View className="flex-row items-center mb-2">
-                    <Text className="text-2xl font-bold mr-2">{trainingPlan.name}</Text>
+                    <Text className="text-2xl font-bold mr-2 text-black">{trainingPlan.name}</Text>
                     {trainingPlan.is_visible ? (
                       <Ionicons name="eye" size={20} color="green" />
                     ) : (
@@ -449,12 +453,17 @@ const TrainingPlanDetail = () => {
                 <View className="flex-row justify-between">
                   <View>
                     <Text className="text-gray-500">Series: {exerciseData.config.sets}</Text>
-                    <Text className="text-gray-500">Repeticiones: {exerciseData.config.reps}</Text>
+                    <Text className="text-gray-500">Repeticiones: {exerciseData.config.repsHigh}-{exerciseData.config.repsLow}</Text>
                   </View>
                   <View>
                     <Text className="text-gray-500">Descanso: {exerciseData.config.rest}s</Text>
                   </View>
                 </View>
+                {exerciseData.config.notes && (
+                  <View className="mt-2">
+                    <Text className="text-gray-500 italic">Notas: {exerciseData.config.notes}</Text>
+                  </View>
+                )}
               </View>
             ))
           )}
@@ -485,32 +494,74 @@ const TrainingPlanDetail = () => {
           </View>
 
           <View className="mb-2">
-            <Text className="text-gray-600 mb-1">Series</Text>
+            <Text className="text-gray-600 mb-1">Series (1-10)</Text>
             <TextInput
               className="border border-gray-300 p-2 rounded-lg"
               value={newExercise.sets.toString()}
-              onChangeText={(value) => setNewExercise({...newExercise, sets: parseInt(value) || 0})}
+              onChangeText={(value) => {
+                const num = parseInt(value) || 0;
+                if (num >= 1 && num <= 10) {
+                  setNewExercise({...newExercise, sets: num});
+                }
+              }}
               keyboardType="numeric"
             />
           </View>
 
           <View className="mb-2">
-            <Text className="text-gray-600 mb-1">Repeticiones</Text>
+            <Text className="text-gray-600 mb-1">Repeticiones Máximas (1-100)</Text>
             <TextInput
               className="border border-gray-300 p-2 rounded-lg"
-              value={newExercise.reps.toString()}
-              onChangeText={(value) => setNewExercise({...newExercise, reps: parseInt(value) || 0})}
+              value={newExercise.repsHigh.toString()}
+              onChangeText={(value) => {
+                const num = parseInt(value) || 0;
+                if (num >= 1 && num <= 100) {
+                  setNewExercise({...newExercise, repsHigh: num});
+                }
+              }}
+              keyboardType="numeric"
+            />
+          </View>
+
+          <View className="mb-2">
+            <Text className="text-gray-600 mb-1">Repeticiones Mínimas (1-100)</Text>
+            <TextInput
+              className="border border-gray-300 p-2 rounded-lg"
+              value={newExercise.repsLow.toString()}
+              onChangeText={(value) => {
+                const num = parseInt(value) || 0;
+                if (num >= 1 && num <= 100) {
+                  setNewExercise({...newExercise, repsLow: num});
+                }
+              }}
+              keyboardType="numeric"
+            />
+          </View>
+
+          <View className="mb-2">
+            <Text className="text-gray-600 mb-1">Descanso (segundos)</Text>
+            <TextInput
+              className="border border-gray-300 p-2 rounded-lg"
+              value={newExercise.rest.toString()}
+              onChangeText={(value) => {
+                const num = parseFloat(value) || 0;
+                if (num >= 1 && num <= 1000) {
+                  setNewExercise({...newExercise, rest: num});
+                }
+              }}
               keyboardType="numeric"
             />
           </View>
 
           <View className="mb-4">
-            <Text className="text-gray-600 mb-1">Descanso (segundos)</Text>
+            <Text className="text-gray-600 mb-1">Notas</Text>
             <TextInput
               className="border border-gray-300 p-2 rounded-lg"
-              value={newExercise.rest.toString()}
-              onChangeText={(value) => setNewExercise({...newExercise, rest: parseInt(value) || 0})}
-              keyboardType="numeric"
+              value={newExercise.notes}
+              onChangeText={(value) => setNewExercise({...newExercise, notes: value})}
+              multiline
+              numberOfLines={3}
+              placeholder="Agrega notas o instrucciones especiales"
             />
           </View>
 
@@ -523,7 +574,17 @@ const TrainingPlanDetail = () => {
             </TouchableOpacity>
             <TouchableOpacity 
               className="bg-red-500 p-2 rounded-lg flex-1"
-              onPress={() => setIsAddingExercise(false)}
+              onPress={() => {
+                setIsAddingExercise(false);
+                setNewExercise({
+                  exercise_id: 0,
+                  sets: 3,
+                  repsHigh: 10,
+                  repsLow: 8,
+                  rest: 60,
+                  notes: ''
+                });
+              }}
             >
               <Text className="text-white font-bold text-center">Cancelar</Text>
             </TouchableOpacity>

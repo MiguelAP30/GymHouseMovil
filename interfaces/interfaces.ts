@@ -158,8 +158,11 @@ export interface TrainingPlanDAO {
     is_visible: boolean;
     tag_of_training_plan_id: number;
     user_email?: string;
+    is_gym_created?: boolean;
+    user_gym_id?: number;
     created_at?: string;
     updated_at?: string;
+
 }
 
 export interface TagOfTrainingPlanDAO {
@@ -178,8 +181,11 @@ export interface WorkoutDayExerciseDAO {
 export interface ExerciseConfigurationDAO {
     id?: number;
     exercise_id: number;
-    reps: number;
+    repsHigh: number;
+    repsLow?: number;
+    notes?:string;
     rest: number;
     sets: number;
     workout_day_exercise_id: number;
+
 }

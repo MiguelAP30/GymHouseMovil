@@ -788,7 +788,7 @@ export const getMyTrainingPlans = async () => {
 
 export const createTrainingPlan = async (data: Omit<TrainingPlanDAO, 'id'>) => {
   try {
-    const response = await authenticatedFetch('/training_plan', {
+    const response = await authenticatedFetch('/training_plan/me', {
       method: 'POST',
       body: JSON.stringify(data)
     });
