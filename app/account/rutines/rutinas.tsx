@@ -2,12 +2,14 @@ import { View, Text, TouchableOpacity, TextInput, ScrollView, ActivityIndicator,
 import React, { useState, useEffect } from 'react'
 import { router } from 'expo-router'
 import { useAuth } from '../../../context/AuthStore'
-import { getTrainingPlans, getTagOfTrainingPlans, getUserDataByEmail } from '../../../lib/api_gymhouse'
-import { TrainingPlanDAO, TagOfTrainingPlanDAO, PaginatedResponse, ROLES } from '../../../interfaces/interfaces'
+import { getTrainingPlans, getTagOfTrainingPlans,  } from '../../../lib/training'
+import {getUserDataByEmail } from '../../../lib/user'
+import { TrainingPlanDAO, TagOfTrainingPlanDAO } from '../../../interfaces/training'
+import { ROLES, UserDAO } from '../../../interfaces/user'
+
 import { Picker } from '@react-native-picker/picker'
 import Pagination from '../../../components/organisms/paginacion'
 import { Ionicons } from '@expo/vector-icons'
-import { UserDAO } from '../../../interfaces/interfaces'
 
 const Rutinas = () => {
   const { user } = useAuth()

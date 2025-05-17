@@ -2,8 +2,8 @@ import { View, Text, TextInput, TouchableOpacity, ScrollView, ActivityIndicator,
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'expo-router'
 import { useAuth } from '../../../context/AuthStore'
-import { createTrainingPlan, getTagOfTrainingPlans } from '../../../lib/api_gymhouse'
-import { TagOfTrainingPlanDAO } from '../../../interfaces/interfaces'
+import { createTrainingPlan, getTagOfTrainingPlans } from '../../../lib/training'
+import { TagOfTrainingPlanDAO } from '../../../interfaces/training'
 import { Picker } from '@react-native-picker/picker'
 import { Ionicons } from '@expo/vector-icons'
 

@@ -2,8 +2,8 @@ import { View, Text, TextInput, TouchableOpacity, ScrollView, ActivityIndicator,
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '../../../context/AuthStore'
 import { router } from 'expo-router'
-import { postGym, getUserGym } from '../../../lib/api_gymhouse'
-import { GymDAO } from '../../../interfaces/interfaces'
+import { postGym, getUserGym } from '../../../lib/gym'
+import { GymDAO } from '../../../interfaces/gym'
 import DateTimePicker from '@react-native-community/datetimepicker'
 
 const CreateGym = () => {

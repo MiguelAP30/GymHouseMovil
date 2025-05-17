@@ -3,7 +3,7 @@ import React, { useContext } from 'react';
 import { Drawer } from 'expo-router/drawer';
 import { Ionicons } from '@expo/vector-icons';
 import { AuthContext } from '../../../context/AuthStore';
-import { ROLES } from '../../../interfaces/interfaces';
+import { ROLES } from '../../../interfaces/user';
 import { Redirect } from 'expo-router';
 
 const LayoutRutinas = () => {

@@ -2,10 +2,16 @@ import { View, Text, TouchableOpacity, Modal, TextInput, ScrollView, ActivityInd
 import { Picker } from '@react-native-picker/picker'
 import React, { useState, useEffect } from 'react'
 import { Ionicons } from '@expo/vector-icons'
-import { ExerciseDAO, DifficultyDAO, PaginatedResponse } from '../../../interfaces/interfaces'
-import { getExercises, postExercise, putExercise, deleteExercise, getDifficulties, getMachines } from '../../../lib/api_gymhouse'
+import { ExerciseDAO, DifficultyDAO } from '../../../interfaces/exercise'
+import { PaginatedResponse } from '../../../interfaces/training'
+import { getExercises, postExercise, putExercise, deleteExercise, getDifficulties } from '../../../lib/exercise'
+import { getMachines } from '../../../lib/machine'
+
+
+
 import Pagination from '../../../components/organisms/paginacion'
 import { useAuth } from '../../../context/AuthStore'
+
 
 interface Machine {
   id: number;

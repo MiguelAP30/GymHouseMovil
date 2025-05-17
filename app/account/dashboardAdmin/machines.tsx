@@ -1,7 +1,7 @@
 import { View, Text, TouchableOpacity, Modal, ScrollView, ActivityIndicator, TextInput } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { Ionicons } from '@expo/vector-icons'
-import { getMachines, createMachine, updateMachine, deleteMachine } from '../../../lib/api_gymhouse'
+import { getMachines, createMachine, updateMachine, deleteMachine } from '../../../lib/machine'
 import { useAuth } from '../../../context/AuthStore'
 
 interface Machine {

@@ -1,8 +1,8 @@
 import { View, Text, TouchableOpacity, Modal, TextInput, ScrollView, ActivityIndicator, Alert } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import { Ionicons } from '@expo/vector-icons'
-import { WeekDayDAO } from '../../../interfaces/interfaces'
-import { getWeekDays, putWeekDay, deleteWeekDay, postWeekDay } from '../../../lib/api_gymhouse'
+import { WeekDayDAO } from '../../../interfaces/exercise'
+import { getWeekDays, putWeekDay, deleteWeekDay, postWeekDay } from '../../../lib/exercise'
 import { useAuth } from '../../../context/AuthStore'
 import { router } from 'expo-router'
 

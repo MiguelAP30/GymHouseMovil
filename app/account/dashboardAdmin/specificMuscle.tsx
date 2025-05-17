@@ -2,8 +2,8 @@ import { View, Text, TouchableOpacity, Modal, TextInput, ScrollView, ActivityInd
 import { Picker } from '@react-native-picker/picker'
 import React, { useState, useEffect } from 'react'
 import { Ionicons } from '@expo/vector-icons'
-import { SpecificMuscleDAO, MuscleDAO } from '../../../interfaces/interfaces'
-import { getSpecificMuscles, putSpecificMuscle, deleteSpecificMuscle, postSpecificMuscle, getMuscles } from '../../../lib/api_gymhouse'
+import { SpecificMuscleDAO, MuscleDAO } from '../../../interfaces/exercise'
+import { getSpecificMuscles, putSpecificMuscle, deleteSpecificMuscle, postSpecificMuscle, getMuscles } from '../../../lib/exercise'
 import { useAuth } from '../../../context/AuthStore'
 
 const SpecificMuscle = () => {

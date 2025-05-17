@@ -1,9 +1,9 @@
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native'
 import React, { useState, useEffect } from 'react'
-import { UserDAO, ROLES } from '../../../interfaces/interfaces'
+import { UserDAO, ROLES } from '../../../interfaces/user'
 import { Picker } from '@react-native-picker/picker'
 import { tarjetaForm, tituloForm, parrafoForm, botonGuardar, tituloFormRoles } from '../../../components/tokens'
-import { getAllUsers, updateUserRole } from '../../../lib/api_gymhouse'
+import { getAllUsers, updateUserRole } from '../../../lib/user'
 import { useAuth } from '../../../context/AuthStore'
 import { router } from 'expo-router'
 

@@ -2,7 +2,7 @@ import { Tabs, Redirect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useContext, useEffect } from 'react';
 import { AuthContext } from '../../context/AuthStore';
-import { ROLES } from '../../interfaces/interfaces';
+import { ROLES } from '../../interfaces/user';
 import { router } from 'expo-router';
 
 export default function AccountLayout() {

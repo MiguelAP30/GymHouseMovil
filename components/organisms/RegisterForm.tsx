@@ -8,7 +8,7 @@ import {
   botonGeneral, textoBotonGeneral, letraPequeñaForm, fondoTotal, 
   inputFormPicker
 } from '../tokens';
-import { postRegister, resendVerificationCode, verifyEmail } from '../../lib/api_gymhouse';
+import { postRegister, resendVerificationCode, verifyEmail } from '../../lib/auth';
 import { AuthContext } from '../../context/AuthStore';
 import { Picker } from '@react-native-picker/picker';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';

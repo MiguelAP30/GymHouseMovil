@@ -1,6 +1,6 @@
 import { View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
 import React, { useState } from 'react';
-import { sendNotification } from '../../../lib/api_gymhouse';
+import { sendNotification } from '../../../lib/notification';
 
 const NOTIFICATION_TOKENS = [
   "ExponentPushToken[2beYvGMKCMvdRS1Ud7Kjf0]",

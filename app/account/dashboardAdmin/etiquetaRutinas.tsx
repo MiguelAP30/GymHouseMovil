@@ -1,8 +1,8 @@
 import { View, Text, TouchableOpacity, Modal, TextInput, ScrollView, ActivityIndicator, Alert } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import { Ionicons } from '@expo/vector-icons'
-import { TagOfTrainingPlanDAO } from '../../../interfaces/interfaces'
-import { getTagsOfTrainingPlan, postTagOfTrainingPlan, putTagOfTrainingPlan, deleteTagOfTrainingPlan } from '../../../lib/api_gymhouse'
+import { TagOfTrainingPlanDAO } from '../../../interfaces/training'
+import { getTagOfTrainingPlans, createTagOfTrainingPlan, updateTagOfTrainingPlan, deleteTagOfTrainingPlan } from '../../../lib/training'
 import { useAuth } from '../../../context/AuthStore'
 import { router } from 'expo-router'
 
@@ -47,7 +47,7 @@ const EtiquetaRutinas = () => {
     const isAuthenticated = await checkAuth()
     if (!isAuthenticated) return
 
-    const response = await getTagsOfTrainingPlan()
+    const response = await getTagOfTrainingPlans()
     setTags(response)
     setLoading(false)
   }
@@ -74,7 +74,7 @@ const EtiquetaRutinas = () => {
     const isAuthenticated = await checkAuth()
     if (!isAuthenticated) return
 
-    await postTagOfTrainingPlan(newTag)
+    await createTagOfTrainingPlan(newTag)
     await fetchTags()
     setNewTag({ name: '' })
     setAddModalVisible(false)
@@ -102,7 +102,12 @@ const EtiquetaRutinas = () => {
     const isAuthenticated = await checkAuth()
     if (!isAuthenticated) return
 
-    await putTagOfTrainingPlan(selectedTag.id, selectedTag)
+    if (!selectedTag.id) {
+      Alert.alert('Error', 'ID de etiqueta no válido');
+      return;
+    }
+
+    await updateTagOfTrainingPlan(selectedTag.id, selectedTag)
     await fetchTags()
     setEditModalVisible(false)
     Alert.alert('Éxito', 'Etiqueta actualizada correctamente')

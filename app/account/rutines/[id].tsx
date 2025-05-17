@@ -5,20 +5,27 @@ import { useAuth } from '../../../context/AuthStore'
 import { 
   getTrainingPlanById, 
   getWorkoutDayExercisesByTrainingPlan,
-  getExerciseConfigurationById,
+  deleteWorkoutDayExercise,
+  createWorkoutDayExercise,
+  updateTrainingPlan
+} from '../../../lib/training'
+
+
+import {  
   getExerciseById,
   getWeekDayById,
   getExerciseConfigurations,
   createExerciseConfiguration,
   updateExerciseConfiguration,
   deleteExerciseConfiguration,
-  getExercises,
-  deleteWorkoutDayExercise,
-  createWorkoutDayExercise,
   getWeekDays,
-  updateTrainingPlan
-} from '../../../lib/api_gymhouse'
-import { TrainingPlanDAO, WorkoutDayExerciseDAO, ExerciseConfigurationDAO, ExerciseDAO, WeekDayDAO, ROLES } from '../../../interfaces/interfaces'
+  getExercises} from '../../../lib/exercise'
+
+
+import {  ExerciseConfigurationDAO, ExerciseDAO, WeekDayDAO } from '../../../interfaces/exercise'
+import { ROLES } from '../../../interfaces/user'
+import {TrainingPlanDAO, WorkoutDayExerciseDAO} from '../../../interfaces/training'
+
 import { Picker } from '@react-native-picker/picker'
 import { Ionicons } from '@expo/vector-icons'
 

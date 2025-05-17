@@ -13,7 +13,7 @@ import {
   fondoTotal 
 } from '../tokens';
 import { useAuth } from '../../context/AuthStore';
-import { postLogin, forgotPassword, resetPassword, resendVerificationCode, verifyEmail } from '../../lib/api_gymhouse';
+import { postLogin, forgotPassword, resetPassword, resendVerificationCode, verifyEmail } from '../../lib/auth';
 
 interface LoginFormProps {
   isConnected: boolean;

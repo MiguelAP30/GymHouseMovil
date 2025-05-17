@@ -1,8 +1,8 @@
 import { View, Text, TouchableOpacity, ScrollView, ActivityIndicator, Alert } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import { Ionicons } from '@expo/vector-icons'
-import { GymDAO } from '../../../interfaces/interfaces'
-import { getUserGym, deleteUserGym } from '../../../lib/api_gymhouse'
+import { GymDAO } from '../../../interfaces/gym'
+import { getUserGym, deleteUserGym } from '../../../lib/gym'
 import { useAuth } from '../../../context/AuthStore'
 import { router, useFocusEffect } from 'expo-router'
 

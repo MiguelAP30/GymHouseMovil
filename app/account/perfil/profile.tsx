@@ -1,7 +1,7 @@
 import { View, Text, ScrollView, TouchableOpacity, TextInput, Alert, ActivityIndicator, Platform } from 'react-native';
 import React, { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../../../context/AuthStore';
-import { changePassword, updateUserData } from '../../../lib/api_gymhouse';
+import { changePassword, updateUserData } from '../../../lib/user';
 import { Picker } from '@react-native-picker/picker';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import {

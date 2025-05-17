@@ -1,7 +1,7 @@
 import { View, Text, TouchableOpacity, Modal, ScrollView, ActivityIndicator } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { Ionicons } from '@expo/vector-icons'
-import { getGym } from '../../../lib/api_gymhouse'
+import { getGym } from '../../../lib/gym'
 import { useAuth } from '../../../context/AuthStore'
 import { useFocusEffect } from 'expo-router'
 
