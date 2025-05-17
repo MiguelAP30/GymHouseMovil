@@ -8,15 +8,15 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Onboarding from 'react-native-onboarding-swiper';
 import { View, ActivityIndicator, Text } from 'react-native';
 
-import { Suspense } from 'react';
-import { SQLiteProvider, openDatabaseSync, } from 'expo-sqlite';
-import { drizzle } from 'drizzle-orm/expo-sqlite';
-import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator';
-import migrations  from '../drizzle/migrations';
-import { addDummyData } from '../db/addDummyData';
+//import { Suspense } from 'react';
+//import { SQLiteProvider, openDatabaseSync, } from 'expo-sqlite';
+//import { drizzle } from 'drizzle-orm/expo-sqlite';
+//import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator';
+//import migrations  from '../drizzle/migrations';
+//import { addDummyData } from '../db/addDummyData';
 
 
-export const DATABASE_NAME = 'gymhouse.db'
+//export const DATABASE_NAME = 'gymhouse.db'
 
 export const ConnectivityContext = createContext<{
   isConnected: boolean | null;
@@ -25,20 +25,20 @@ export const ConnectivityContext = createContext<{
 });
 
 const HomeLayout = () => {
-  const expoDB = openDatabaseSync(DATABASE_NAME)
-  const db = drizzle(expoDB)
-  const { success, error } = useMigrations(db, migrations)
+  //const expoDB = openDatabaseSync(DATABASE_NAME)
+  //const db = drizzle(expoDB)
+  //const { success, error } = useMigrations(db, migrations)
 
   const [isConnected, setIsConnected] = React.useState<boolean | null>(null)
   const [isFirstLaunch, setIsFirstLaunch] = useState<boolean | null>(null)
   const { expoPushToken, notification} = usePushNotifications()
-
+/*
   useEffect(() =>{
     if (success) {
       addDummyData(db)
     }
   },[])
-
+*/
   useEffect(() => {
     const checkFirstLaunch = async () => {
       try {
@@ -122,12 +122,12 @@ const HomeLayout = () => {
 
   return (
     //<Text selectable={true}>{expoPushToken?.data}</Text>
-  <Suspense>
-    <SQLiteProvider 
-      databaseName={DATABASE_NAME}
-      options={{enableChangeListener:true}}
-      useSuspense
-    >
+  //<Suspense>
+    //<SQLiteProvider 
+      //databaseName={DATABASE_NAME}
+      //options={{enableChangeListener:true}}
+      //useSuspense
+    //>
       <AuthProvider>
         <ConnectivityContext.Provider value={{ isConnected }}>
           <Stack>
@@ -138,8 +138,8 @@ const HomeLayout = () => {
           </Stack>
         </ConnectivityContext.Provider>
       </AuthProvider>
-    </SQLiteProvider>
-  </Suspense>
+    //</SQLiteProvider>
+  //</Suspense>
   )
 }
 
