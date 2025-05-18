@@ -1,3 +1,5 @@
+import { Permissions } from './training';
+
 export interface ExerciseDAO {
     id?: number;
     name: string;
@@ -41,4 +43,5 @@ export interface ExerciseConfigurationDAO {
     rest: number;
     sets: number;
     workout_day_exercise_id: number;
+    permissions?: Permissions;
 } 

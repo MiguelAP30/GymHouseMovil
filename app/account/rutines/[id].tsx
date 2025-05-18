@@ -9,8 +9,6 @@ import {
   createWorkoutDayExercise,
   updateTrainingPlan
 } from '../../../lib/training'
-
-
 import {  
   getExerciseById,
   getWeekDayById,
@@ -20,14 +18,12 @@ import {
   deleteExerciseConfiguration,
   getWeekDays,
   getExercises} from '../../../lib/exercise'
-
-
 import {  ExerciseConfigurationDAO, ExerciseDAO, WeekDayDAO } from '../../../interfaces/exercise'
 import { ROLES } from '../../../interfaces/user'
 import {TrainingPlanDAO, WorkoutDayExerciseDAO} from '../../../interfaces/training'
-
 import { Picker } from '@react-native-picker/picker'
 import { Ionicons } from '@expo/vector-icons'
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 interface ExerciseWithConfig {
   exercise: ExerciseDAO;
@@ -67,7 +63,11 @@ const TrainingPlanDetail = () => {
   const [isAddingExercise, setIsAddingExercise] = useState(false)
 
   const isOwnerOrAdmin = () => {
-    return role === ROLES.admin || (user?.email === trainingPlan?.user_email)
+    return trainingPlan?.permissions?.can_edit || false;
+  }
+
+  const canDelete = () => {
+    return trainingPlan?.permissions?.can_delete || false;
   }
 
   useEffect(() => {
@@ -318,287 +318,144 @@ const TrainingPlanDetail = () => {
   }
 
   return (
-    <ScrollView className="flex-1 p-5 bg-gray-100">
-      {trainingPlan && (
-        <View className="mb-6">
-          <View className="flex-row justify-between items-center flex-wrap">
-            <View className="flex-1 min-w-[200px]">
-              {isEditing ? (
-                <View>
-                  <TextInput
-                    className="border border-gray-300 p-2 rounded-lg mb-2"
-                    value={editingRoutine.name}
-                    onChangeText={(text) => setEditingRoutine({...editingRoutine, name: text})}
-                    placeholder="Nombre de la rutina"
-                  />
-                  <TextInput
-                    className="border border-gray-300 p-2 rounded-lg mb-2"
-                    value={editingRoutine.description}
-                    onChangeText={(text) => setEditingRoutine({...editingRoutine, description: text})}
-                    placeholder="Descripción"
-                    multiline
-                  />
-                  <View className="flex-row items-center mb-2">
-                    <Text className="mr-2">Visible:</Text>
-                    <TouchableOpacity
-                      onPress={() => setEditingRoutine({...editingRoutine, is_visible: !editingRoutine.is_visible})}
-                      className={`p-2 rounded-lg ${editingRoutine.is_visible ? 'bg-green-500' : 'bg-red-500'}`}
-                    >
-                      <Ionicons 
-                        name={editingRoutine.is_visible ? "eye" : "eye-off"} 
-                        size={20} 
-                        color="white" 
-                      />
-                    </TouchableOpacity>
-                  </View>
-                  <View className="flex-row space-x-2">
-                    <TouchableOpacity 
-                      className="bg-green-500 p-2 rounded-lg flex-1"
-                      onPress={handleUpdateRoutine}
-                    >
-                      <Text className="text-white font-bold text-center">Guardar</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity 
-                      className="bg-red-500 p-2 rounded-lg flex-1"
-                      onPress={() => setIsEditing(false)}
-                    >
-                      <Text className="text-white font-bold text-center">Cancelar</Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              ) : (
-                <View>
-                  <View className="flex-row items-center mb-2">
-                    <Text className="text-2xl font-bold mr-2 text-black">{trainingPlan.name}</Text>
-                    {trainingPlan.is_visible ? (
-                      <Ionicons name="eye" size={20} color="green" />
-                    ) : (
-                      <Ionicons name="eye-off" size={20} color="red" />
-                    )}
-                  </View>
-                  <Text className="text-gray-600 mb-2">{trainingPlan.description}</Text>
-                  <View className="flex-row items-center">
-                    <Ionicons name="person" size={16} color="gray" />
-                    <Text className="text-gray-500 ml-1">{trainingPlan.user_email}</Text>
-                  </View>
-                </View>
-              )}
-            </View>
-            {isOwnerOrAdmin() && !isEditing && (
-              <TouchableOpacity 
-                className="bg-blue-500 p-2 rounded-lg"
-                onPress={() => setIsEditing(true)}
-              >
-                <Ionicons name="pencil" size={20} color="white" />
-              </TouchableOpacity>
-            )}
-          </View>
-        </View>
-      )}
-
-      {isOwnerOrAdmin() && (
-        <View className="mb-4">
-          <TouchableOpacity 
-            className="bg-green-500 p-2 rounded-lg flex-row items-center justify-center"
-            onPress={handleAddDay}
-          >
-            <Ionicons name="add" size={20} color="white" />
-            <Text className="text-white font-bold ml-2">Agregar día</Text>
-          </TouchableOpacity>
-        </View>
-      )}
-
-      {sortDaysOfWeek(daysWithExercises).map((dayData, index) => (
-        <View key={index} className="bg-white p-4 rounded-lg mb-4 shadow-md">
-          <View className="flex-row justify-between items-center mb-3">
-            <Text className="text-xl font-bold">{dayData.weekDay.name}</Text>
-            {isOwnerOrAdmin() && (
-              <View className="flex-row space-x-2">
-                <TouchableOpacity 
-                  className="bg-green-500 p-2 rounded-lg"
-                  onPress={() => {
-                    setSelectedDay(dayData.workoutDayId)
-                    setIsAddingExercise(true)
-                  }}
-                >
-                  <Ionicons name="add" size={20} color="white" />
-                </TouchableOpacity>
-                <TouchableOpacity 
-                  onPress={() => handleDeleteDay(dayData.workoutDayId)}
-                  className="bg-red-500 p-2 rounded-lg"
-                >
-                  <Ionicons name="trash" size={20} color="white" />
-                </TouchableOpacity>
-              </View>
-            )}
-          </View>
-          
-          {dayData.exercises.length === 0 ? (
-            <View className="p-3 bg-yellow-50 rounded-lg">
-              <Text className="text-yellow-800 text-center">
-                No hay ejercicios configurados para este día
-              </Text>
-            </View>
-          ) : (
-            dayData.exercises.map((exerciseData, exIndex) => (
-              <View key={exIndex} className="mb-4 p-3 bg-gray-50 rounded-lg">
-                <View className="flex-row justify-between items-start">
-                  <View className="flex-1">
-                    <Text className="text-lg font-semibold">{exerciseData.exercise.name}</Text>
-                    <Text className="text-gray-600 mb-2">{exerciseData.exercise.description}</Text>
-                  </View>
-                  {isOwnerOrAdmin() && (
-                    <TouchableOpacity 
-                      onPress={() => handleDeleteExercise(exerciseData.config.id!)}
-                      className="bg-red-500 p-1 rounded-full"
-                    >
-                      <Ionicons name="trash" size={16} color="white" />
-                    </TouchableOpacity>
-                  )}
-                </View>
-                
-                <View className="flex-row justify-between">
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#1F2937' }}>
+      <ScrollView className="flex-1 p-5 bg-gray-100">
+        {trainingPlan && (
+          <View className="mb-6">
+            <View className="flex-row justify-between items-center flex-wrap">
+              <View className="flex-1 min-w-[200px]">
+                {isEditing ? (
                   <View>
-                    <Text className="text-gray-500">Series: {exerciseData.config.sets}</Text>
-                    <Text className="text-gray-500">Repeticiones: {exerciseData.config.repsHigh}-{exerciseData.config.repsLow}</Text>
+                    <TextInput
+                      className="border border-gray-300 p-2 rounded-lg mb-2"
+                      value={editingRoutine.name}
+                      onChangeText={(text) => setEditingRoutine({...editingRoutine, name: text})}
+                      placeholder="Nombre de la rutina"
+                    />
+                    <TextInput
+                      className="border border-gray-300 p-2 rounded-lg mb-2"
+                      value={editingRoutine.description}
+                      onChangeText={(text) => setEditingRoutine({...editingRoutine, description: text})}
+                      placeholder="Descripción"
+                      multiline
+                    />
+                    <View className="flex-row items-center mb-2">
+                      <Text className="mr-2">Visible:</Text>
+                      <TouchableOpacity
+                        onPress={() => setEditingRoutine({...editingRoutine, is_visible: !editingRoutine.is_visible})}
+                        className={`p-2 rounded-lg ${editingRoutine.is_visible ? 'bg-green-500' : 'bg-red-500'}`}
+                      >
+                        <Ionicons 
+                          name={editingRoutine.is_visible ? "eye" : "eye-off"} 
+                          size={20} 
+                          color="white" 
+                        />
+                      </TouchableOpacity>
+                    </View>
+                    <View className="flex-row space-x-2">
+                      <TouchableOpacity 
+                        className="bg-green-500 p-2 rounded-lg flex-1"
+                        onPress={handleUpdateRoutine}
+                      >
+                        <Text className="text-white font-bold text-center">Guardar</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity 
+                        className="bg-red-500 p-2 rounded-lg flex-1"
+                        onPress={() => setIsEditing(false)}
+                      >
+                        <Text className="text-white font-bold text-center">Cancelar</Text>
+                      </TouchableOpacity>
+                    </View>
                   </View>
+                ) : (
                   <View>
-                    <Text className="text-gray-500">Descanso: {exerciseData.config.rest}s</Text>
-                  </View>
-                </View>
-                {exerciseData.config.notes && (
-                  <View className="mt-2">
-                    <Text className="text-gray-500 italic">Notas: {exerciseData.config.notes}</Text>
+                    <View className="flex-row items-center mb-2">
+                      <Text className="text-2xl font-bold mr-2 text-black">{trainingPlan.name}</Text>
+                      {trainingPlan.is_visible ? (
+                        <Ionicons name="eye" size={20} color="green" />
+                      ) : (
+                        <Ionicons name="eye-off" size={20} color="red" />
+                      )}
+                    </View>
+                    <Text className="text-gray-600 mb-2">{trainingPlan.description}</Text>
+                    <View className="flex-row items-center">
+                      <Ionicons name="person" size={16} color="gray" />
+                      <Text className="text-gray-500 ml-1">{trainingPlan.user_email}</Text>
+                    </View>
                   </View>
                 )}
               </View>
-            ))
-          )}
-        </View>
-      ))}
-
-      {isAddingExercise && isOwnerOrAdmin() && (
-        <View className="bg-white p-4 rounded-lg mb-4 shadow-md">
-          <Text className="text-lg font-bold mb-2">Agregar Ejercicio</Text>
-          
-          <View className="mb-2">
-            <Text className="text-gray-600 mb-1">Ejercicio</Text>
-            <View className="border border-gray-300 rounded-lg">
-              <Picker
-                selectedValue={newExercise.exercise_id}
-                onValueChange={(value) => setNewExercise({...newExercise, exercise_id: value})}
-              >
-                <Picker.Item label="Selecciona un ejercicio" value={0} />
-                {allExercises.map(exercise => (
-                  <Picker.Item 
-                    key={exercise.id} 
-                    label={exercise.name} 
-                    value={exercise.id} 
-                  />
-                ))}
-              </Picker>
+              {isOwnerOrAdmin() && !isEditing && (
+                <TouchableOpacity 
+                  className="bg-blue-500 p-2 rounded-lg"
+                  onPress={() => setIsEditing(true)}
+                >
+                  <Ionicons name="pencil" size={20} color="white" />
+                </TouchableOpacity>
+              )}
             </View>
           </View>
+        )}
 
-          <View className="mb-2">
-            <Text className="text-gray-600 mb-1">Series (1-10)</Text>
-            <TextInput
-              className="border border-gray-300 p-2 rounded-lg"
-              value={newExercise.sets.toString()}
-              onChangeText={(value) => {
-                const num = parseInt(value) || 0;
-                if (num >= 1 && num <= 10) {
-                  setNewExercise({...newExercise, sets: num});
-                }
-              }}
-              keyboardType="numeric"
-            />
-          </View>
-
-          <View className="mb-2">
-            <Text className="text-gray-600 mb-1">Repeticiones Máximas (1-100)</Text>
-            <TextInput
-              className="border border-gray-300 p-2 rounded-lg"
-              value={newExercise.repsHigh.toString()}
-              onChangeText={(value) => {
-                const num = parseInt(value) || 0;
-                if (num >= 1 && num <= 100) {
-                  setNewExercise({...newExercise, repsHigh: num});
-                }
-              }}
-              keyboardType="numeric"
-            />
-          </View>
-
-          <View className="mb-2">
-            <Text className="text-gray-600 mb-1">Repeticiones Mínimas (1-100)</Text>
-            <TextInput
-              className="border border-gray-300 p-2 rounded-lg"
-              value={newExercise.repsLow.toString()}
-              onChangeText={(value) => {
-                const num = parseInt(value) || 0;
-                if (num >= 1 && num <= 100) {
-                  setNewExercise({...newExercise, repsLow: num});
-                }
-              }}
-              keyboardType="numeric"
-            />
-          </View>
-
-          <View className="mb-2">
-            <Text className="text-gray-600 mb-1">Descanso (segundos)</Text>
-            <TextInput
-              className="border border-gray-300 p-2 rounded-lg"
-              value={newExercise.rest.toString()}
-              onChangeText={(value) => {
-                const num = parseFloat(value) || 0;
-                if (num >= 1 && num <= 1000) {
-                  setNewExercise({...newExercise, rest: num});
-                }
-              }}
-              keyboardType="numeric"
-            />
-          </View>
-
+        {isOwnerOrAdmin() && (
           <View className="mb-4">
-            <Text className="text-gray-600 mb-1">Notas</Text>
-            <TextInput
-              className="border border-gray-300 p-2 rounded-lg"
-              value={newExercise.notes}
-              onChangeText={(value) => setNewExercise({...newExercise, notes: value})}
-              multiline
-              numberOfLines={3}
-              placeholder="Agrega notas o instrucciones especiales"
-            />
+            <TouchableOpacity 
+              className="bg-green-500 p-2 rounded-lg flex-row items-center justify-center"
+              onPress={handleAddDay}
+            >
+              <Ionicons name="add" size={20} color="white" />
+              <Text className="text-white font-bold ml-2">Agregar día</Text>
+            </TouchableOpacity>
           </View>
+        )}
 
-          <View className="flex-row space-x-2">
-            <TouchableOpacity 
-              className="bg-green-500 p-2 rounded-lg flex-1"
-              onPress={handleAddExercise}
-            >
-              <Text className="text-white font-bold text-center">Agregar</Text>
-            </TouchableOpacity>
-            <TouchableOpacity 
-              className="bg-red-500 p-2 rounded-lg flex-1"
-              onPress={() => {
-                setIsAddingExercise(false);
-                setNewExercise({
-                  exercise_id: 0,
-                  sets: 3,
-                  repsHigh: 10,
-                  repsLow: 8,
-                  rest: 60,
-                  notes: ''
-                });
-              }}
-            >
-              <Text className="text-white font-bold text-center">Cancelar</Text>
-            </TouchableOpacity>
+        {sortDaysOfWeek(daysWithExercises).map((dayData, index) => (
+          <View key={index} className="bg-white p-4 rounded-lg mb-4 shadow-md">
+            <View className="flex-row justify-between items-center mb-3">
+              <Text className="text-xl font-bold">{dayData.weekDay.name}</Text>
+              <View className="flex-row space-x-2">
+                <TouchableOpacity 
+                  className="bg-blue-500 p-2 rounded-lg"
+                  onPress={() => {
+                    console.log('Navegando a workout day:', dayData.workoutDayId);
+                    router.push({
+                      pathname: '/account/rutines/workout_day/[id]',
+                      params: { id: dayData.workoutDayId }
+                    });
+                  }}
+                >
+                  <Ionicons name="eye" size={20} color="white" />
+                </TouchableOpacity>
+                {isOwnerOrAdmin() && canDelete() && (
+                  <TouchableOpacity 
+                    onPress={() => handleDeleteDay(dayData.workoutDayId)}
+                    className="bg-red-500 p-2 rounded-lg"
+                  >
+                    <Ionicons name="trash" size={20} color="white" />
+                  </TouchableOpacity>
+                )}
+              </View>
+            </View>
+            
+            {dayData.exercises.length === 0 ? (
+              <View className="p-3 bg-yellow-50 rounded-lg">
+                <Text className="text-yellow-800 text-center">
+                  No hay ejercicios configurados para este día
+                </Text>
+              </View>
+            ) : (
+              <View className="space-y-2">
+                {dayData.exercises.map((exerciseData, exIndex) => (
+                  <View key={exIndex} className="p-2 bg-gray-50 rounded-lg">
+                    <Text className="text-lg font-semibold">{exerciseData.exercise.name}</Text>
+                  </View>
+                ))}
+              </View>
+            )}
           </View>
-        </View>
-      )}
-    </ScrollView>
+        ))}
+      </ScrollView>
+    </SafeAreaView>
   )
 }
 

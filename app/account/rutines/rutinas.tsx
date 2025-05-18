@@ -6,10 +6,10 @@ import { getTrainingPlans, getTagOfTrainingPlans,  } from '../../../lib/training
 import {getUserDataByEmail } from '../../../lib/user'
 import { TrainingPlanDAO, TagOfTrainingPlanDAO } from '../../../interfaces/training'
 import { ROLES, UserDAO } from '../../../interfaces/user'
-
 import { Picker } from '@react-native-picker/picker'
 import Pagination from '../../../components/organisms/paginacion'
 import { Ionicons } from '@expo/vector-icons'
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const Rutinas = () => {
   const { user } = useAuth()
@@ -163,140 +163,142 @@ const Rutinas = () => {
   }
 
   return (
-    <View className="flex-1 p-5 bg-gray-100">
-      <View className="flex-row justify-between items-center mb-5">
-        <Text className="text-2xl font-bold">Rutinas</Text>
-        <TouchableOpacity 
-          className="bg-blue-500 p-2.5 rounded-lg"
-          onPress={() => router.push('/account/rutines/crearRutines')}
-        >
-          <Text className="text-white font-bold">Crear</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Search Section */}
-      <View className="bg-white p-4 rounded-lg mb-4 shadow-md">
-        <TextInput
-          className="border border-gray-300 p-2.5 rounded-lg mb-2.5"
-          placeholder="Buscar por nombre..."
-          value={tempSearchName}
-          onChangeText={setTempSearchName}
-        />
-        
-        <View className="border border-gray-300 rounded-lg mb-2.5">
-          <Picker
-            selectedValue={tempSelectedTag}
-            onValueChange={setTempSelectedTag}
-            style={{ height: 50 }}
-            mode="dropdown"
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#1F2937' }}>
+      <View className="flex-1 p-5 bg-gray-100">
+        <View className="flex-row justify-between items-center mb-5">
+          <Text className="text-2xl font-bold">Rutinas</Text>
+          <TouchableOpacity 
+            className="bg-blue-500 p-2.5 rounded-lg"
+            onPress={() => router.push('/account/rutines/crearRutines')}
           >
-            <Picker.Item label="Sin filtro" value={null} />
-            <Picker.Item label="Todas las etiquetas" value={-1} />
-            {tags.map(tag => (
-              <Picker.Item 
-                key={tag.id} 
-                label={tag.name} 
-                value={tag.id} 
-              />
-            ))}
-          </Picker>
+            <Text className="text-white font-bold">Crear</Text>
+          </TouchableOpacity>
         </View>
 
-        <View className="border border-gray-300 rounded-lg mb-2.5">
-          <Picker
-            selectedValue={tempSelectedRole}
-            onValueChange={setTempSelectedRole}
-            style={{ height: 50 }}
-            mode="dropdown"
-          >
-            <Picker.Item label="Sin filtro" value={null} />
-            <Picker.Item label="Todos los roles" value={-1} />
-            {Object.entries(ROLES)
-              .filter(([_, value]) => value !== ROLES.logued)
-              .map(([key, value]) => (
+        {/* Search Section */}
+        <View className="bg-white p-4 rounded-lg mb-4 shadow-md">
+          <TextInput
+            className="border border-gray-300 p-2.5 rounded-lg mb-2.5"
+            placeholder="Buscar por nombre..."
+            value={tempSearchName}
+            onChangeText={setTempSearchName}
+          />
+          
+          <View className="border border-gray-300 rounded-lg mb-2.5">
+            <Picker
+              selectedValue={tempSelectedTag}
+              onValueChange={setTempSelectedTag}
+              style={{ height: 50 }}
+              mode="dropdown"
+            >
+              <Picker.Item label="Sin filtro" value={null} />
+              <Picker.Item label="Todas las etiquetas" value={-1} />
+              {tags.map(tag => (
                 <Picker.Item 
-                  key={value} 
-                  label={key} 
-                  value={value} 
+                  key={tag.id} 
+                  label={tag.name} 
+                  value={tag.id} 
                 />
               ))}
-          </Picker>
-        </View>
-
-        <TextInput
-          className="border border-gray-300 p-2.5 rounded-lg mb-2.5"
-          placeholder="Máximo de días (opcional)"
-          value={tempMaxDays}
-          onChangeText={setTempMaxDays}
-          keyboardType="numeric"
-        />
-
-        <View className="flex-row space-x-2">
-          <TouchableOpacity 
-            className="flex-1 bg-blue-500 p-2.5 rounded-lg"
-            onPress={handleSearch}
-          >
-            <Text className="text-white font-bold text-center">Buscar</Text>
-          </TouchableOpacity>
-          <TouchableOpacity 
-            className="flex-1 bg-gray-500 p-2.5 rounded-lg"
-            onPress={handleClearFilters}
-          >
-            <Text className="text-white font-bold text-center">Limpiar</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      <ScrollView className="flex-1">
-        {routines.length === 0 ? (
-          <View className="bg-white p-4 rounded-lg shadow-md">
-            <Text className="text-center text-gray-500">No se encontraron rutinas</Text>
+            </Picker>
           </View>
-        ) : (
-          routines.map(routine => (
-            <View key={routine.id} className="bg-white p-4 rounded-lg mb-2.5 shadow-md">
-              <View className="flex-row justify-between">
-                <View className="flex-1">
-                  <Text className="text-lg font-bold">{routine.name}</Text>
-                  <Text className="text-gray-600 mt-1">{routine.description}</Text>
-                  <View className="flex-row items-center mt-2">
-                    <View className="bg-blue-100 px-2 py-1 rounded-full">
-                      <Text className="text-blue-800 text-xs">
-                        {tags.find(t => t.id === routine.tag_of_training_plan_id)?.name || 'Sin etiqueta'}
-                      </Text>
-                    </View>
-                    {!routine.is_visible && (
-                      <View className="bg-gray-100 px-2 py-1 rounded-full ml-2">
-                        <Text className="text-gray-800 text-xs">Privada</Text>
+
+          <View className="border border-gray-300 rounded-lg mb-2.5">
+            <Picker
+              selectedValue={tempSelectedRole}
+              onValueChange={setTempSelectedRole}
+              style={{ height: 50 }}
+              mode="dropdown"
+            >
+              <Picker.Item label="Sin filtro" value={null} />
+              <Picker.Item label="Todos los roles" value={-1} />
+              {Object.entries(ROLES)
+                .filter(([_, value]) => value !== ROLES.logued)
+                .map(([key, value]) => (
+                  <Picker.Item 
+                    key={value} 
+                    label={key} 
+                    value={value} 
+                  />
+                ))}
+            </Picker>
+          </View>
+
+          <TextInput
+            className="border border-gray-300 p-2.5 rounded-lg mb-2.5"
+            placeholder="Máximo de días (opcional)"
+            value={tempMaxDays}
+            onChangeText={setTempMaxDays}
+            keyboardType="numeric"
+          />
+
+          <View className="flex-row space-x-2">
+            <TouchableOpacity 
+              className="flex-1 bg-blue-500 p-2.5 rounded-lg"
+              onPress={handleSearch}
+            >
+              <Text className="text-white font-bold text-center">Buscar</Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              className="flex-1 bg-gray-500 p-2.5 rounded-lg"
+              onPress={handleClearFilters}
+            >
+              <Text className="text-white font-bold text-center">Limpiar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        <ScrollView className="flex-1">
+          {routines.length === 0 ? (
+            <View className="bg-white p-4 rounded-lg shadow-md">
+              <Text className="text-center text-gray-500">No se encontraron rutinas</Text>
+            </View>
+          ) : (
+            routines.map(routine => (
+              <View key={routine.id} className="bg-white p-4 rounded-lg mb-2.5 shadow-md">
+                <View className="flex-row justify-between">
+                  <View className="flex-1">
+                    <Text className="text-lg font-bold">{routine.name}</Text>
+                    <Text className="text-gray-600 mt-1">{routine.description}</Text>
+                    <View className="flex-row items-center mt-2">
+                      <View className="bg-blue-100 px-2 py-1 rounded-full">
+                        <Text className="text-blue-800 text-xs">
+                          {tags.find(t => t.id === routine.tag_of_training_plan_id)?.name || 'Sin etiqueta'}
+                        </Text>
                       </View>
-                    )}
-                    <View className="bg-purple-100 px-2 py-1 rounded-full ml-2">
-                      <Text className="text-purple-800 text-xs">
-                        {getRoleName(routine.user_email ? userRoles[routine.user_email] : undefined)}
-                      </Text>
+                      {!routine.is_visible && (
+                        <View className="bg-gray-100 px-2 py-1 rounded-full ml-2">
+                          <Text className="text-gray-800 text-xs">Privada</Text>
+                        </View>
+                      )}
+                      <View className="bg-purple-100 px-2 py-1 rounded-full ml-2">
+                        <Text className="text-purple-800 text-xs">
+                          {getRoleName(routine.user_email ? userRoles[routine.user_email] : undefined)}
+                        </Text>
+                      </View>
                     </View>
                   </View>
                 </View>
+                
+                <View className="flex-row justify-end mt-3">
+                  <TouchableOpacity 
+                    onPress={() => routine.id && handleViewRoutine(routine.id)}
+                  >
+                    <Ionicons name="eye" size={24} color="#007AFF" />
+                  </TouchableOpacity>
+                </View>
               </View>
-              
-              <View className="flex-row justify-end mt-3">
-                <TouchableOpacity 
-                  onPress={() => routine.id && handleViewRoutine(routine.id)}
-                >
-                  <Ionicons name="eye" size={24} color="#007AFF" />
-                </TouchableOpacity>
-              </View>
-            </View>
-          ))
-        )}
-      </ScrollView>
+            ))
+          )}
+        </ScrollView>
 
-      <Pagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={(page) => setCurrentPage(page)}
-      />
-    </View>
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={(page) => setCurrentPage(page)}
+        />
+      </View>
+    </SafeAreaView>
   )
 }
 
