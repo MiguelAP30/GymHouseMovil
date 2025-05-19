@@ -4,7 +4,7 @@ import { HistoryPRExercise, SeriesPRExercise, DropsetPRExercise } from "../inter
 // History PR Exercise endpoints
 export const createHistoryPRExercise = async (data: HistoryPRExercise) => {
   try {
-    const response = await authenticatedFetch('/api/v1/history_pr_exercise', {
+    const response = await authenticatedFetch('/history_pr_exercise', {
       method: 'POST',
       body: JSON.stringify(data)
     });
@@ -17,7 +17,7 @@ export const createHistoryPRExercise = async (data: HistoryPRExercise) => {
 
 export const getAllHistoryPRExercise = async () => {
   try {
-    const response = await authenticatedFetch('/api/v1/history_pr_exercise');
+    const response = await authenticatedFetch('/history_pr_exercise');
     return await response.json();
   } catch (error) {
     console.error('Error al obtener historiales de PR:', error);
@@ -27,7 +27,7 @@ export const getAllHistoryPRExercise = async () => {
 
 export const updateHistoryPRExercise = async (id: number, data: Partial<HistoryPRExercise>) => {
   try {
-    const response = await authenticatedFetch(`/api/v1/history_pr_exercise/${id}`, {
+    const response = await authenticatedFetch(`/history_pr_exercise/${id}`, {
       method: 'PUT',
       body: JSON.stringify(data)
     });
@@ -40,7 +40,7 @@ export const updateHistoryPRExercise = async (id: number, data: Partial<HistoryP
 
 export const deleteHistoryPRExercise = async (id: number) => {
   try {
-    const response = await authenticatedFetch(`/api/v1/history_pr_exercise/${id}`, {
+    const response = await authenticatedFetch(`/history_pr_exercise/${id}`, {
       method: 'DELETE'
     });
     return await response.json();
@@ -52,7 +52,7 @@ export const deleteHistoryPRExercise = async (id: number) => {
 
 export const getHistoryPRExerciseById = async (id: number) => {
   try {
-    const response = await authenticatedFetch(`/api/v1/history_pr_exercise/${id}`);
+    const response = await authenticatedFetch(`/history_pr_exercise/${id}`);
     return await response.json();
   } catch (error) {
     console.error(`Error al obtener historial de PR con ID ${id}:`, error);
@@ -62,7 +62,7 @@ export const getHistoryPRExerciseById = async (id: number) => {
 
 export const getHistoryPRExerciseByExercise = async (exerciseId: number) => {
   try {
-    const response = await authenticatedFetch(`/api/v1/history_pr_exercise/exercise/${exerciseId}`);
+    const response = await authenticatedFetch(`/history_pr_exercise/exercise/${exerciseId}`);
     return await response.json();
   } catch (error) {
     console.error(`Error al obtener historiales de PR para ejercicio ${exerciseId}:`, error);
@@ -72,7 +72,7 @@ export const getHistoryPRExerciseByExercise = async (exerciseId: number) => {
 
 export const getHistoryPRExerciseByUser = async (userEmail: string) => {
   try {
-    const response = await authenticatedFetch(`/api/v1/history_pr_exercise/user/${encodeURIComponent(userEmail)}`);
+    const response = await authenticatedFetch(`/history_pr_exercise/user/${encodeURIComponent(userEmail)}`);
     return await response.json();
   } catch (error) {
     console.error(`Error al obtener historiales de PR para usuario ${userEmail}:`, error);
@@ -82,7 +82,7 @@ export const getHistoryPRExerciseByUser = async (userEmail: string) => {
 
 export const getHistoryPRExerciseByExerciseAndUser = async (exerciseId: number, userEmail: string) => {
   try {
-    const response = await authenticatedFetch(`/api/v1/history_pr_exercise/exercise/${exerciseId}/user/${encodeURIComponent(userEmail)}`);
+    const response = await authenticatedFetch(`/history_pr_exercise/exercise/${exerciseId}/user/${encodeURIComponent(userEmail)}`);
     return await response.json();
   } catch (error) {
     console.error(`Error al obtener historiales de PR para ejercicio ${exerciseId} y usuario ${userEmail}:`, error);
@@ -93,7 +93,7 @@ export const getHistoryPRExerciseByExerciseAndUser = async (exerciseId: number, 
 // Series PR Exercise endpoints
 export const createSeriesPRExercise = async (data: SeriesPRExercise) => {
   try {
-    const response = await authenticatedFetch('/api/v1/series_pr_exercise', {
+    const response = await authenticatedFetch('/series_pr_exercise', {
       method: 'POST',
       body: JSON.stringify(data)
     });
@@ -106,7 +106,7 @@ export const createSeriesPRExercise = async (data: SeriesPRExercise) => {
 
 export const getSeriesPRExerciseByHistory = async (historyId: number) => {
   try {
-    const response = await authenticatedFetch(`/api/v1/series_pr_exercise?history_pr_exercise_id=${historyId}`);
+    const response = await authenticatedFetch(`/series_pr_exercise?history_pr_exercise_id=${historyId}`);
     return await response.json();
   } catch (error) {
     console.error(`Error al obtener series de PR para historial ${historyId}:`, error);
@@ -116,7 +116,7 @@ export const getSeriesPRExerciseByHistory = async (historyId: number) => {
 
 export const getSeriesPRExerciseById = async (id: number) => {
   try {
-    const response = await authenticatedFetch(`/api/v1/series_pr_exercise/${id}`);
+    const response = await authenticatedFetch(`/series_pr_exercise/${id}`);
     return await response.json();
   } catch (error) {
     console.error(`Error al obtener serie de PR con ID ${id}:`, error);
@@ -126,7 +126,7 @@ export const getSeriesPRExerciseById = async (id: number) => {
 
 export const updateSeriesPRExercise = async (id: number, data: Partial<SeriesPRExercise>) => {
   try {
-    const response = await authenticatedFetch(`/api/v1/series_pr_exercise/${id}`, {
+    const response = await authenticatedFetch(`/series_pr_exercise/${id}`, {
       method: 'PUT',
       body: JSON.stringify(data)
     });
@@ -139,7 +139,7 @@ export const updateSeriesPRExercise = async (id: number, data: Partial<SeriesPRE
 
 export const deleteSeriesPRExercise = async (id: number) => {
   try {
-    const response = await authenticatedFetch(`/api/v1/series_pr_exercise/${id}`, {
+    const response = await authenticatedFetch(`/series_pr_exercise/${id}`, {
       method: 'DELETE'
     });
     return await response.json();
@@ -152,7 +152,7 @@ export const deleteSeriesPRExercise = async (id: number) => {
 // Dropset PR Exercise endpoints
 export const createDropsetPRExercise = async (data: DropsetPRExercise) => {
   try {
-    const response = await authenticatedFetch('/api/v1/dropset_pr_exercise', {
+    const response = await authenticatedFetch('/dropset_pr_exercise', {
       method: 'POST',
       body: JSON.stringify(data)
     });
@@ -165,7 +165,7 @@ export const createDropsetPRExercise = async (data: DropsetPRExercise) => {
 
 export const getDropsetPRExerciseBySeries = async (seriesId: number) => {
   try {
-    const response = await authenticatedFetch(`/api/v1/dropset_pr_exercise?serie_pr_exercise_id=${seriesId}`);
+    const response = await authenticatedFetch(`/dropset_pr_exercise?serie_pr_exercise_id=${seriesId}`);
     return await response.json();
   } catch (error) {
     console.error(`Error al obtener dropsets de PR para serie ${seriesId}:`, error);
@@ -175,7 +175,7 @@ export const getDropsetPRExerciseBySeries = async (seriesId: number) => {
 
 export const getDropsetPRExerciseById = async (id: number) => {
   try {
-    const response = await authenticatedFetch(`/api/v1/dropset_pr_exercise/${id}`);
+    const response = await authenticatedFetch(`/dropset_pr_exercise/${id}`);
     return await response.json();
   } catch (error) {
     console.error(`Error al obtener dropset de PR con ID ${id}:`, error);
@@ -185,7 +185,7 @@ export const getDropsetPRExerciseById = async (id: number) => {
 
 export const updateDropsetPRExercise = async (id: number, data: Partial<DropsetPRExercise>) => {
   try {
-    const response = await authenticatedFetch(`/api/v1/dropset_pr_exercise/${id}`, {
+    const response = await authenticatedFetch(`/dropset_pr_exercise/${id}`, {
       method: 'PUT',
       body: JSON.stringify(data)
     });
@@ -198,7 +198,7 @@ export const updateDropsetPRExercise = async (id: number, data: Partial<DropsetP
 
 export const deleteDropsetPRExercise = async (id: number) => {
   try {
-    const response = await authenticatedFetch(`/api/v1/dropset_pr_exercise/${id}`, {
+    const response = await authenticatedFetch(`/dropset_pr_exercise/${id}`, {
       method: 'DELETE'
     });
     return await response.json();
