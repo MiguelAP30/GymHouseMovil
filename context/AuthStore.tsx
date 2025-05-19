@@ -241,6 +241,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       console.log('Token en checkAuth:', currentToken); // Para debug
 
       if (!currentToken) {
+        await logout(); // Ensure we clean up any stale data
         router.replace('/');
         return false;
       }
@@ -253,6 +254,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       });
 
       if (!response.ok) {
+        // If we get a 401 or 403, the token is definitely invalid
+        if (response.status === 401 || response.status === 403) {
+          console.log('Token inválido detectado, eliminando...');
+          await logout();
+          router.replace('/');
+          return false;
+        }
+        // For other errors, we'll still logout to be safe
+        console.log('Error en la respuesta del servidor, eliminando token...');
         await logout();
         router.replace('/');
         return false;
@@ -267,6 +277,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       return true;
     } catch (error) {
       console.error('Error checking auth:', error);
+      // Ensure we clean up on any error
       await logout();
       router.replace('/');
       return false;
