@@ -14,6 +14,7 @@ import {
 } from '../tokens';
 import { useAuth } from '../../context/AuthStore';
 import { postLogin, forgotPassword, resetPassword, resendVerificationCode, verifyEmail } from '../../lib/auth';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 interface LoginFormProps {
   isConnected: boolean;

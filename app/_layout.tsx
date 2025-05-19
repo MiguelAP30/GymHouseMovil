@@ -7,6 +7,8 @@ import { usePushNotifications } from '../hooks/usePushNotifications';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Onboarding from 'react-native-onboarding-swiper';
 import { View, ActivityIndicator, Text } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
 //import { Suspense } from 'react';
 //import { SQLiteProvider, openDatabaseSync, } from 'expo-sqlite';
@@ -128,8 +130,10 @@ const HomeLayout = () => {
       //options={{enableChangeListener:true}}
       //useSuspense
     //>
+    <SafeAreaProvider>
       <AuthProvider>
         <ConnectivityContext.Provider value={{ isConnected }}>
+          <StatusBar style="light"/>
           <Stack>
             <Stack.Screen name="index" options={{headerShown:false}}/>
             <Stack.Screen name="account" options={{headerShown:false}}/>
@@ -138,6 +142,7 @@ const HomeLayout = () => {
           </Stack>
         </ConnectivityContext.Provider>
       </AuthProvider>
+    </SafeAreaProvider>
     //</SQLiteProvider>
   //</Suspense>
   )

@@ -1,3 +1,8 @@
+export interface Permissions {
+    can_edit: boolean;
+    can_delete: boolean;
+}
+
 export interface TrainingPlanDAO {
     id?: number;
     name: string;
@@ -9,6 +14,7 @@ export interface TrainingPlanDAO {
     user_gym_id?: number;
     created_at?: string;
     updated_at?: string;
+    permissions?: Permissions;
 }
 
 export interface TagOfTrainingPlanDAO {
@@ -22,6 +28,7 @@ export interface WorkoutDayExerciseDAO {
     week_day_id: number;
     training_plan_id: number;
     exercise_configurations?: number[];
+    permissions?: Permissions;
 }
 
 export interface PaginatedResponse<T> {
