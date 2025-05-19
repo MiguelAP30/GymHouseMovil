@@ -8,8 +8,29 @@ export const postProfile = async (data: ProfileDAO) => {
   }).then(res => res.json());
 }
 
+export const getAllProfiles = async () => {
+  return authenticatedFetch('/profile').then(res => res.json());
+}
+
+export const deleteProfile = async (id: number) => {
+  return authenticatedFetch(`/profile/${id}`, {
+    method: 'DELETE'
+  }).then(res => res.json());
+}
+
+export const updateProfile = async (id: number, data: ProfileDAO) => {
+  return authenticatedFetch(`/profile/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data)
+  }).then(res => res.json());
+}
+
 export const getProfileByEmail = async (email: string) => {
-  return authenticatedFetch(`/profile/${email}`).then(res => res.json());
+  return authenticatedFetch(`/profile/${encodeURIComponent(email)}`).then(res => res.json());
+}
+
+export const getProfileById = async (id: number) => {
+  return authenticatedFetch(`/profile/id/${id}`).then(res => res.json());
 }
 
 export const getUserDataByEmail = async (email: string) => {

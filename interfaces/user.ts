@@ -17,12 +17,40 @@ export interface UserDAO {
 }
 
 export interface ProfileDAO {
-    user_email: string;
-    weight: number;
-    height: number;
-    physical_activity: number;
+    biceps: number;
+    chest: number;
     date: string;
+    fat: number;
+    height: number;
+    hips: number;
+    muscle: number;
+    notes: string;
+    physical_activity: number;
+    thigh: number;
+    waist: number;
+    weight: number;
 }
+
+export interface ProfileDTO {
+    biceps: number;
+    chest: number;
+    date: string;
+    fat: number;
+    height: number;
+    hips: number;
+    muscle: number;
+    notes: string;
+    email: string;
+    physical_activity: number;
+    thigh: number;
+    waist: number;
+    weight: number;
+}
+
+export interface ProfileWithId extends ProfileDAO {
+    id: number;
+}
+  
 
 export const ROLES = {
     admin: 4,

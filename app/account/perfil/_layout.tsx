@@ -29,6 +29,41 @@ export default function PerfilLayout() {
           headerShown: true,
         }}
       />
+      <Stack.Screen
+        name="processPersonal"
+        options={{
+          title: 'Progreso personal',
+          headerShown: true,
+        }}
+      />
+      <Stack.Screen
+        name="stats"
+        options={{
+          title: 'Estadisticas',
+          headerShown: true,
+        }}
+      />
+      <Stack.Screen
+        name="settings"
+        options={{
+          title: 'Configuracion',
+          headerShown: true,
+        }}
+      />
+      <Stack.Screen
+        name="about"
+        options={{
+          title: 'Sobre nosotros',
+          headerShown: true,
+        }}
+      />
+      <Stack.Screen
+        name="questions"
+        options={{
+          title: 'Preguntas',
+          headerShown: true,
+        }}
+      />
     </Stack>
   );
 } 

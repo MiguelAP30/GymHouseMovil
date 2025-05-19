@@ -8,7 +8,7 @@ export default function UnauthorizedScreen() {
       <Text className="text-white text-center mb-6">
         No tienes permisos para acceder a esta sección.
       </Text>
-      <Link href="/account/about" className="bg-blue-600 px-6 py-3 rounded-lg">
+      <Link href="/account/perfil/about" className="bg-blue-600 px-6 py-3 rounded-lg">
         <Text className="text-white font-bold">Volver al Inicio</Text>
       </Link>
     </View>

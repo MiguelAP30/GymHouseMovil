@@ -24,11 +24,11 @@ export default function AccountLayout() {
   }
 
   const canAccessGym = role === ROLES.gym || role === ROLES.admin;
-
   const canAccessRutines = role === ROLES.premium || role === ROLES.gym || role === ROLES.admin;
 
   return (
     <Tabs
+      initialRouteName={isAdmin ? "dashboardAdmin" : "perfil"}
       screenOptions={{
         tabBarShowLabel: true,
         tabBarStyle: { 
@@ -46,16 +46,6 @@ export default function AccountLayout() {
     >
       {/* Rutas accesibles para todos los usuarios autenticados */}
       <Tabs.Screen
-        name="about"
-        options={{
-          title: 'Nosotros',
-          headerShown: false,
-          tabBarIcon: ({ color, size }) => <Ionicons name="information-circle" size={size} color={color} />,
-        }}
-      />
-
-      {/* Rutas accesibles para todos los usuarios autenticados */}
-      <Tabs.Screen
         name="exercises"
         options={{
           title: 'Ejercicios',
@@ -65,17 +55,15 @@ export default function AccountLayout() {
       />
 
       {/* Rutas para usuarios con roles específicos */}
-      
-        <Tabs.Screen
-          name="rutines"
-          options={{
-            title: 'Rutinas',
-            headerShown: false,
-            tabBarIcon: ({ color, size }) => <Ionicons name="barbell" size={size} color={color} />,
-            href: canAccessRutines ? "/account/rutines" : null,
-          }}
-        />
-      
+      <Tabs.Screen
+        name="rutines"
+        options={{
+          title: 'Rutinas',
+          headerShown: false,
+          tabBarIcon: ({ color, size }) => <Ionicons name="barbell" size={size} color={color} />,
+          href: canAccessRutines ? "/account/rutines" : null,
+        }}
+      />
 
       {/* Ruta exclusiva para admin */}
       <Tabs.Screen
@@ -103,7 +91,6 @@ export default function AccountLayout() {
           title: 'Perfil',
           headerShown: false,
           tabBarIcon: ({ color, size }) => <Ionicons name="person" size={size} color={color} />,
-          href: "/account/perfil",
         }}
       />
     </Tabs>

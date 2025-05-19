@@ -73,11 +73,10 @@ export const LoginForm: React.FC<LoginFormProps> = ({ isConnected }) => {
       await login(response.access_token, response.user);
       
       const isValid = await checkAuth();
-      if (isValid) {
-        router.push('/account/about');
-      } else {
+      if (!isValid) {
         throw new Error('Error al verificar la autenticación');
       }
+      // La redirección será manejada por el useEffect en index.tsx
     } catch (error) {
       console.error('Error en login:', error);
       Alert.alert(

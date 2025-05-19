@@ -3,6 +3,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../../../context/AuthStore';
 import { changePassword, updateUserData } from '../../../lib/user';
 import { Picker } from '@react-native-picker/picker';
+import { Ionicons } from '@expo/vector-icons'
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import {
   perfilContainer,
@@ -23,6 +24,7 @@ import {
   labelForm,
   inputFormPicker
 } from '../../../components/tokens';
+import { router } from 'expo-router';
 
 const Profile = () => {
   const { profile, fetchUserData } = useContext(AuthContext);
@@ -310,10 +312,19 @@ const Profile = () => {
     <ScrollView className={perfilContainer}>
       {profile ? (
         <View className="p-4">
-          <View className={perfilHeader}>
-            <Text className={perfilNombre}>{profile.name}</Text>
-            <Text className={perfilUsername}>{profile.user_name}</Text>
-            <Text className={perfilEmail}>{profile.email}</Text>
+
+          <View className="relative">
+            <TouchableOpacity 
+              className="absolute right-3 top-2 z-10"
+              onPress={() => router.push('/account/perfil/settings')}
+            >
+              <Ionicons name="settings" size={24} color="#FFFFFF" />
+            </TouchableOpacity>
+            <View className={perfilHeader}>
+              <Text className={perfilNombre}>{profile.name}</Text>
+              <Text className={perfilUsername}>{profile.user_name}</Text>
+              <Text className={perfilEmail}>{profile.email}</Text>
+            </View>
           </View>
 
           <View className={perfilCard}>
@@ -437,7 +448,9 @@ const Profile = () => {
                 </TouchableOpacity>
               </>
             ) : (
+              
               <>
+              
                 <View className={perfilRow}>
                   <Text className={perfilLabel}>Documento:</Text>
                   <Text className={perfilValue}>{profile.id_number}</Text>
@@ -465,6 +478,12 @@ const Profile = () => {
                 >
                   <Text className={textoBotonGeneral}>Cambiar Contraseña</Text>
                 </TouchableOpacity>
+                <TouchableOpacity 
+                className={`${botonGeneral} mt-4`}
+                onPress={() => router.push('account/perfil/processPersonal')}
+              >
+                  <Text className={textoBotonGeneral}>Progreso</Text>
+              </TouchableOpacity>
               </>
             )}
           </View>
