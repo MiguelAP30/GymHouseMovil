@@ -131,6 +131,7 @@ const HomeLayout = () => {
       //useSuspense
     //>
     <SafeAreaProvider>
+      
       <AuthProvider>
         <ConnectivityContext.Provider value={{ isConnected }}>
           <StatusBar style="light"/>
@@ -142,6 +143,7 @@ const HomeLayout = () => {
           </Stack>
         </ConnectivityContext.Provider>
       </AuthProvider>
+
     </SafeAreaProvider>
     //</SQLiteProvider>
   //</Suspense>

@@ -1,24 +1,24 @@
-import * as React from 'react';
-import { View, Text, ScrollView, Image } from 'react-native';
-import { titulo, parrafo, parrafoNegrilla, fondoTotal } from '../../../components/tokens';
+import React from 'react';
+import { View, Text, Image } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { fondoTotal } from '../../../components/tokens';
 
 const About = () => {
     return (
-      <View className={`${fondoTotal} flex-1 justify-center items-center px-6`}>
-        {/* Logo Superior */}
-        <Image source={require('../../../assets/logo.png')} className="w-20 h-20 mb-6" />
-
-        {/* Título */}    
-        <Text className={titulo}>Sobre</Text>
-        <Text className={`${titulo} mb-6`}>Nosotros</Text>
-
-        {/* Descripción */}
-        <Text className={parrafo}>
-          Somos un grupo de entusiastas del fitness que se unieron para crear 
-          <Text className={parrafoNegrilla}> GymHouse</Text>, un lugar donde puedes encontrar 
-          rutinas de ejercicios personalizadas y mucho más.
-        </Text>
-      </View>
+        <SafeAreaView className={`${fondoTotal} flex-1`} edges={['bottom']}>
+            <View className="flex-1 p-6">
+                <Image 
+                    source={require('../../../assets/logo.png')} 
+                    className="w-32 h-32 mb-6 self-center" 
+                />
+                <Text className="text-white text-xl font-bold mb-4 text-center">
+                    Sobre GymHouse
+                </Text>
+                <Text className="text-white text-base text-center">
+                    GymHouse es una aplicación móvil diseñada para ayudarte a alcanzar tus objetivos fitness de manera personalizada y efectiva.
+                </Text>
+            </View>
+        </SafeAreaView>
     );
 }
 

@@ -5,6 +5,7 @@ import { changePassword, updateUserData } from '../../../lib/user';
 import { Picker } from '@react-native-picker/picker';
 import { Ionicons } from '@expo/vector-icons'
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   perfilContainer,
   perfilHeader,
@@ -309,191 +310,195 @@ const Profile = () => {
   }
 
   return (
-    <ScrollView className={perfilContainer}>
-      {profile ? (
-        <View className="p-4">
+    <SafeAreaView className={`${perfilContainer} flex-1`} edges={['bottom']}>
+      <ScrollView className="flex-1">
+        <View className="p-6">
+          {profile ? (
+            <View className="p-4">
 
-          <View className="relative">
-            <TouchableOpacity 
-              className="absolute right-3 top-2 z-10"
-              onPress={() => router.push('/account/perfil/settings')}
-            >
-              <Ionicons name="settings" size={24} color="#FFFFFF" />
-            </TouchableOpacity>
-            <View className={perfilHeader}>
-              <Text className={perfilNombre}>{profile.name}</Text>
-              <Text className={perfilUsername}>{profile.user_name}</Text>
-              <Text className={perfilEmail}>{profile.email}</Text>
-            </View>
-          </View>
-
-          <View className={perfilCard}>
-            <View className="flex-row justify-between items-center">
-              <Text className={perfilTitulo}>Información Personal</Text>
-              <TouchableOpacity onPress={() => setIsEditing(!isEditing)}>
-                <Text className="text-blue-400">{isEditing ? 'Cancelar' : 'Editar'}</Text>
-              </TouchableOpacity>
-            </View>
-
-            {isEditing ? (
-              <>
-                <View className="mt-4">
-                  <Text className="text-gray-700 font-semibold mb-1">Nombre *</Text>
-                  <TextInput
-                    className="bg-white border border-gray-400 rounded-lg p-2 text-gray-800"
-                    value={formData.name}
-                    onChangeText={(text) => setFormData({ ...formData, name: text })}
-                    placeholder="Tu nombre completo"
-                    placeholderTextColor="gray"
-                    maxLength={50}
-                  />
+              <View className="relative">
+                <TouchableOpacity 
+                  className="absolute right-3 top-2 z-10"
+                  onPress={() => router.push('/account/perfil/settings')}
+                >
+                  <Ionicons name="settings" size={24} color="#FFFFFF" />
+                </TouchableOpacity>
+                <View className={perfilHeader}>
+                  <Text className={perfilNombre}>{profile.name}</Text>
+                  <Text className={perfilUsername}>{profile.user_name}</Text>
+                  <Text className={perfilEmail}>{profile.email}</Text>
                 </View>
+              </View>
 
-                <View className="mt-4">
-                  <Text className="text-gray-700 font-semibold mb-1">Nombre de Usuario</Text>
-                  <TextInput
-                    className="bg-white border border-gray-400 rounded-lg p-2 text-gray-800"
-                    value={formData.user_name}
-                    onChangeText={(text) => setFormData({ ...formData, user_name: text })}
-                    placeholder="Tu nombre de usuario"
-                    placeholderTextColor="gray"
-                    maxLength={50}
-                  />
-                </View>
-
-                <View className="mt-4">
-                  <Text className="text-gray-700 font-semibold mb-1">Documento *</Text>
-                  <TextInput
-                    className="bg-white border border-gray-400 rounded-lg p-2 text-gray-800"
-                    value={formData.id_number}
-                    onChangeText={(text) => setFormData({ ...formData, id_number: text })}
-                    placeholder="Tu número de documento"
-                    placeholderTextColor="gray"
-                    maxLength={20}
-                    keyboardType="numeric"
-                  />
-                </View>
-
-                <View className="mt-4">
-                  <Text className="text-gray-700 font-semibold mb-1">Teléfono *</Text>
-                  <TextInput
-                    className="bg-white border border-gray-400 rounded-lg p-2 text-gray-800"
-                    value={formData.phone}
-                    onChangeText={(text) => setFormData({ ...formData, phone: text })}
-                    placeholder="Tu número de teléfono"
-                    placeholderTextColor="gray"
-                    maxLength={20}
-                    keyboardType="phone-pad"
-                  />
-                </View>
-
-                <View className="mt-4">
-                  <Text className="text-gray-700 font-semibold mb-1">Dirección</Text>
-                  <TextInput
-                    className="bg-white border border-gray-400 rounded-lg p-2 text-gray-800"
-                    value={formData.address}
-                    onChangeText={(text) => setFormData({ ...formData, address: text })}
-                    placeholder="Tu dirección"
-                    placeholderTextColor="gray"
-                    maxLength={150}
-                  />
-                </View>
-
-                <View className="mt-4">
-                  <Text className="text-gray-700 font-semibold mb-1">Fecha de Nacimiento *</Text>
-                  <TouchableOpacity
-                    onPress={() => setShowDatePicker(true)}
-                    className="bg-white border border-gray-400 rounded-lg p-2"
-                  >
-                    <Text style={{ color: formData.birth_date ? '#1F2937' : 'gray' }}>
-                      {formData.birth_date || 'YYYY-MM-DD'}
-                    </Text>
+              <View className={perfilCard}>
+                <View className="flex-row justify-between items-center">
+                  <Text className={perfilTitulo}>Información Personal</Text>
+                  <TouchableOpacity onPress={() => setIsEditing(!isEditing)}>
+                    <Text className="text-blue-400">{isEditing ? 'Cancelar' : 'Editar'}</Text>
                   </TouchableOpacity>
-                  {showDatePicker && (
-                    <DateTimePicker
-                      value={formData.birth_date ? new Date(formData.birth_date) : new Date(getMaxDate())}
-                      mode="date"
-                      display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                      onChange={(event: DateTimePickerEvent, selectedDate?: Date) => {
-                        setShowDatePicker(Platform.OS === 'ios');
-                        if (selectedDate) {
-                          setFormData({ ...formData, birth_date: formatDate(selectedDate) });
-                        }
-                      }}
-                      maximumDate={getMaxDate()}
-                    />
-                  )}
                 </View>
 
-                <View className="mt-4">
-                  <Text className="text-gray-700 font-semibold mb-1">Género *</Text>
-                  <View className="bg-white border border-gray-400 rounded-lg">
-                    <Picker
-                      selectedValue={formData.gender}
-                      onValueChange={(itemValue) => setFormData({ ...formData, gender: itemValue })}
-                      style={{ color: '#1F2937' }}
+                {isEditing ? (
+                  <>
+                    <View className="mt-4">
+                      <Text className="text-gray-700 font-semibold mb-1">Nombre *</Text>
+                      <TextInput
+                        className="bg-white border border-gray-400 rounded-lg p-2 text-gray-800"
+                        value={formData.name}
+                        onChangeText={(text) => setFormData({ ...formData, name: text })}
+                        placeholder="Tu nombre completo"
+                        placeholderTextColor="gray"
+                        maxLength={50}
+                      />
+                    </View>
+
+                    <View className="mt-4">
+                      <Text className="text-gray-700 font-semibold mb-1">Nombre de Usuario</Text>
+                      <TextInput
+                        className="bg-white border border-gray-400 rounded-lg p-2 text-gray-800"
+                        value={formData.user_name}
+                        onChangeText={(text) => setFormData({ ...formData, user_name: text })}
+                        placeholder="Tu nombre de usuario"
+                        placeholderTextColor="gray"
+                        maxLength={50}
+                      />
+                    </View>
+
+                    <View className="mt-4">
+                      <Text className="text-gray-700 font-semibold mb-1">Documento *</Text>
+                      <TextInput
+                        className="bg-white border border-gray-400 rounded-lg p-2 text-gray-800"
+                        value={formData.id_number}
+                        onChangeText={(text) => setFormData({ ...formData, id_number: text })}
+                        placeholder="Tu número de documento"
+                        placeholderTextColor="gray"
+                        maxLength={20}
+                        keyboardType="numeric"
+                      />
+                    </View>
+
+                    <View className="mt-4">
+                      <Text className="text-gray-700 font-semibold mb-1">Teléfono *</Text>
+                      <TextInput
+                        className="bg-white border border-gray-400 rounded-lg p-2 text-gray-800"
+                        value={formData.phone}
+                        onChangeText={(text) => setFormData({ ...formData, phone: text })}
+                        placeholder="Tu número de teléfono"
+                        placeholderTextColor="gray"
+                        maxLength={20}
+                        keyboardType="phone-pad"
+                      />
+                    </View>
+
+                    <View className="mt-4">
+                      <Text className="text-gray-700 font-semibold mb-1">Dirección</Text>
+                      <TextInput
+                        className="bg-white border border-gray-400 rounded-lg p-2 text-gray-800"
+                        value={formData.address}
+                        onChangeText={(text) => setFormData({ ...formData, address: text })}
+                        placeholder="Tu dirección"
+                        placeholderTextColor="gray"
+                        maxLength={150}
+                      />
+                    </View>
+
+                    <View className="mt-4">
+                      <Text className="text-gray-700 font-semibold mb-1">Fecha de Nacimiento *</Text>
+                      <TouchableOpacity
+                        onPress={() => setShowDatePicker(true)}
+                        className="bg-white border border-gray-400 rounded-lg p-2"
+                      >
+                        <Text style={{ color: formData.birth_date ? '#1F2937' : 'gray' }}>
+                          {formData.birth_date || 'YYYY-MM-DD'}
+                        </Text>
+                      </TouchableOpacity>
+                      {showDatePicker && (
+                        <DateTimePicker
+                          value={formData.birth_date ? new Date(formData.birth_date) : new Date(getMaxDate())}
+                          mode="date"
+                          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                          onChange={(event: DateTimePickerEvent, selectedDate?: Date) => {
+                            setShowDatePicker(Platform.OS === 'ios');
+                            if (selectedDate) {
+                              setFormData({ ...formData, birth_date: formatDate(selectedDate) });
+                            }
+                          }}
+                          maximumDate={getMaxDate()}
+                        />
+                      )}
+                    </View>
+
+                    <View className="mt-4">
+                      <Text className="text-gray-700 font-semibold mb-1">Género *</Text>
+                      <View className="bg-white border border-gray-400 rounded-lg">
+                        <Picker
+                          selectedValue={formData.gender}
+                          onValueChange={(itemValue) => setFormData({ ...formData, gender: itemValue })}
+                          style={{ color: '#1F2937' }}
+                        >
+                          <Picker.Item label="Selecciona un género" value="" enabled={false} style={{ color: 'gray' }} />
+                          <Picker.Item label="Masculino" value="m" style={{ color: '#1F2937' }} />
+                          <Picker.Item label="Femenino" value="f" style={{ color: '#1F2937' }} />
+                        </Picker>
+                      </View>
+                    </View>
+
+                    <TouchableOpacity 
+                      className={`${botonGeneral} mt-4`}
+                      onPress={handleUpdateProfile}
                     >
-                      <Picker.Item label="Selecciona un género" value="" enabled={false} style={{ color: 'gray' }} />
-                      <Picker.Item label="Masculino" value="m" style={{ color: '#1F2937' }} />
-                      <Picker.Item label="Femenino" value="f" style={{ color: '#1F2937' }} />
-                    </Picker>
-                  </View>
-                </View>
+                      <Text className={textoBotonGeneral}>Guardar Cambios</Text>
+                    </TouchableOpacity>
+                  </>
+                ) : (
+                  
+                  <>
+                  
+                    <View className={perfilRow}>
+                      <Text className={perfilLabel}>Documento:</Text>
+                      <Text className={perfilValue}>{profile.id_number}</Text>
+                    </View>
+                    <View className={perfilRow}>
+                      <Text className={perfilLabel}>Teléfono:</Text>
+                      <Text className={perfilValue}>{profile.phone}</Text>
+                    </View>
+                    <View className={perfilRow}>
+                      <Text className={perfilLabel}>Dirección:</Text>
+                      <Text className={perfilValue}>{profile.address}</Text>
+                    </View>
+                    <View className={perfilRow}>
+                      <Text className={perfilLabel}>Fecha de Nacimiento:</Text>
+                      <Text className={perfilValue}>{profile.birth_date ? new Date(profile.birth_date).toLocaleDateString() : 'No especificada'}</Text>
+                    </View>
+                    <View className={perfilRow}>
+                      <Text className={perfilLabel}>Género:</Text>
+                      <Text className={perfilValue}>{profile.gender}</Text>
+                    </View>
 
-                <TouchableOpacity 
-                  className={`${botonGeneral} mt-4`}
-                  onPress={handleUpdateProfile}
-                >
-                  <Text className={textoBotonGeneral}>Guardar Cambios</Text>
-                </TouchableOpacity>
-              </>
-            ) : (
-              
-              <>
-              
-                <View className={perfilRow}>
-                  <Text className={perfilLabel}>Documento:</Text>
-                  <Text className={perfilValue}>{profile.id_number}</Text>
-                </View>
-                <View className={perfilRow}>
-                  <Text className={perfilLabel}>Teléfono:</Text>
-                  <Text className={perfilValue}>{profile.phone}</Text>
-                </View>
-                <View className={perfilRow}>
-                  <Text className={perfilLabel}>Dirección:</Text>
-                  <Text className={perfilValue}>{profile.address}</Text>
-                </View>
-                <View className={perfilRow}>
-                  <Text className={perfilLabel}>Fecha de Nacimiento:</Text>
-                  <Text className={perfilValue}>{profile.birth_date ? new Date(profile.birth_date).toLocaleDateString() : 'No especificada'}</Text>
-                </View>
-                <View className={perfilRow}>
-                  <Text className={perfilLabel}>Género:</Text>
-                  <Text className={perfilValue}>{profile.gender}</Text>
-                </View>
-
-                <TouchableOpacity 
-                  className={`${botonGeneral} mt-4`}
-                  onPress={() => setIsChangingPassword(true)}
-                >
-                  <Text className={textoBotonGeneral}>Cambiar Contraseña</Text>
-                </TouchableOpacity>
-                <TouchableOpacity 
-                className={`${botonGeneral} mt-4`}
-                onPress={() => router.push('account/perfil/processPersonal')}
-              >
-                  <Text className={textoBotonGeneral}>Progreso</Text>
-              </TouchableOpacity>
-              </>
-            )}
-          </View>
+                    <TouchableOpacity 
+                      className={`${botonGeneral} mt-4`}
+                      onPress={() => setIsChangingPassword(true)}
+                    >
+                      <Text className={textoBotonGeneral}>Cambiar Contraseña</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity 
+                    className={`${botonGeneral} mt-4`}
+                    onPress={() => router.push('account/perfil/processPersonal')}
+                  >
+                      <Text className={textoBotonGeneral}>Progreso</Text>
+                  </TouchableOpacity>
+                  </>
+                )}
+              </View>
+            </View>
+          ) : (
+            <Text className={perfilError}>
+              No se pudo cargar la información del usuario
+            </Text>
+          )}
         </View>
-      ) : (
-        <Text className={perfilError}>
-          No se pudo cargar la información del usuario
-        </Text>
-      )}
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
