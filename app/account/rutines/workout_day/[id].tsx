@@ -85,6 +85,7 @@ const WorkoutDayDetail = () => {
     reps: 8,
     weight: 0
   })
+  const [selectedExerciseId, setSelectedExerciseId] = useState<number | null>(null)
 
   const isOwnerOrAdmin = () => {
     return workoutDay?.permissions?.can_edit || false;
@@ -273,14 +274,18 @@ const WorkoutDayDetail = () => {
 
   const handleAddSeries = async (exerciseId: number) => {
     try {
-      // Obtener el número de series existentes para este ejercicio
-      const existingSeries = exercises
-        .find(ex => ex.exercise.id === exerciseId)
-        ?.series || [];
+      // Obtener el número de series existentes para este ejercicio específico
+      const currentExercise = exercises.find(ex => ex.exercise.id === exerciseId);
+      if (!currentExercise) {
+        console.error('Ejercicio no encontrado:', exerciseId);
+        return;
+      }
+
+      const existingSeries = currentExercise.series || [];
       
       const newSeriesData: SeriesWithDropsets = {
-        id: Date.now(), // ID temporal para el estado local
-        history_pr_exercise_id: 0, // Este ID se actualizará cuando se guarde todo
+        id: Date.now(), // Temporal, idealmente usar uuid
+        history_pr_exercise_id: 0,
         notas_serie: newSeries.notas_serie,
         orden_serie: existingSeries.length + 1,
         reps: Number(newSeries.reps),
@@ -290,17 +295,19 @@ const WorkoutDayDetail = () => {
         dropsets: []
       };
 
-      setExercises(exercises.map(ex => {
-        if (ex.exercise.id === exerciseId) {
-          return {
-            ...ex,
-            series: [...(ex.series || []), newSeriesData]
+      setExercises(prevExercises => 
+        prevExercises.map(ex => {
+          if (ex.exercise.id === exerciseId) {
+            return {
+              ...ex,
+              series: [...(ex.series || []), newSeriesData]
+            };
           }
-        }
-        return ex
-      }))
+          return ex;
+        })
+      );
       
-      setIsSeriesModalVisible(false)
+      setIsSeriesModalVisible(false);
       setNewSeries({
         history_pr_exercise_id: 0,
         notas_serie: '',
@@ -309,12 +316,12 @@ const WorkoutDayDetail = () => {
         rpe: 8.5,
         tipo_serie: 'Principal',
         weight: 100
-      })
+      });
     } catch (error) {
-      console.error('Error al agregar serie:', error)
-      Alert.alert('Error', 'No se pudo agregar la serie')
+      console.error('Error al agregar serie:', error);
+      Alert.alert('Error', 'No se pudo agregar la serie');
     }
-  }
+  };
 
   const handleAddDropset = async (seriesId: number) => {
     try {
@@ -575,18 +582,20 @@ const WorkoutDayDetail = () => {
                     className="border border-gray-300 p-2 rounded-lg"
                     value={exerciseData.historyPR.notas}
                     onChangeText={(text) => {
-                      setExercises(exercises.map(ex => {
-                        if (ex.exercise.id === exerciseData.exercise.id) {
-                          return {
-                            ...ex,
-                            historyPR: {
-                              ...ex.historyPR!,
-                              notas: text
-                            }
+                      setExercises(prevExercises => 
+                        prevExercises.map(ex => {
+                          if (ex.exercise.id === exerciseData.exercise.id) {
+                            return {
+                              ...ex,
+                              historyPR: {
+                                ...ex.historyPR!,
+                                notas: text
+                              }
+                            };
                           }
-                        }
-                        return ex
-                      }))
+                          return ex;
+                        })
+                      );
                     }}
                     placeholder="Agrega notas sobre la sesión"
                     multiline
@@ -599,11 +608,12 @@ const WorkoutDayDetail = () => {
                   <TouchableOpacity 
                     className="bg-green-500 p-2 rounded-lg"
                     onPress={() => {
+                      setSelectedExerciseId(exerciseData.exercise.id!);
                       setNewSeries({
                         ...newSeries,
                         history_pr_exercise_id: exerciseData.historyPR!.id!
-                      })
-                      setIsSeriesModalVisible(true)
+                      });
+                      setIsSeriesModalVisible(true);
                     }}
                   >
                     <Text className="text-white">Agregar Serie</Text>
@@ -757,7 +767,7 @@ const WorkoutDayDetail = () => {
                     value={newSeries.rpe.toString()}
                     onChangeText={(value) => {
                       const num = value ? parseFloat(value) : 0;
-                      if (!isNaN(num) && num >= 1 && num <= 10) {
+                      if (num >= 0 && num <= 10) {
                         setNewSeries({...newSeries, rpe: num});
                       }
                     }}
@@ -784,11 +794,8 @@ const WorkoutDayDetail = () => {
                     onPress={() => {
                       if (selectedSeries) {
                         handleUpdateSeries(selectedSeries.id!, newSeries);
-                      } else {
-                        const currentExercise = exercises.find(ex => ex.historyPR?.id === newSeries.history_pr_exercise_id);
-                        if (currentExercise) {
-                          handleAddSeries(currentExercise.exercise.id!);
-                        }
+                      } else if (selectedExerciseId) {
+                        handleAddSeries(selectedExerciseId);
                       }
                     }}
                   >
@@ -801,6 +808,7 @@ const WorkoutDayDetail = () => {
                     onPress={() => {
                       setIsSeriesModalVisible(false);
                       setSelectedSeries(null);
+                      setSelectedExerciseId(null);
                       setNewSeries({
                         history_pr_exercise_id: 0,
                         notas_serie: '',
@@ -944,7 +952,7 @@ const WorkoutDayDetail = () => {
                     value={newExercise.repsHigh.toString()}
                     onChangeText={(value) => {
                       const num = parseInt(value) || 0;
-                      if (num >= 1 && num <= 100) {
+                      if (num >= 0 && num <= 100) {
                         setNewExercise({...newExercise, repsHigh: num});
                       }
                     }}
@@ -959,7 +967,7 @@ const WorkoutDayDetail = () => {
                     value={newExercise.repsLow.toString()}
                     onChangeText={(value) => {
                       const num = parseInt(value) || 0;
-                      if (num >= 1 && num <= 100) {
+                      if (num >= 0 && num <= 100) {
                         setNewExercise({...newExercise, repsLow: num});
                       }
                     }}
@@ -974,7 +982,7 @@ const WorkoutDayDetail = () => {
                     value={newExercise.rest.toString()}
                     onChangeText={(value) => {
                       const num = parseFloat(value) || 0;
-                      if (num >= 1 && num <= 1000) {
+                      if (num >= 0 && num <= 1000) {
                         setNewExercise({...newExercise, rest: num});
                       }
                     }}
