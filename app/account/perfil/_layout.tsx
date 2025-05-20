@@ -72,6 +72,22 @@ export default function PerfilLayout() {
               headerShown: true,
             }}
           />
+          <Stack.Screen
+            name="(progressExercise)/exercises"
+            options={{
+              title: 'Ejercicios',
+              headerShown: true,
+            }}
+          />
+          <Stack.Screen
+          name="(progressExercise)/[id]"
+          options={{
+            title: 'Progreso del ejercicio',
+            headerShown: true,
+          }}
+        />
+
+          
         </Stack>
       </SafeAreaView>
     </SafeAreaProvider>

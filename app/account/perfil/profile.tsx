@@ -475,19 +475,27 @@ const Profile = () => {
                       <Text className={perfilValue}>{profile.gender}</Text>
                     </View>
 
+
                     <TouchableOpacity 
+                    className={`${botonGeneral} mt-4`}
+                    onPress={() => router.push('account/perfil/processPersonal')}
+                  >
+                      <Text className={textoBotonGeneral}>Progreso Personal</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity 
+                    className={`${botonGeneral} mt-4`}
+                    onPress={() => router.push('account/perfil/exercises')}
+                  >
+                      <Text className={textoBotonGeneral}>Progreso Ejercicios</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity 
                       className={`${botonGeneral} mt-4`}
                       onPress={() => setIsChangingPassword(true)}
                     >
                       <Text className={textoBotonGeneral}>Cambiar Contraseña</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity 
-                    className={`${botonGeneral} mt-4`}
-                    onPress={() => router.push('account/perfil/processPersonal')}
-                  >
-                      <Text className={textoBotonGeneral}>Progreso</Text>
-                  </TouchableOpacity>
                   </>
+
                 )}
               </View>
             </View>
