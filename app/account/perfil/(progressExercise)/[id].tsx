@@ -21,6 +21,7 @@ import { LineChart } from 'react-native-chart-kit'
 type TabType = 'resumen' | 'historia' | 'indicaciones'
 type TimeFilter = 'all' | 'week' | 'month' | 'sixMonths' | 'year'
 type MetricType = 'totalReps' | 'maxWeight' | 'sessionVolume' | 'oneRM'
+type DateRange = 'all' | 'last3' | 'last5' | 'last10'
 
 interface HistoryWithDetails extends HistoryPRExercise {
   series?: (SeriesPRExercise & {
@@ -51,6 +52,7 @@ const ExerciseHistory = () => {
   const [activeTab, setActiveTab] = useState<TabType>('resumen')
   const [timeFilter, setTimeFilter] = useState<TimeFilter>('all')
   const [selectedMetric, setSelectedMetric] = useState<MetricType>('totalReps')
+  const [dateRange, setDateRange] = useState<DateRange>('all')
   const screenWidth = Dimensions.get('window').width
 
   const formatDate = (dateString: string): string => {
@@ -60,6 +62,27 @@ const ExerciseHistory = () => {
       month: 'long',
       year: 'numeric',
     }).format(date);
+  };
+
+  const formatChartDate = (dateString: string): string => {
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat('es-ES', {
+      day: '2-digit',
+      month: '2-digit',
+    }).format(date);
+  };
+
+  const filterDataByDateRange = (data: MetricData[]): MetricData[] => {
+    switch (dateRange) {
+      case 'last3':
+        return data.slice(-3);
+      case 'last5':
+        return data.slice(-5);
+      case 'last10':
+        return data.slice(-10);
+      default:
+        return data;
+    }
   };
 
   const calculateMetric = (history: HistoryWithDetails[], metric: MetricType): MetricData[] => {
@@ -254,10 +277,11 @@ const ExerciseHistory = () => {
     switch (activeTab) {
       case 'resumen':
         const metricData = calculateMetric(history, selectedMetric);
+        const filteredMetricData = filterDataByDateRange(metricData);
         const chartData = {
-          labels: metricData.map(item => formatDate(item.date)),
+          labels: filteredMetricData.map(item => formatChartDate(item.date)),
           datasets: [{
-            data: metricData.map(item => item.value)
+            data: filteredMetricData.map(item => item.value)
           }]
         };
 
@@ -282,6 +306,23 @@ const ExerciseHistory = () => {
                     {selectedMetric === 'sessionVolume' && 'Volumen de la Sesión'}
                     {selectedMetric === 'oneRM' && '1 Repetición Máxima'}
                   </Text>
+
+                  {/* Date Range Selector */}
+                  <View className="mb-4">
+                    <Text className="text-gray-600 font-medium mb-2">Rango de fechas:</Text>
+                    <View className="border-2 border-gray-200 rounded-lg overflow-hidden">
+                      <Picker
+                        selectedValue={dateRange}
+                        onValueChange={(value: DateRange) => setDateRange(value)}
+                        style={{ height: 50 }}
+                      >
+                        <Picker.Item label="Últimos 3 registros" value="last3" />
+                        <Picker.Item label="Últimos 5 registros" value="last5" />
+                        <Picker.Item label="Últimos 10 registros" value="last10" />
+                      </Picker>
+                    </View>
+                  </View>
+
                   <LineChart
                     data={chartData}
                     width={screenWidth - 48}

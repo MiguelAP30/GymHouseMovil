@@ -310,7 +310,7 @@ const Profile = () => {
   }
 
   return (
-    <SafeAreaView className={`${perfilContainer} flex-1`} edges={['bottom']}>
+    <SafeAreaView className={`${perfilContainer} flex-1`} edges={['top', 'bottom']}>
       <ScrollView className="flex-1">
         <View className="p-6">
           {profile ? (

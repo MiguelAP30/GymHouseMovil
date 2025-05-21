@@ -23,7 +23,9 @@ import {
   updateDropsetPRExercise,
   deleteSeriesPRExercise,
   deleteDropsetPRExercise,
-  getHistoryPRExerciseByExerciseAndUser
+  getHistoryPRExerciseByExerciseAndUser,
+  getSeriesPRExerciseByHistory,
+  getDropsetPRExerciseBySeries
 } from '../../../../lib/pr_exercise'
 import { ExerciseConfigurationDAO, ExerciseDAO, WeekDayDAO } from '../../../../interfaces/exercise'
 import { ROLES } from '../../../../interfaces/user'
@@ -43,6 +45,7 @@ interface ExerciseWithConfig {
   config: ExerciseConfigurationDAO;
   historyPR?: HistoryPRExercise;
   series?: SeriesWithDropsets[];
+  lastSession?: HistoryPRExercise;
 }
 
 const WorkoutDayDetail = () => {
@@ -62,6 +65,11 @@ const WorkoutDayDetail = () => {
   const [isDropsetModalVisible, setIsDropsetModalVisible] = useState(false)
   const [selectedHistoryPR, setSelectedHistoryPR] = useState<HistoryPRExercise | null>(null)
   const [selectedSeries, setSelectedSeries] = useState<SeriesWithDropsets | null>(null)
+  const [isLastSessionModalVisible, setIsLastSessionModalVisible] = useState(false)
+  const [selectedLastSession, setSelectedLastSession] = useState<{
+    history: HistoryPRExercise;
+    series: SeriesWithDropsets[];
+  } | null>(null)
   const [newExercise, setNewExercise] = useState({
     exercise_id: 0,
     sets: 3,
@@ -133,9 +141,21 @@ const WorkoutDayDetail = () => {
       const exerciseConfigs = await Promise.all(
         dayConfigs.map(async (config: ExerciseConfigurationDAO) => {
           const exercise = await getExerciseById(config.exercise_id)
+          // Get last session for this exercise
+          const sessions = await getHistoryPRExerciseByExerciseAndUser(exercise.id!, user?.email || '')
+          // Sort by date and ID to get the most recent
+          const sortedSessions = sessions.sort((a: HistoryPRExercise, b: HistoryPRExercise) => {
+            const dateA = new Date(a.date).getTime()
+            const dateB = new Date(b.date).getTime()
+            if (dateA === dateB) {
+              return (b.id || 0) - (a.id || 0)
+            }
+            return dateB - dateA
+          })
           return {
             exercise,
-            config
+            config,
+            lastSession: sortedSessions[0] // Get the most recent session
           }
         })
       )
@@ -237,14 +257,14 @@ const WorkoutDayDetail = () => {
       // Crear todos los HistoryPRExercise con sus series y dropsets
       const results = await Promise.all(
         exercises.map(async (exercise) => {
-          if (!exercise.historyPR) return null;
+          if (!exercise.historyPR || !exercise.series || exercise.series.length === 0) return null;
 
           const historyData = {
             date: exercise.historyPR.date,
             exercise_id: exercise.historyPR.exercise_id,
             notas: exercise.historyPR.notas,
             tipo_sesion: exercise.historyPR.tipo_sesion,
-            series: exercise.series?.map(series => ({
+            series: exercise.series.map(series => ({
               notas_serie: series.notas_serie,
               orden_serie: series.orden_serie,
               reps: series.reps,
@@ -256,7 +276,7 @@ const WorkoutDayDetail = () => {
                 reps: dropset.reps,
                 weight: dropset.weight
               })) || []
-            })) || []
+            }))
           };
 
           console.log('Enviando datos del historial:', historyData);
@@ -266,6 +286,9 @@ const WorkoutDayDetail = () => {
 
       setIsTraining(false);
       Alert.alert('Éxito', 'Entrenamiento guardado correctamente');
+      
+      // Recargar los datos después de guardar
+      await loadWorkoutDayDetails();
     } catch (error) {
       console.error('Error al terminar entrenamiento:', error);
       Alert.alert('Error', 'No se pudo guardar el entrenamiento');
@@ -462,6 +485,26 @@ const WorkoutDayDetail = () => {
     }
   }
 
+  const handleViewLastSession = async (exerciseId: number, historyId: number) => {
+    try {
+      const series = await getSeriesPRExerciseByHistory(historyId)
+      const seriesWithDropsets = await Promise.all(
+        series.map(async (serie: SeriesPRExercise) => {
+          const dropsets = await getDropsetPRExerciseBySeries(serie.id!)
+          return { ...serie, dropsets }
+        })
+      )
+      setSelectedLastSession({
+        history: exercises.find(ex => ex.exercise.id === exerciseId)?.lastSession!,
+        series: seriesWithDropsets
+      })
+      setIsLastSessionModalVisible(true)
+    } catch (error) {
+      console.error('Error al cargar detalles de la última sesión:', error)
+      Alert.alert('Error', 'No se pudieron cargar los detalles de la última sesión')
+    }
+  }
+
   if (loading) {
     return (
       <View className="flex-1 justify-center items-center">
@@ -571,6 +614,18 @@ const WorkoutDayDetail = () => {
             {exerciseData.config.notes && (
               <View className="mt-2">
                 <Text className="text-gray-500 italic">Notas: {exerciseData.config.notes}</Text>
+              </View>
+            )}
+
+            {exerciseData.lastSession && (
+              <View className="mt-4 flex-row justify-between items-center">
+                <Text className="text-gray-700 font-semibold">Última Sesión</Text>
+                <TouchableOpacity 
+                  onPress={() => handleViewLastSession(exerciseData.exercise.id!, exerciseData.lastSession!.id!)}
+                  className="bg-blue-500 p-2 rounded-full"
+                >
+                  <Ionicons name="eye" size={20} color="white" />
+                </TouchableOpacity>
               </View>
             )}
 
@@ -1022,6 +1077,81 @@ const WorkoutDayDetail = () => {
                     <Text className="text-white font-bold text-center">Cancelar</Text>
                   </TouchableOpacity>
                 </View>
+              </ScrollView>
+            </View>
+          </View>
+        </Modal>
+
+        {/* Last Session Modal */}
+        <Modal
+          visible={isLastSessionModalVisible}
+          animationType="slide"
+          transparent={true}
+          onRequestClose={() => setIsLastSessionModalVisible(false)}
+        >
+          <View className="flex-1 justify-center items-center bg-black/50">
+            <View className="bg-white p-4 rounded-lg w-[90%] max-h-[80%]">
+              <ScrollView>
+                <View className="flex-row justify-between items-center mb-4">
+                  <Text className="text-xl font-bold">Detalles de la Última Sesión</Text>
+                  <TouchableOpacity 
+                    onPress={() => setIsLastSessionModalVisible(false)}
+                    className="bg-red-500 p-2 rounded-full"
+                  >
+                    <Ionicons name="close" size={20} color="white" />
+                  </TouchableOpacity>
+                </View>
+
+                {selectedLastSession && (
+                  <>
+                    <View className="mb-4">
+                      <Text className="text-lg font-semibold mb-2">
+                        {new Date(selectedLastSession.history.date).toLocaleDateString('es-ES', {
+                          day: '2-digit',
+                          month: 'long',
+                          year: 'numeric'
+                        })}
+                      </Text>
+                      <Text className="text-gray-600 mb-1">
+                        Tipo de Sesión: {selectedLastSession.history.tipo_sesion}
+                      </Text>
+                      {selectedLastSession.history.notas && (
+                        <Text className="text-gray-600 italic">
+                          Notas: {selectedLastSession.history.notas}
+                        </Text>
+                      )}
+                    </View>
+
+                    <View className="mb-4">
+                      <Text className="text-lg font-semibold mb-2">Series</Text>
+                      {selectedLastSession.series.map((serie, index) => (
+                        <View key={index} className="bg-gray-50 p-3 rounded-lg mb-2">
+                          <Text className="font-semibold">Serie {serie.orden_serie}</Text>
+                          <Text>Tipo: {serie.tipo_serie}</Text>
+                          <Text>Reps: {serie.reps}</Text>
+                          <Text>Peso: {serie.weight}kg</Text>
+                          <Text>RPE: {serie.rpe}</Text>
+                          {serie.notas_serie && (
+                            <Text className="italic">Notas: {serie.notas_serie}</Text>
+                          )}
+
+                          {serie.dropsets && serie.dropsets.length > 0 && (
+                            <View className="mt-2 ml-4">
+                              <Text className="font-semibold mb-1">Dropsets</Text>
+                              {serie.dropsets.map((dropset, dIndex) => (
+                                <View key={dIndex} className="bg-gray-100 p-2 rounded-lg mb-1">
+                                  <Text>Dropset {dropset.orden_dropset}</Text>
+                                  <Text>Reps: {dropset.reps}</Text>
+                                  <Text>Peso: {dropset.weight}kg</Text>
+                                </View>
+                              ))}
+                            </View>
+                          )}
+                        </View>
+                      ))}
+                    </View>
+                  </>
+                )}
               </ScrollView>
             </View>
           </View>

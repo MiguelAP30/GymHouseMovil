@@ -15,7 +15,7 @@ export default function PerfilLayout() {
   return (
     <SafeAreaProvider>
       <StatusBar barStyle="light-content" backgroundColor="#1F2937" />
-      <SafeAreaView style={{ flex: 1, backgroundColor: '#1F2937' }} edges={['top']}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: '#1F2937' }} edges={['top', 'bottom']}>
         <Stack
           screenOptions={{
             headerStyle: {
