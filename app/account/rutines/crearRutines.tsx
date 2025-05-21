@@ -86,7 +86,11 @@ const CrearRutines = () => {
         [
           {
             text: 'OK',
-            onPress: () => router.back()
+            onPress: () => {
+              router.back()
+              // Forzar recarga de la pantalla anterior
+              router.replace(router.canGoBack() ? '/account/rutines' : '/account/rutines/misRutinas')
+            }
           }
         ]
       )

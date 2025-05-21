@@ -2,7 +2,7 @@ import { View, Text, TouchableOpacity, ScrollView, ActivityIndicator, Alert } fr
 import React, { useState, useEffect } from 'react'
 import { Ionicons } from '@expo/vector-icons'
 import { GymDAO, UserGymDAO } from '../../../interfaces/gym'
-import { deleteGymByUser, getGymUsers, getGymByUser } from '../../../lib/gym'
+import { deleteGymByUser, getGymUsers, getGymByUser, deleteUserGymById } from '../../../lib/gym'
 import { useAuth } from '../../../context/AuthStore'
 import { router, useFocusEffect } from 'expo-router'
 
@@ -67,6 +67,35 @@ const MyGym = () => {
       console.error('Error al eliminar gimnasio:', error)
       Alert.alert('Error', 'No se pudo eliminar el gimnasio. Por favor, intenta de nuevo.')
     }
+  }
+
+  const handleDeleteUser = async (userEmail: string) => {
+    if (!gym?.id) return
+
+    Alert.alert(
+      'Eliminar Usuario',
+      '¿Estás seguro de que deseas eliminar este usuario del gimnasio?',
+      [
+        {
+          text: 'Cancelar',
+          style: 'cancel'
+        },
+        {
+          text: 'Eliminar',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await deleteUserGymById(gym.id, userEmail)
+              await fetchUsers() // Recargar la lista de usuarios
+              Alert.alert('Éxito', 'Usuario eliminado correctamente')
+            } catch (error) {
+              console.error('Error al eliminar usuario:', error)
+              Alert.alert('Error', 'No se pudo eliminar el usuario. Por favor, intenta de nuevo.')
+            }
+          }
+        }
+      ]
+    )
   }
 
   if (loading) {
@@ -155,6 +184,13 @@ const MyGym = () => {
           </View>
 
           <View className="flex-row items-center mb-2">
+            <Ionicons name="people" size={20} color="#666" />
+            <Text className="ml-2 text-gray-600">
+              Usuarios: {gym.current_users} / {gym.max_users}
+            </Text>
+          </View>
+
+          <View className="flex-row items-center mb-2">
             <Ionicons name="calendar" size={20} color="#666" />
             <Text className="ml-2 text-gray-600">
               {new Date(gym.start_date).toLocaleDateString()} - {new Date(gym.final_date).toLocaleDateString()}
@@ -185,31 +221,40 @@ const MyGym = () => {
             <Text className="text-gray-500 text-center py-4">No hay usuarios registrados</Text>
           ) : (
             users.map((user, index) => (
-              <TouchableOpacity
+              <View
                 key={index}
                 className="border-b border-gray-200 py-3"
-                onPress={() => router.push({
-                  pathname: '/account/dashboardGym/userDetails',
-                  params: { id: user.id }
-                })}
               >
                 <View className="flex-row justify-between items-center">
-                  <View>
-                    <Text className="font-bold">{user.user_email}</Text>
-                    <Text className="text-gray-600">
-                      {new Date(user.start_date).toLocaleDateString()} - {new Date(user.final_date).toLocaleDateString()}
-                    </Text>
-                  </View>
+                  <TouchableOpacity
+                    className="flex-1"
+                    onPress={() => router.push({
+                      pathname: '/account/dashboardGym/[id]',
+                      params: { id: user.id }
+                    })}
+                  >
+                    <View>
+                      <Text className="font-bold">{user.user_email}</Text>
+                      <Text className="text-gray-600">
+                        {new Date(user.start_date).toLocaleDateString()} - {new Date(user.final_date).toLocaleDateString()}
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
                   <View className="flex-row items-center">
                     {user.is_premium && (
                       <View className="bg-yellow-100 px-2 py-1 rounded-full mr-2">
                         <Text className="text-yellow-800 text-xs">Premium</Text>
                       </View>
                     )}
-                    <Ionicons name="chevron-forward" size={20} color="#666" />
+                    <TouchableOpacity
+                      onPress={() => handleDeleteUser(user.user_email)}
+                      className="bg-red-500 p-2 rounded-full ml-2"
+                    >
+                      <Ionicons name="trash" size={20} color="white" />
+                    </TouchableOpacity>
                   </View>
                 </View>
-              </TouchableOpacity>
+              </View>
             ))
           )}
         </View>

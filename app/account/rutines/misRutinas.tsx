@@ -1,6 +1,6 @@
 import { View, Text, TouchableOpacity, TextInput, ScrollView, ActivityIndicator, Alert } from 'react-native'
 import React, { useState, useEffect } from 'react'
-import { useRouter } from 'expo-router'
+import { useRouter, useFocusEffect } from 'expo-router'
 import { useAuth } from '../../../context/AuthStore'
 import { getMyTrainingPlans, deleteTrainingPlan, getTagOfTrainingPlans } from '../../../lib/training'
 import { TrainingPlanDAO, TagOfTrainingPlanDAO } from '../../../interfaces/training'
@@ -32,6 +32,22 @@ const MisRutinas = () => {
     }
     loadData()
   }, [searchName, selectedTag])
+
+  // Agregar un efecto que se ejecuta cuando la pantalla se enfoca
+  useFocusEffect(
+    React.useCallback(() => {
+      const loadData = async () => {
+        const isAuthenticated = await checkAuth()
+        if (!isAuthenticated) return
+
+        await Promise.all([
+          fetchMyRoutines(),
+          fetchTags()
+        ])
+      }
+      loadData()
+    }, [])
+  )
 
   const fetchMyRoutines = async () => {
     setLoading(true)
@@ -100,25 +116,23 @@ const MisRutinas = () => {
           text: 'Eliminar',
           style: 'destructive',
           onPress: async () => {
-            await deleteTrainingPlan(id)
-            Alert.alert('Éxito', 'Rutina eliminada correctamente')
-            await fetchMyRoutines()
+            try {
+              await deleteTrainingPlan(id)
+              Alert.alert('Éxito', 'Rutina eliminada correctamente')
+              await fetchMyRoutines()
+            } catch (error) {
+              console.error('Error al eliminar la rutina:', error)
+              Alert.alert('Error', 'No se pudo eliminar la rutina')
+            }
           }
         }
       ]
     )
   }
 
-  const handleEditRoutine = (id: number) => {
-    // Aquí se implementaría la navegación a la pantalla de edición
-    // Por ahora solo mostramos un mensaje
-    Alert.alert('Editar', `Editar rutina con ID: ${id}`)
-  }
 
   const handleViewRoutine = (id: number) => {
-    // Aquí se implementaría la navegación a la pantalla de detalles
-    // Por ahora solo mostramos un mensaje
-    Alert.alert('Ver detalles', `Ver detalles de la rutina con ID: ${id}`)
+    router.push(`/account/rutines/${id}`)
   }
 
   if (loading && routines.length === 0) {
@@ -232,12 +246,6 @@ const MisRutinas = () => {
                     className="mr-3"
                   >
                     <Ionicons name="eye" size={24} color="#007AFF" />
-                  </TouchableOpacity>
-                  <TouchableOpacity 
-                    onPress={() => routine.id && handleEditRoutine(routine.id)}
-                    className="mr-3"
-                  >
-                    <Ionicons name="pencil" size={24} color="#007AFF" />
                   </TouchableOpacity>
                   <TouchableOpacity 
                     onPress={() => routine.id && handleDeleteRoutine(routine.id)}

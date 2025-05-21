@@ -167,12 +167,20 @@ const Rutinas = () => {
       <View className="flex-1 p-5 bg-gray-100">
         <View className="flex-row justify-between items-center mb-5">
           <Text className="text-2xl font-bold">Rutinas</Text>
-          <TouchableOpacity 
-            className="bg-blue-500 p-2.5 rounded-lg"
-            onPress={() => router.push('/account/rutines/crearRutines')}
-          >
-            <Text className="text-white font-bold">Crear</Text>
-          </TouchableOpacity>
+          <View className="flex-row space-x-2">
+            <TouchableOpacity 
+              className="bg-blue-500 p-2.5 rounded-lg"
+              onPress={() => router.push('/account/rutines/misRutinas')}
+            >
+              <Text className="text-white font-bold">Mis Rutinas</Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              className="bg-blue-500 p-2.5 rounded-lg"
+              onPress={() => router.push('/account/rutines/crearRutines')}
+            >
+              <Text className="text-white font-bold">Crear</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* Search Section */}

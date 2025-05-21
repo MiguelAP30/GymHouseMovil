@@ -24,8 +24,7 @@ const DashboardGymLayout = () => {
       <Stack.Screen
         name="index"
         options={{
-          title: 'Mi Gimnasio',
-          headerShown: true,
+          headerShown: false,
         }}
       />
       <Stack.Screen
