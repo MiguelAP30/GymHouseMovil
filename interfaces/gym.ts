@@ -16,4 +16,20 @@ export interface GymDAO {
     start_date: Date;
     final_date: Date;
     is_active: boolean;
-} 
+    current_users: number;
+    max_users: number;
+}
+
+export interface UserGymDAO {
+    id?: number;
+    user_email: string;
+    gym_id: number;
+    start_date: Date;
+    final_date: Date;
+    is_active: boolean;
+    is_premium: boolean;
+    permissions?: {
+        can_edit: boolean;
+        can_delete: boolean;
+    };
+}

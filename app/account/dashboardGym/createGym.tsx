@@ -2,7 +2,7 @@ import { View, Text, TextInput, TouchableOpacity, ScrollView, ActivityIndicator,
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '../../../context/AuthStore'
 import { router } from 'expo-router'
-import { postGym, getUserGym } from '../../../lib/gym'
+import { postGym, getGymByUser } from '../../../lib/gym'
 import { GymDAO } from '../../../interfaces/gym'
 import DateTimePicker from '@react-native-community/datetimepicker'
 
@@ -65,7 +65,7 @@ const CreateGym = () => {
         return
       }
 
-      const existingGym = await getUserGym()
+      const existingGym = await getGymByUser()
       if (existingGym) {
         Alert.alert(
           'Gimnasio existente',
@@ -73,11 +73,11 @@ const CreateGym = () => {
           [
             {
               text: 'Ver mi gimnasio',
-              onPress: () => router.replace('/account/dashboardGym/myGym')
+              onPress: () => router.replace('/account/dashboardGym/index')
             }
           ]
         )
-        router.replace('/account/dashboardGym/myGym')
+        router.replace('/account/dashboardGym/index')
       }
     } catch (error) {
       console.error('Error al verificar gimnasio existente:', error)
@@ -197,7 +197,7 @@ const CreateGym = () => {
       }
 
       // Verificar nuevamente si el usuario ya tiene un gimnasio
-      const existingGym = await getUserGym()
+      const existingGym = await getGymByUser()
       if (existingGym) {
         Alert.alert(
           'Gimnasio existente',
@@ -205,11 +205,11 @@ const CreateGym = () => {
           [
             {
               text: 'Ver mi gimnasio',
-              onPress: () => router.replace('/account/dashboardGym/myGym')
+              onPress: () => router.replace('/account/dashboardGym/index')
             }
           ]
         )
-        router.replace('/account/dashboardGym/myGym')
+        router.replace('/account/dashboardGym/index')
         return
       }
 

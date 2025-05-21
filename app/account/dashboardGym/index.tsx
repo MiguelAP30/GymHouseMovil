@@ -1,8 +1,8 @@
 import { View, Text, TouchableOpacity, ScrollView, ActivityIndicator, Alert } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import { Ionicons } from '@expo/vector-icons'
-import { GymDAO } from '../../../interfaces/gym'
-import { getUserGym, deleteUserGym } from '../../../lib/gym'
+import { GymDAO, UserGymDAO } from '../../../interfaces/gym'
+import { deleteGymByUser, getGymUsers, getGymByUser } from '../../../lib/gym'
 import { useAuth } from '../../../context/AuthStore'
 import { router, useFocusEffect } from 'expo-router'
 
@@ -10,6 +10,7 @@ const MyGym = () => {
   const { checkAuth } = useAuth()
   const [loading, setLoading] = useState(true)
   const [gym, setGym] = useState<GymDAO | null>(null)
+  const [users, setUsers] = useState<UserGymDAO[]>([])
 
   useFocusEffect(
     React.useCallback(() => {
@@ -26,9 +27,12 @@ const MyGym = () => {
         return
       }
 
-      const response = await getUserGym()
+      const response = await getGymByUser()
       if (response) {
         setGym(response)
+        await Promise.all([
+          fetchUsers(),
+        ])
       } else {
         router.replace('/account/dashboardGym/createGym')
       }
@@ -44,9 +48,18 @@ const MyGym = () => {
     }
   }
 
+  const fetchUsers = async () => {
+    try {
+      const response = await getGymUsers()
+      setUsers(response)
+    } catch (error) {
+      console.error('Error al obtener usuarios:', error)
+    }
+  }
+
   const handleDeleteGym = async () => {
     try {
-      await deleteUserGym()
+      await deleteGymByUser()
       setGym(null)
       router.replace('/account/dashboardGym/createGym')
       Alert.alert('Éxito', 'Gimnasio eliminado correctamente')
@@ -154,6 +167,51 @@ const MyGym = () => {
               {gym.is_active ? 'Activo' : 'Inactivo'}
             </Text>
           </View>
+        </View>
+
+        {/* Users Section */}
+        <View className="bg-white p-4 rounded-lg mb-4 shadow-md">
+          <View className="flex-row justify-between items-center mb-4">
+            <Text className="text-xl font-bold">Usuarios</Text>
+            <TouchableOpacity 
+              className="bg-blue-500 p-2 rounded-lg"
+              onPress={() => router.push('/account/dashboardGym/addUser')}
+            >
+              <Text className="text-white font-bold">Agregar Usuario</Text>
+            </TouchableOpacity>
+          </View>
+
+          {users.length === 0 ? (
+            <Text className="text-gray-500 text-center py-4">No hay usuarios registrados</Text>
+          ) : (
+            users.map((user, index) => (
+              <TouchableOpacity
+                key={index}
+                className="border-b border-gray-200 py-3"
+                onPress={() => router.push({
+                  pathname: '/account/dashboardGym/userDetails',
+                  params: { id: user.id }
+                })}
+              >
+                <View className="flex-row justify-between items-center">
+                  <View>
+                    <Text className="font-bold">{user.user_email}</Text>
+                    <Text className="text-gray-600">
+                      {new Date(user.start_date).toLocaleDateString()} - {new Date(user.final_date).toLocaleDateString()}
+                    </Text>
+                  </View>
+                  <View className="flex-row items-center">
+                    {user.is_premium && (
+                      <View className="bg-yellow-100 px-2 py-1 rounded-full mr-2">
+                        <Text className="text-yellow-800 text-xs">Premium</Text>
+                      </View>
+                    )}
+                    <Ionicons name="chevron-forward" size={20} color="#666" />
+                  </View>
+                </View>
+              </TouchableOpacity>
+            ))
+          )}
         </View>
       </ScrollView>
     </View>

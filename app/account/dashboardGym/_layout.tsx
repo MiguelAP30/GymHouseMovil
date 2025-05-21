@@ -1,6 +1,6 @@
 import { View } from 'react-native';
 import React, { useContext } from 'react';
-import { Drawer } from 'expo-router/drawer';
+import { Stack } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { AuthContext } from '../../../context/AuthStore';
 import { ROLES } from '../../../interfaces/interfaces';
@@ -14,42 +14,49 @@ const DashboardGymLayout = () => {
   }
 
   return (
-    <Drawer
+    <Stack
       screenOptions={{
-        drawerStyle: { backgroundColor: '#1F2937', width: 250 },
-        drawerLabelStyle: { color: '#ffffff', fontSize: 16 },
         headerStyle: { backgroundColor: '#1F2937' },
         headerTintColor: '#37A4DF',
-        drawerActiveBackgroundColor: '#6200ea',
-        drawerActiveTintColor: '#ffffff',
-        drawerInactiveBackgroundColor: '#1F2937',
+        headerTitleStyle: { color: '#ffffff' },
       }}
     >
-      <Drawer.Screen
-        name="dashboard"
-        options={{
-          title: 'Dashboard',
-          headerShown: true,
-          drawerIcon: ({ size }) => <Ionicons name="speedometer" size={size} color={'#fff'} />,
-        }}
-      />
-      <Drawer.Screen
-        name="myGym"
+      <Stack.Screen
+        name="index"
         options={{
           title: 'Mi Gimnasio',
           headerShown: true,
-          drawerIcon: ({ size }) => <Ionicons name="barbell" size={size} color={'#fff'} />,
         }}
       />
-      <Drawer.Screen
+      <Stack.Screen
         name="createGym"
         options={{
           title: 'Crear Gimnasio',
           headerShown: true,
-          drawerIcon: ({ size }) => <Ionicons name="add-circle" size={size} color={'#fff'} />,
         }}
       />
-    </Drawer>
+      <Stack.Screen
+        name="users"
+        options={{
+          title: 'Usuarios del Gimnasio',
+          headerShown: true,
+        }}
+      />
+      <Stack.Screen
+        name="addUser"
+        options={{
+          title: 'Agregar Usuario',
+          headerShown: true,
+        }}
+      />
+      <Stack.Screen
+        name="userDetails"
+        options={{
+          title: 'Detalles del Usuario',
+          headerShown: true,
+        }}
+      />
+    </Stack>
   );
 };
 
