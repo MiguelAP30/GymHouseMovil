@@ -13,8 +13,10 @@ import {
   createExerciseConfiguration,
   updateExerciseConfiguration,
   deleteExerciseConfiguration,
-  getExercises
+  getExercises,
+  getDifficulties
 } from '../../../../lib/exercise'
+import { getMachines } from '../../../../lib/machine'
 import {
   createHistoryPRExercise,
   createSeriesPRExercise,
@@ -27,13 +29,21 @@ import {
   getSeriesPRExerciseByHistory,
   getDropsetPRExerciseBySeries
 } from '../../../../lib/pr_exercise'
-import { ExerciseConfigurationDAO, ExerciseDAO, WeekDayDAO } from '../../../../interfaces/exercise'
+import { ExerciseConfigurationDAO, ExerciseDAO, WeekDayDAO, DifficultyDAO } from '../../../../interfaces/exercise'
 import { ROLES } from '../../../../interfaces/user'
 import { WorkoutDayExerciseDAO } from '../../../../interfaces/training'
 import { HistoryPRExercise, SeriesPRExercise, DropsetPRExercise } from '../../../../interfaces/pr_exercise'
 import { Picker } from '@react-native-picker/picker'
 import { Ionicons } from '@expo/vector-icons'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import Pagination from '../../../../components/organisms/paginacion'
+import ExerciseList from '../../../../components/ecosystems/ExerciseList'
+
+interface Machine {
+  id: number;
+  name: string;
+  description: string;
+}
 
 interface SeriesWithDropsets extends SeriesPRExercise {
   id?: number;
@@ -76,7 +86,8 @@ const WorkoutDayDetail = () => {
     repsHigh: 10,
     repsLow: 8,
     rest: 60,
-    notes: ''
+    notes: '',
+    exercise_name: ''
   })
   const [newSeries, setNewSeries] = useState({
     history_pr_exercise_id: 0,
@@ -94,6 +105,17 @@ const WorkoutDayDetail = () => {
     weight: 0
   })
   const [selectedExerciseId, setSelectedExerciseId] = useState<number | null>(null)
+  const [isExerciseSelectionModalVisible, setIsExerciseSelectionModalVisible] = useState(false)
+  const [searchExerciseName, setSearchExerciseName] = useState('')
+  const [selectedDifficulty, setSelectedDifficulty] = useState<number | null>(null)
+  const [selectedMachine, setSelectedMachine] = useState<number | null>(null)
+  const [filteredExercises, setFilteredExercises] = useState<ExerciseDAO[]>([])
+  const [isSearching, setIsSearching] = useState(false)
+  const [difficulties, setDifficulties] = useState<DifficultyDAO[]>([])
+  const [machines, setMachines] = useState<Machine[]>([])
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const [pageSize] = useState(10)
 
   const isOwnerOrAdmin = () => {
     return workoutDay?.permissions?.can_edit || false;
@@ -107,13 +129,18 @@ const WorkoutDayDetail = () => {
     if (id) {
       console.log('Cargando detalles del workout day:', id);
       loadWorkoutDayDetails()
-      loadAllExercises()
     }
   }, [id])
 
+  useEffect(() => {
+    if (isExerciseSelectionModalVisible) {
+      loadFilterData()
+    }
+  }, [isExerciseSelectionModalVisible])
+
   const loadAllExercises = async () => {
     try {
-      const response = await getExercises()
+      const response = await getExercises(1, 50)
       if (response && response.items) {
         setAllExercises(response.items)
       }
@@ -189,7 +216,8 @@ const WorkoutDayDetail = () => {
         repsHigh: 10,
         repsLow: 8,
         rest: 60,
-        notes: ''
+        notes: '',
+        exercise_name: ''
       })
     } catch (error) {
       console.error('Error al agregar ejercicio:', error)
@@ -229,7 +257,8 @@ const WorkoutDayDetail = () => {
       repsHigh: exerciseData.config.repsHigh,
       repsLow: exerciseData.config.repsLow || 8,
       rest: exerciseData.config.rest,
-      notes: exerciseData.config.notes || ''
+      notes: exerciseData.config.notes || '',
+      exercise_name: exerciseData.exercise.name
     })
     setIsEditing(true)
     setIsModalVisible(true)
@@ -505,6 +534,68 @@ const WorkoutDayDetail = () => {
     }
   }
 
+  const loadFilterData = async () => {
+    try {
+      const [difficultiesData, machinesData] = await Promise.all([
+        getDifficulties(),
+        getMachines()
+      ])
+      setDifficulties(difficultiesData)
+      setMachines(machinesData)
+    } catch (error) {
+      console.error('Error al cargar datos de filtro:', error)
+    }
+  }
+
+  const searchExercises = async () => {
+    if (!searchExerciseName && !selectedDifficulty && !selectedMachine) {
+      setFilteredExercises([])
+      setTotalPages(1)
+      return
+    }
+
+    setIsSearching(true)
+    try {
+      const response = await getExercises(
+        currentPage,
+        pageSize,
+        searchExerciseName || undefined,
+        selectedDifficulty || undefined,
+        selectedMachine || undefined
+      )
+      setFilteredExercises(response.items)
+      setTotalPages(response.pages)
+    } catch (error) {
+      console.error('Error al buscar ejercicios:', error)
+    } finally {
+      setIsSearching(false)
+    }
+  }
+
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(() => {
+      setCurrentPage(1)
+      searchExercises()
+    }, 500)
+
+    return () => clearTimeout(delayDebounceFn)
+  }, [searchExerciseName, selectedDifficulty, selectedMachine])
+
+  useEffect(() => {
+    if (currentPage > 1) {
+      searchExercises()
+    }
+  }, [currentPage])
+
+  const handleExerciseSelect = (exercise: ExerciseDAO) => {
+    setNewExercise(prev => ({
+      ...prev,
+      exercise_id: exercise.id!,
+      exercise_name: exercise.name
+    }))
+    setIsExerciseSelectionModalVisible(false)
+  }
+
   if (loading) {
     return (
       <View className="flex-1 justify-center items-center">
@@ -561,7 +652,8 @@ const WorkoutDayDetail = () => {
                       repsHigh: 10,
                       repsLow: 8,
                       rest: 60,
-                      notes: ''
+                      notes: '',
+                      exercise_name: ''
                     })
                     setIsModalVisible(true)
                   }}
@@ -965,24 +1057,17 @@ const WorkoutDayDetail = () => {
                   {isEditing ? 'Editar Ejercicio' : 'Agregar Ejercicio'}
                 </Text>
                 
-                <View className="mb-2">
+                <View className="mb-4">
                   <Text className="text-gray-600 mb-1">Ejercicio</Text>
-                  <View className="border border-gray-300 rounded-lg">
-                    <Picker
-                      selectedValue={newExercise.exercise_id}
-                      onValueChange={(value) => setNewExercise({...newExercise, exercise_id: value})}
-                      enabled={!isEditing}
-                    >
-                      <Picker.Item label="Selecciona un ejercicio" value={0} />
-                      {allExercises.map(exercise => (
-                        <Picker.Item 
-                          key={exercise.id} 
-                          label={exercise.name} 
-                          value={exercise.id} 
-                        />
-                      ))}
-                    </Picker>
-                  </View>
+                  <TouchableOpacity 
+                    className="border border-gray-300 p-2 rounded-lg flex-row justify-between items-center"
+                    onPress={() => setIsExerciseSelectionModalVisible(true)}
+                  >
+                    <Text className="text-gray-700">
+                      {newExercise.exercise_name || 'Selecciona un ejercicio'}
+                    </Text>
+                    <Ionicons name="chevron-down" size={20} color="gray" />
+                  </TouchableOpacity>
                 </View>
 
                 <View className="mb-2">
@@ -1078,6 +1163,32 @@ const WorkoutDayDetail = () => {
                   </TouchableOpacity>
                 </View>
               </ScrollView>
+            </View>
+          </View>
+        </Modal>
+
+        {/* Modal de selección de ejercicio */}
+        <Modal
+          visible={isExerciseSelectionModalVisible}
+          animationType="slide"
+          transparent={true}
+          onRequestClose={() => setIsExerciseSelectionModalVisible(false)}
+        >
+          <View className="flex-1 justify-center items-center bg-black/50">
+            <View className="bg-white p-4 rounded-lg w-[95%] h-[90%]">
+              <View className="flex-row justify-between items-center mb-4">
+                <Text className="text-xl font-bold">Seleccionar Ejercicio</Text>
+                <TouchableOpacity 
+                  onPress={() => setIsExerciseSelectionModalVisible(false)}
+                  className="bg-red-500 p-2 rounded-full"
+                >
+                  <Ionicons name="close" size={20} color="white" />
+                </TouchableOpacity>
+              </View>
+
+              <View className="flex-1">
+                <ExerciseList onExerciseSelect={handleExerciseSelect} isSelectionMode={true} />
+              </View>
             </View>
           </View>
         </Modal>

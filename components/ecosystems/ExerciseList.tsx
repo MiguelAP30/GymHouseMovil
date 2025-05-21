@@ -19,9 +19,10 @@ interface Machine {
 
 interface ExerciseListProps {
   onExerciseSelect?: (exercise: ExerciseDAO) => void;
+  isSelectionMode?: boolean;
 }
 
-const ExerciseList = ({ onExerciseSelect }: ExerciseListProps) => {
+const ExerciseList = ({ onExerciseSelect, isSelectionMode = false }: ExerciseListProps) => {
   const netInfo = useNetInfo();
   const isConnected = netInfo.isConnected ?? false;
   const { checkAuth } = useAuth()
@@ -146,13 +147,15 @@ const ExerciseList = ({ onExerciseSelect }: ExerciseListProps) => {
     <View className="flex-1 p-5 bg-gray-100">
       <View className="flex-row justify-between items-center mb-5">
         <Text className="text-2xl font-bold text-black">Ejercicios</Text>
-        <TouchableOpacity 
-          className="bg-blue-500 px-4 py-2 rounded-lg flex-row items-center"
-          onPress={() => router.push('/account/exercises/muscles')}
-        >
-          <Ionicons name="fitness" size={20} color="white" />
-          <Text className="text-white font-bold ml-2">Músculos</Text>
-        </TouchableOpacity>
+        {!isSelectionMode && (
+          <TouchableOpacity 
+            className="bg-blue-500 px-4 py-2 rounded-lg flex-row items-center"
+            onPress={() => router.push('/account/exercises/muscles')}
+          >
+            <Ionicons name="fitness" size={20} color="white" />
+            <Text className="text-white font-bold ml-2">Músculos</Text>
+          </TouchableOpacity>
+        )}
       </View>
 
       {/* Search Section */}
@@ -224,7 +227,17 @@ const ExerciseList = ({ onExerciseSelect }: ExerciseListProps) => {
 
       <ScrollView className="flex-1">
         {exercises.map(exercise => (
-          <View key={exercise.id} className="bg-white p-4 rounded-lg mb-2.5 flex-row justify-between items-center shadow-md">
+          <TouchableOpacity 
+            key={exercise.id} 
+            className="bg-white p-4 rounded-lg mb-2.5 flex-row justify-between items-center shadow-md"
+            onPress={() => {
+              if (isSelectionMode && onExerciseSelect) {
+                onExerciseSelect(exercise);
+              } else if (!isSelectionMode) {
+                handleViewExercise(exercise);
+              }
+            }}
+          >
             <View className="flex-1">
               <Text className="text-lg font-bold">{exercise.name}</Text>
               <Text className="text-gray-600">{exercise.description}</Text>
@@ -235,22 +248,15 @@ const ExerciseList = ({ onExerciseSelect }: ExerciseListProps) => {
                 Máquina: {machines.find(m => m.id === exercise.machine_id)?.name || 'No especificada'}
               </Text>
             </View>
-            {isConnected && (
+            {!isSelectionMode && isConnected && (
               <TouchableOpacity 
-                key={exercise.id}
-                onPress={() => {
-                  if (onExerciseSelect) {
-                    onExerciseSelect(exercise);
-                  } else {
-                    router.push(`/account/perfil/${exercise.id}`);
-                  }
-                }}
+                onPress={() => handleViewExercise(exercise)}
                 className="ml-2.5"
               >
                 <Ionicons name="eye" size={24} color="#007AFF" />
               </TouchableOpacity>
             )}
-          </View>
+          </TouchableOpacity>
         ))}
       </ScrollView>
 
