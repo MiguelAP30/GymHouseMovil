@@ -23,7 +23,7 @@ export default function Index() {
             if (role === ROLES.admin) {
               router.replace('/account/dashboardAdmin');
             } else {
-              router.replace('/account/perfil');
+              router.replace('/account/exercises');
             }
             return; // Importante: salimos de la función si el token es válido
           } else {

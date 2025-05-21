@@ -1,34 +1,39 @@
-
 import React, { useContext } from 'react';
-import { Drawer } from 'expo-router/drawer';
+import { Stack } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { AuthContext } from '../../../context/AuthStore';
 
 const LayoutExercises = () => {
   const { isAuthenticated, role } = useContext(AuthContext);
 
-
   return (
-    <Drawer
+    <Stack
       screenOptions={{
-        drawerStyle: { backgroundColor: '#1F2937' , width: 250 },
-        drawerLabelStyle: { color: '#ffffff', fontSize: 16 },
         headerStyle: { backgroundColor: '#1F2937' },
         headerTintColor: '#37A4DF',
-        drawerActiveBackgroundColor: '#6200ea',
-        drawerActiveTintColor: '#ffffff',
-        drawerInactiveBackgroundColor: '#1F2937',
+        headerTitleStyle: {
+          fontWeight: 'bold',
+        },
+        contentStyle: {
+          backgroundColor: '#1F2937',
+        },
       }}
     >
-      <Drawer.Screen
-        name="muscles"
+      <Stack.Screen
+        name="index"
         options={{
-          title: 'Musculos',
+          title: 'Ejercicios',
           headerShown: true,
-          drawerIcon: ({ size }) => <Ionicons name="speedometer" size={size} color={'#fff'} />,
         }}
       />
-    </Drawer>
+      <Stack.Screen
+        name="muscles"
+        options={{
+          title: 'Músculos',
+          headerShown: true,
+        }}
+      />
+    </Stack>
   );
 }
 

@@ -1,3 +1,7 @@
+// This file is currently disabled due to notification issues
+// The functionality has been moved to a future implementation
+
+/*
 import { NotificationTokenDAO, SendNotificationDAO } from '../interfaces/notification';
 import { authenticatedFetch } from './utils';
 
@@ -38,4 +42,5 @@ export const sendNotification = async (data: SendNotificationDAO) => {
     console.error('Error detallado en sendNotification:', error);
     throw error;
   }
-} 
+}
+*/ 

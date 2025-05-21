@@ -1,9 +1,11 @@
+// This file is currently disabled due to notification issues
+// The functionality has been moved to a future implementation
+
+/*
 import { useState, useEffect, useRef } from "react";
 import * as Device from "expo-device";
 import * as Notifications from "expo-notifications";
-
 import Constants from "expo-constants";
-
 import { Platform } from "react-native";
 
 export interface PushNotificationState {
@@ -95,3 +97,4 @@ export const usePushNotifications = (): PushNotificationState => {
     notification,
   };
 };
+*/
