@@ -139,6 +139,7 @@ const HomeLayout = () => {
           <StatusBar style="light"/>
           <Stack>
             <Stack.Screen name="index" options={{headerShown:false}}/>
+            <Stack.Screen name="auth" options={{headerShown:false}}/>
             <Stack.Screen name="account" options={{headerShown:false}}/>
             <Stack.Screen name="register" options={{headerShown:false}}/>
             <Stack.Screen name="unauthorized" options={{headerShown:false}}/>

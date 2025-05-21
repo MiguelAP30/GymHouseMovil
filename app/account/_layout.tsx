@@ -1,23 +1,40 @@
 import { Tabs, Redirect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { useContext, useEffect } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { AuthContext } from '../../context/AuthStore';
 import { ROLES } from '../../interfaces/user';
 import { router } from 'expo-router';
+import { View, ActivityIndicator } from 'react-native';
 
 export default function AccountLayout() {
   const { isAuthenticated, role, checkAuth } = useContext(AuthContext);
+  const [isChecking, setIsChecking] = useState(true);
   const isAdmin = role === ROLES.admin;
 
   useEffect(() => {
     const validateAuth = async () => {
-      const isValid = await checkAuth();
-      if (!isValid) {
+      try {
+        const isValid = await checkAuth();
+        if (!isValid) {
+          router.replace('/');
+        }
+      } catch (error) {
+        console.error('Error validating auth:', error);
         router.replace('/');
+      } finally {
+        setIsChecking(false);
       }
     };
     validateAuth();
   }, []);
+
+  if (isChecking) {
+    return (
+      <View className="flex-1 justify-center items-center bg-gray-900">
+        <ActivityIndicator size="large" color="#6200ea" />
+      </View>
+    );
+  }
 
   if (!isAuthenticated || role === null) {
     return <Redirect href="/" />;

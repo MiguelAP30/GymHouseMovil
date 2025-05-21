@@ -89,10 +89,20 @@ const DashboardAdminLayout = () => {
           drawerIcon: ({ size }) => <Ionicons name="body" size={size} color={'#fff'} />,
         }}
       />
+
+      <Drawer.Screen
+          name="exercisesMuscles"
+          options={{
+            title: 'Ejercicio/Musculo',
+            headerShown: true,
+            drawerIcon: ({ size }) => <Ionicons name="barbell" size={size} color={'#fff'} />,
+          }}
+        />
+
       <Drawer.Screen
         name="rateExercises"
         options={{
-          title: 'Calificación de Ejercicio',
+          title: 'Valor de ejercicio',
           headerShown: true,
           drawerIcon: ({ size }) => <Ionicons name="star" size={size} color={'#fff'} />,
         }}
@@ -121,6 +131,8 @@ const DashboardAdminLayout = () => {
             drawerIcon: ({ size }) => <Ionicons name="notifications" size={size} color={'#fff'} />,
           }}
         />
+
+
         
     </Drawer>
   );

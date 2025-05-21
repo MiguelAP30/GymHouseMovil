@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, TouchableOpacity } from 'react-native'
+import { View, Text, ScrollView, TouchableOpacity, Modal, TextInput } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import { UserDAO, ROLES } from '../../../interfaces/user'
 import { Picker } from '@react-native-picker/picker'
@@ -6,12 +6,18 @@ import { tarjetaForm, tituloForm, parrafoForm, botonGuardar, tituloFormRoles } f
 import { getAllUsers, updateUserRole } from '../../../lib/user'
 import { useAuth } from '../../../context/AuthStore'
 import { router } from 'expo-router'
+import DateTimePicker from '@react-native-community/datetimepicker'
 
 const Roles = () => {
   const { checkAuth } = useAuth()
   const [users, setUsers] = useState<UserDAO[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [modalVisible, setModalVisible] = useState(false)
+  const [selectedUser, setSelectedUser] = useState<UserDAO | null>(null)
+  const [newRole, setNewRole] = useState<number>(ROLES.logued)
+  const [finalDate, setFinalDate] = useState(new Date())
+  const [showDatePicker, setShowDatePicker] = useState(false)
 
   const fetchUsers = async () => {
     const isAuthenticated = await checkAuth()
@@ -28,14 +34,40 @@ const Roles = () => {
     setLoading(false)
   }
 
-  const handleRoleUpdate = async (email: string, newRoleId: number) => {
+  const handleRoleUpdate = async () => {
+    if (!selectedUser) return
+
     const isAuthenticated = await checkAuth()
     if (!isAuthenticated) return
 
-    await updateUserRole(email, newRoleId)
-    setUsers(users.map(user => 
-      user.email === email ? { ...user, role_id: newRoleId } : user
-    ))
+    try {
+      await updateUserRole(selectedUser.email, newRole, finalDate.toISOString().split('T')[0])
+      setUsers(users.map(user => 
+        user.email === selectedUser.email ? { ...user, role_id: newRole } : user
+      ))
+      setModalVisible(false)
+    } catch (error) {
+      setError('Error al actualizar el rol del usuario')
+    }
+  }
+
+  const openEditModal = (user: UserDAO) => {
+    setSelectedUser(user)
+    setNewRole(user.role_id)
+    setModalVisible(true)
+  }
+
+  const getRoleName = (roleId: number) => {
+    switch (roleId) {
+      case ROLES.logued:
+        return 'Usuario Registrado'
+      case ROLES.premium:
+        return 'Usuario Premium'
+      case ROLES.gym:
+        return 'Gimnasio'
+      default:
+        return 'Desconocido'
+    }
   }
 
   useEffect(() => {
@@ -74,31 +106,87 @@ const Roles = () => {
         <View className="mt-8">
           {users.map((user) => (
             <View key={user.email} className="bg-white rounded-lg p-4 mb-4 border border-gray-300 shadow-lg">
-              <View className="items-center">
-                <Text className="text-gray-800 text-base">Email: {user.email}</Text>
-                <Text className="text-gray-800 text-base">Usuario: {user.user_name || 'No especificado'}</Text>
-                <Text className="text-gray-800 text-base">Nombre: {user.name}</Text>
-              </View>
-              
-              <View className="mt-4 border-2 border-gray-400 rounded-lg overflow-hidden">
-                <Picker
-                  selectedValue={user.role_id}
-                  onValueChange={(itemValue: number) => handleRoleUpdate(user.email, itemValue)}
-                  style={{ 
-                    backgroundColor: 'white',
-                    color: 'black',
-                    height: 50
-                  }}
+              <View className="flex-row justify-between items-center">
+                <View className="flex-1">
+                  <Text className="text-gray-800 text-base">Email: {user.email}</Text>
+                  <Text className="text-gray-800 text-base">Usuario: {user.user_name || 'No especificado'}</Text>
+                  <Text className="text-gray-800 text-base">Nombre: {user.name}</Text>
+                  <Text className="text-gray-800 text-base">Rol actual: {getRoleName(user.role_id)}</Text>
+                </View>
+                <TouchableOpacity 
+                  className="bg-blue-500 px-4 py-2 rounded-lg"
+                  onPress={() => openEditModal(user)}
                 >
-                  <Picker.Item label="Usuario Registrado" value={ROLES.logued} />
-                  <Picker.Item label="Usuario Premium" value={ROLES.premium} />
-                  <Picker.Item label="Gimnasio" value={ROLES.gym} />
-                </Picker>
+                  <Text className="text-white">Editar</Text>
+                </TouchableOpacity>
               </View>
             </View>
           ))}
         </View>
       )}
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View className="flex-1 justify-center items-center bg-black/50">
+          <View className="bg-white p-6 rounded-lg w-11/12">
+            <Text className="text-xl font-bold mb-4">Editar Rol de Usuario</Text>
+            
+            <Text className="text-gray-800 mb-2">Nuevo Rol:</Text>
+            <View className="border-2 border-gray-400 rounded-lg mb-4">
+              <Picker
+                selectedValue={newRole}
+                onValueChange={(itemValue: number) => setNewRole(itemValue)}
+                style={{ height: 50 }}
+              >
+                <Picker.Item label="Usuario Registrado" value={ROLES.logued} />
+                <Picker.Item label="Usuario Premium" value={ROLES.premium} />
+                <Picker.Item label="Gimnasio" value={ROLES.gym} />
+              </Picker>
+            </View>
+
+            <Text className="text-gray-800 mb-2">Fecha Final:</Text>
+            <TouchableOpacity 
+              className="border-2 border-gray-400 rounded-lg p-3 mb-4"
+              onPress={() => setShowDatePicker(true)}
+            >
+              <Text>{finalDate.toLocaleDateString()}</Text>
+            </TouchableOpacity>
+
+            {showDatePicker && (
+              <DateTimePicker
+                value={finalDate}
+                mode="date"
+                display="default"
+                onChange={(event, selectedDate) => {
+                  setShowDatePicker(false)
+                  if (selectedDate) {
+                    setFinalDate(selectedDate)
+                  }
+                }}
+              />
+            )}
+
+            <View className="flex-row justify-end space-x-4">
+              <TouchableOpacity 
+                className="bg-gray-500 px-4 py-2 rounded-lg"
+                onPress={() => setModalVisible(false)}
+              >
+                <Text className="text-white">Cancelar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                className="bg-blue-500 px-4 py-2 rounded-lg"
+                onPress={handleRoleUpdate}
+              >
+                <Text className="text-white">Guardar</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   )
 }

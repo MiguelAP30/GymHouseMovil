@@ -20,9 +20,10 @@ interface Machine {
 interface ExerciseListProps {
   onExerciseSelect?: (exercise: ExerciseDAO) => void;
   isSelectionMode?: boolean;
+  customActionIcon?: string;
 }
 
-const ExerciseList = ({ onExerciseSelect, isSelectionMode = false }: ExerciseListProps) => {
+const ExerciseList = ({ onExerciseSelect, isSelectionMode = false, customActionIcon }: ExerciseListProps) => {
   const netInfo = useNetInfo();
   const isConnected = netInfo.isConnected ?? false;
   const { checkAuth } = useAuth()
@@ -90,8 +91,7 @@ const ExerciseList = ({ onExerciseSelect, isSelectionMode = false }: ExerciseLis
   }
 
   const handleViewExercise = (exercise: ExerciseDAO) => {
-    setSelectedExercise(exercise)
-    setViewModalVisible(true)
+    router.push(`/account/perfil/(progressExercise)/${exercise.id}`);
   }
 
   const handleSearch = async () => {
@@ -254,6 +254,14 @@ const ExerciseList = ({ onExerciseSelect, isSelectionMode = false }: ExerciseLis
                 className="ml-2.5"
               >
                 <Ionicons name="eye" size={24} color="#007AFF" />
+              </TouchableOpacity>
+            )}
+            {isSelectionMode && (
+              <TouchableOpacity 
+                onPress={() => onExerciseSelect?.(exercise)}
+                className="ml-2.5"
+              >
+                <Ionicons name={customActionIcon || "add-circle"} size={24} color="#007AFF" />
               </TouchableOpacity>
             )}
           </TouchableOpacity>

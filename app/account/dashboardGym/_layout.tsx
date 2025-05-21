@@ -49,10 +49,10 @@ const DashboardGymLayout = () => {
         }}
       />
       <Stack.Screen
-        name="userDetails"
+        name="[id]"
         options={{
           title: 'Detalles del Usuario',
-          headerShown: true,
+          headerShown: false,
         }}
       />
     </Stack>

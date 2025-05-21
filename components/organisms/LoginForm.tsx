@@ -591,25 +591,21 @@ export const LoginForm: React.FC<LoginFormProps> = ({ isConnected }) => {
         </TouchableOpacity>
 
         <TouchableOpacity 
-          onPress={handleForgotPassword}
+          onPress={() => router.push('/auth/forgot-password')}
           className="mt-2"
         >
           <Text className="text-blue-400">¿Olvidaste tu contraseña?</Text>
         </TouchableOpacity>
 
         <TouchableOpacity 
-          onPress={() => {
-            setEmail('');
-            setVerificationCode('');
-            setIsVerificationMode(true);
-          }}
+          onPress={() => router.push('/auth/verify-email')}
           className="mt-2"
         >
           <Text className="text-blue-400">Verificar código</Text>
         </TouchableOpacity>
 
         <TouchableOpacity 
-          onPress={handleResendVerificationCode}
+          onPress={() => router.push('/auth/verify-email')}
           className="mt-2"
         >
           <Text className="text-blue-400">¿Necesitas reenviar el código de verificación?</Text>

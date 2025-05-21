@@ -2,11 +2,15 @@ import React, { useContext } from 'react';
 import { Stack } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { AuthContext } from '../../../context/AuthStore';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const LayoutExercises = () => {
   const { isAuthenticated, role } = useContext(AuthContext);
 
   return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#1F2937' }}>
+
+    
     <Stack
       screenOptions={{
         headerStyle: { backgroundColor: '#1F2937' },
@@ -23,7 +27,7 @@ const LayoutExercises = () => {
         name="index"
         options={{
           title: 'Ejercicios',
-          headerShown: true,
+          headerShown: false,
         }}
       />
       <Stack.Screen
@@ -34,6 +38,7 @@ const LayoutExercises = () => {
         }}
       />
     </Stack>
+    </SafeAreaView>
   );
 }
 

@@ -103,15 +103,26 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
 
       const data = await response.json();
+      console.log('Respuesta de user_data:', data); // Para debug
       
+      if (!data.data || !data.data["sub"]) {
+        console.error('Datos de usuario inválidos:', data);
+        throw new Error('Datos de usuario inválidos');
+      }
+
       const profileData = await getProfileByEmail(data.data["sub"], currentToken);
+      console.log('Datos del perfil:', profileData); // Para debug
+
+      if (!profileData) {
+        throw new Error('No se pudo obtener el perfil del usuario');
+      }
 
       //Usuario de migue      
       const userData: UserDAO = {
         ...user!,
-        role_id: data.data["user.role"],
-        name: data.data["user.name"],
-        email: data.data["sub"], 
+        role_id: data.data["user.role"] || user?.role_id || 0,
+        name: data.data["user.name"] || user?.name || "",
+        email: data.data["sub"] || user?.email || "", 
         id_number: user?.id_number || "",
         user_name: user?.user_name || "",
         phone: user?.phone || "",
@@ -127,24 +138,24 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       //usuario andres
       const profileUser: UserDAO = {
         ...profile!,
-        role_id: profileData["role"],
-        name: profileData["name"],
-        email: profileData["email"], 
-        id_number: profileData["id_number"],
-        user_name: profileData["user_name"],
-        phone: profileData["phone"],
-        birth_date: profileData["birth_date"],
-        gender: profileData["gender"] == 'm' ? 'Masculino' : 'Femenino',
-        address: profileData["address"],
-        password: profileData["password"],
-        status: profileData["status"],
-        start_date: profileData["start_date"],
-        final_date: profileData["final_date"]
+        role_id: profileData["role"] || profile?.role_id || 0,
+        name: profileData["name"] || profile?.name || "",
+        email: profileData["email"] || profile?.email || "", 
+        id_number: profileData["id_number"] || profile?.id_number || "",
+        user_name: profileData["user_name"] || profile?.user_name || "",
+        phone: profileData["phone"] || profile?.phone || "",
+        birth_date: profileData["birth_date"] || profile?.birth_date || 0,
+        gender: profileData["gender"] ? (profileData["gender"] == 'm' ? 'Masculino' : 'Femenino') : profile?.gender || "",
+        address: profileData["address"] || profile?.address || "",
+        password: profileData["password"] || profile?.password || "",
+        status: profileData["status"] || profile?.status || false,
+        start_date: profileData["start_date"] || profile?.start_date || null,
+        final_date: profileData["final_date"] || profile?.final_date || null
       };
 
       setUser(userData);
       setProfile(profileUser);
-      setRole(data.data["user.role"]);
+      setRole(data.data["user.role"] || userData.role_id);
     } catch (error) {
       console.error('Error fetching user data:', error);
       await logout();
@@ -242,6 +253,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       console.log('Token en checkAuth:', currentToken); // Para debug
 
       if (!currentToken) {
+        console.log('No hay token, redirigiendo a login...');
         await logout(); // Ensure we clean up any stale data
         router.replace('/');
         return false;
@@ -253,6 +265,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           'Content-Type': 'application/json'
         }
       });
+
+      console.log('Respuesta de checkAuth:', response.status); // Para debug
 
       if (!response.ok) {
         // If we get a 401 or 403, the token is definitely invalid
@@ -268,6 +282,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         router.replace('/');
         return false;
       }
+
+      const data = await response.json();
+      console.log('Datos de usuario en checkAuth:', data); // Para debug
 
       // Solo actualizamos los datos del usuario si la autenticación es exitosa
       // y no estamos en medio de una actualización

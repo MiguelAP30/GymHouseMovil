@@ -202,6 +202,16 @@ const WorkoutDayDetail = () => {
       return
     }
 
+    // Verificar si el ejercicio ya existe en la lista
+    const exerciseExists = exercises.some(
+      exerciseData => exerciseData.exercise.id === newExercise.exercise_id
+    )
+
+    if (exerciseExists) {
+      Alert.alert('Error', 'Este ejercicio ya está agregado a la rutina')
+      return
+    }
+
     try {
       await createExerciseConfiguration({
         ...newExercise,

@@ -1,8 +1,13 @@
 import React from 'react'
+import { SafeAreaView } from 'react-native'
 import ExerciseList from '../../../components/ecosystems/ExerciseList'
 
 const Index = () => {
-  return <ExerciseList />
+  return (
+    <SafeAreaView className="flex-1 bg-white">
+      <ExerciseList />
+    </SafeAreaView>
+  )
 }
 
 export default Index

@@ -53,9 +53,9 @@ export const getAllUsers = async () => {
   }
 }
 
-export const updateUserRole = async (email: string, role_id: number) => {
+export const updateUserRole = async (email: string, role_id: number, final_date: string) => {
   try {
-    const response = await authenticatedFetch(`/user/user_role/${email}?role_id=${role_id}`, {
+    const response = await authenticatedFetch(`/user/role/${email}?role_id=${role_id}&final_date=${final_date}`, {
       method: 'PUT'
     });
     
