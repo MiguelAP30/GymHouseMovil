@@ -124,7 +124,7 @@ const DashboardAdminLayout = () => {
           }}
         />
         <Drawer.Screen
-          name="notifications"
+          name="expoNotifications"
           options={{
             title: 'Notificaciones',
             headerShown: true,

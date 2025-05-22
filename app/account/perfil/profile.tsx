@@ -5,7 +5,6 @@ import { changePassword, updateUserData } from '../../../lib/user';
 import { Picker } from '@react-native-picker/picker';
 import { Ionicons } from '@expo/vector-icons'
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   perfilContainer,
   perfilHeader,
@@ -310,7 +309,7 @@ const Profile = () => {
   }
 
   return (
-    <SafeAreaView className={`${perfilContainer} flex-1`} edges={['top', 'bottom']}>
+    
       <ScrollView className="flex-1">
         <View className="p-6">
           {profile ? (
@@ -506,7 +505,7 @@ const Profile = () => {
           )}
         </View>
       </ScrollView>
-    </SafeAreaView>
+   
   );
 };
 

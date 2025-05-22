@@ -5,6 +5,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { AuthContext } from '../../../context/AuthStore';
 import { ROLES } from '../../../interfaces/interfaces';
 import { Redirect } from 'expo-router';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
 
 const DashboardGymLayout = () => {
   const { isAuthenticated, role } = useContext(AuthContext);
@@ -14,6 +16,9 @@ const DashboardGymLayout = () => {
   }
 
   return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#1F2937' }}>
+
+    
     <Stack
       screenOptions={{
         headerStyle: { backgroundColor: '#1F2937' },
@@ -35,13 +40,6 @@ const DashboardGymLayout = () => {
         }}
       />
       <Stack.Screen
-        name="users"
-        options={{
-          title: 'Usuarios del Gimnasio',
-          headerShown: true,
-        }}
-      />
-      <Stack.Screen
         name="addUser"
         options={{
           title: 'Agregar Usuario',
@@ -56,6 +54,7 @@ const DashboardGymLayout = () => {
         }}
       />
     </Stack>
+    </SafeAreaView>
   );
 };
 

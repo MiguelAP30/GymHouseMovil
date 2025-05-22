@@ -1,17 +1,33 @@
 import { View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
-import React, { useState } from 'react';
-import { sendNotification } from '../../../lib/notification';
+import React, { useState, useEffect } from 'react';
+import { sendBulkNotification, getAllNotificationTokens } from '../../../lib/notification';
+import * as Notifications from 'expo-notifications';
 
-const NOTIFICATION_TOKENS = [
-  "ExponentPushToken[2beYvGMKCMvdRS1Ud7Kjf0]",
-  "ExponentPushToken[FVBhZHK9iQs0N6c-LzeTx_]",
-  "ExponentPushToken[Z6O4drPo6Pxs1U9aTQ6t_t]"
-];
-
-export default function Notifications() {
+export default function ExpoNotifications() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [notificationTokens, setNotificationTokens] = useState<string[]>([]);
+
+  useEffect(() => {
+    loadNotificationTokens();
+  }, []);
+
+  const loadNotificationTokens = async () => {
+    try {
+      const response = await getAllNotificationTokens();
+      if (response.data) {
+        // Filter only active tokens
+        const activeTokens = response.data
+          .filter((token: any) => token.is_active)
+          .map((token: any) => token.token);
+        setNotificationTokens(activeTokens);
+      }
+    } catch (error) {
+      console.error('Error al cargar tokens:', error);
+      Alert.alert('Error', 'No se pudieron cargar los tokens de notificación');
+    }
+  };
 
   const handleSendNotification = async () => {
     if (!title.trim() || !description.trim()) {
@@ -19,38 +35,28 @@ export default function Notifications() {
       return;
     }
 
+    if (notificationTokens.length === 0) {
+      Alert.alert('Error', 'No hay dispositivos registrados para enviar notificaciones');
+      return;
+    }
+
     try {
       setIsLoading(true);
-      console.log('Enviando notificaciones a tokens:', NOTIFICATION_TOKENS);
+      console.log('Enviando notificaciones a tokens:', notificationTokens);
       
-      // Enviamos una notificación por cada token
-      const results = await Promise.allSettled(
-        NOTIFICATION_TOKENS.map(token => 
-          sendNotification({
-            title: title.trim(),
-            message: description.trim(),
-            token: token
-          })
-        )
+      const result = await sendBulkNotification(
+        title.trim(),
+        description.trim(),
+        notificationTokens
       );
 
-      console.log('Resultados del envío:', results);
-
-      // Contamos cuántas notificaciones se enviaron exitosamente
-      const successfulCount = results.filter(result => result.status === 'fulfilled').length;
-      
-      if (successfulCount === NOTIFICATION_TOKENS.length) {
-        Alert.alert('Éxito', `Notificaciones enviadas correctamente a ${successfulCount} dispositivos`);
+      if (result) {
+        Alert.alert('Éxito', `Notificaciones enviadas correctamente a ${notificationTokens.length} dispositivos`);
         setTitle('');
         setDescription('');
-      } else {
-        Alert.alert(
-          'Parcial', 
-          `Se enviaron ${successfulCount} de ${NOTIFICATION_TOKENS.length} notificaciones correctamente`
-        );
       }
     } catch (error) {
-      console.error('Error completo al enviar notificaciones:', error);
+      console.error('Error al enviar notificaciones:', error);
       Alert.alert(
         'Error',
         error instanceof Error ? error.message : 'Error al enviar las notificaciones. Por favor, intente nuevamente.'
@@ -73,7 +79,7 @@ export default function Notifications() {
           value={title}
           onChangeText={setTitle}
           placeholder="Ingrese el título de la notificación"
-          maxLength = {100}
+          maxLength={100}
         />
       </View>
 
@@ -87,13 +93,13 @@ export default function Notifications() {
           multiline
           numberOfLines={4}
           textAlignVertical="top"
-          maxLength = {200}
+          maxLength={200}
         />
       </View>
 
       <View className="mb-5">
         <Text className="text-sm text-gray-600">
-          La notificación se enviará a {NOTIFICATION_TOKENS.length} dispositivos
+          La notificación se enviará a {notificationTokens.length} dispositivos
         </Text>
       </View>
 
