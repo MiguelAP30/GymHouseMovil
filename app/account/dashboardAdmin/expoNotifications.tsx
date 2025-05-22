@@ -2,12 +2,14 @@ import { View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { sendBulkNotification, getAllNotificationTokens } from '../../../lib/notification';
 import * as Notifications from 'expo-notifications';
+import { usePushNotifications } from '../../../hooks/usePushNotifications';
 
 export default function ExpoNotifications() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [notificationTokens, setNotificationTokens] = useState<string[]>([]);
+  const { expoPushToken } = usePushNotifications();
 
   useEffect(() => {
     loadNotificationTokens();
@@ -101,6 +103,11 @@ export default function ExpoNotifications() {
         <Text className="text-sm text-gray-600">
           La notificación se enviará a {notificationTokens.length} dispositivos
         </Text>
+        {expoPushToken && (
+          <Text className="text-sm text-gray-500 mt-2">
+            Tu dispositivo está registrado para recibir notificaciones
+          </Text>
+        )}
       </View>
 
       <TouchableOpacity 
@@ -115,4 +122,5 @@ export default function ExpoNotifications() {
     </View>
   );
 }
+
 

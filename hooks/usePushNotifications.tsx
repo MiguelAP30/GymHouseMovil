@@ -1,12 +1,12 @@
 // This file is currently disabled due to notification issues
 // The functionality has been moved to a future implementation
 
-/*
 import { useState, useEffect, useRef } from "react";
 import * as Device from "expo-device";
 import * as Notifications from "expo-notifications";
 import Constants from "expo-constants";
 import { Platform } from "react-native";
+import { registerNotificationToken } from "../lib/notification";
 
 export interface PushNotificationState {
   expoPushToken?: Notifications.ExpoPushToken;
@@ -16,9 +16,9 @@ export interface PushNotificationState {
 export const usePushNotifications = (): PushNotificationState => {
   Notifications.setNotificationHandler({
     handleNotification: async () => ({
-      shouldPlaySound: false,
+      shouldPlaySound: true,
       shouldShowAlert: true,
-      shouldSetBadge: false,
+      shouldSetBadge: true,
     }),
   });
 
@@ -45,15 +45,25 @@ export const usePushNotifications = (): PushNotificationState => {
         finalStatus = status;
       }
       if (finalStatus !== "granted") {
-        alert("Failed to get push token for push notification");
+        console.log("Failed to get push token for push notification");
         return;
       }
 
-      token = await Notifications.getExpoPushTokenAsync({
-        projectId: Constants.expoConfig?.extra?.eas.projectId,
-      });
+      try {
+        token = await Notifications.getExpoPushTokenAsync({
+          projectId: Constants.expoConfig?.extra?.eas.projectId,
+        });
+        
+        // Registrar el token en el backend
+        if (token) {
+          await registerNotificationToken(token.data);
+          console.log("Token registrado exitosamente en el backend");
+        }
+      } catch (error) {
+        console.error("Error al obtener o registrar el token:", error);
+      }
     } else {
-      alert("Must be using a physical device for Push notifications");
+      console.log("Must be using a physical device for Push notifications");
     }
 
     if (Platform.OS === "android") {
@@ -80,15 +90,19 @@ export const usePushNotifications = (): PushNotificationState => {
 
     responseListener.current =
       Notifications.addNotificationResponseReceivedListener((response) => {
-        console.log(response);
+        console.log("Notificación recibida:", response);
       });
 
     return () => {
-      Notifications.removeNotificationSubscription(
-        notificationListener.current!
-      );
+      if (notificationListener.current) {
+        Notifications.removeNotificationSubscription(
+          notificationListener.current
+        );
+      }
 
-      Notifications.removeNotificationSubscription(responseListener.current!);
+      if (responseListener.current) {
+        Notifications.removeNotificationSubscription(responseListener.current);
+      }
     };
   }, []);
 
@@ -97,4 +111,3 @@ export const usePushNotifications = (): PushNotificationState => {
     notification,
   };
 };
-*/

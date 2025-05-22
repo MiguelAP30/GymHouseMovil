@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "GymHouse",
-    "slug": "gymhouse",
+    "slug": "gymhouse-f7utpz38ahyq44t28hye",
     "scheme": "gymhouse",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -14,7 +14,8 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.miguelap.gymhouse"
     },
     "android": {
       "adaptiveIcon": {
@@ -28,14 +29,21 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "expo-router"
+      "expo-router",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/logo.png",
+          "color": "#ffffff"
+        }
+      ]
     ],
     "extra": {
       "router": {
         "origin": false
       },
       "eas": {
-        "projectId": "a70e07a1-c29e-49d7-a6dc-45eac25208e9"
+        "projectId": "d8d55a0d-714f-4899-accd-7855191a1047"
       }
     },
     "owner": "andre1438"

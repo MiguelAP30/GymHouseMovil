@@ -5,13 +5,19 @@ import { AuthContext } from '../../context/AuthStore';
 import { ROLES } from '../../interfaces/user';
 import { router } from 'expo-router';
 import { View, ActivityIndicator } from 'react-native';
+import { usePushNotifications } from '../../hooks/usePushNotifications';
 
 export default function AccountLayout() {
   const { isAuthenticated, role, checkAuth } = useContext(AuthContext);
   const [isChecking, setIsChecking] = useState(true);
   const isAdmin = role === ROLES.admin;
 
+  // Notifications setup - Currently disabled
+  const { expoPushToken, notification} = usePushNotifications()
+
   useEffect(() => {
+    // Notifications logging - Currently disabled
+    
     const validateAuth = async () => {
       try {
         const isValid = await checkAuth();
@@ -26,6 +32,9 @@ export default function AccountLayout() {
       }
     };
     validateAuth();
+    console.log('expoPushToken', expoPushToken);
+    console.log('notification', notification)
+    console.log("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
   }, []);
 
   if (isChecking) {
