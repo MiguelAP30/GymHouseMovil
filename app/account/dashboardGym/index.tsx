@@ -235,10 +235,16 @@ const MyGym = () => {
                 <View className="flex-row justify-between items-center">
                   <TouchableOpacity
                     className="flex-1"
-                    onPress={() => router.push({
-                      pathname: '/account/dashboardGym/[id]',
-                      params: { id: user.id }
-                    })}
+                    onPress={() => {
+                      if (!user.id || isNaN(Number(user.id))) {
+                        Alert.alert('Error', 'ID de usuario inválido');
+                        return;
+                      }
+                      router.push({
+                        pathname: '/account/dashboardGym/[id]',
+                        params: { id: user.id }
+                      });
+                    }}
                   >
                     <View>
                       <Text className="font-bold">{user.user_email}</Text>

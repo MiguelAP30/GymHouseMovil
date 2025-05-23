@@ -36,11 +36,7 @@ export default function Index() {
         if (token) {
           const isValid = await checkAuth();
           if (isValid) {
-            if (role === ROLES.admin) {
-              router.replace('/account/dashboardAdmin');
-            } else {
-              router.replace('/account/exercises');
-            }
+            router.replace('/account/exercises');
             return; // Importante: salimos de la función si el token es válido
           } else {
             await AsyncStorage.removeItem('token');

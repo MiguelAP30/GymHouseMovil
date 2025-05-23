@@ -63,7 +63,20 @@ const UserGymDetails = () => {
         return
       }
 
+      console.log("------------------------------ \n" )
+      console.log("ID recibido:", id)
+      console.log("------------------------------ \n" )
+
+
+      if (!id || typeof id !== 'string') {
+        throw new Error('ID de usuario no proporcionado')
+      }
+
       const userId = Number(id)
+      console.log("------------------------------ \n" )
+      console.log("ID convertido:", userId)
+      console.log("------------------------------ \n" )
+
       if (isNaN(userId)) {
         throw new Error('ID de usuario inválido')
       }

@@ -89,7 +89,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         throw new Error('No hay token de autenticación');
       }
 
-      console.log('Token actual:', currentToken); // Para debug
+      console.log('Token actual:', currentToken);
 
       const response = await fetch(`${API}/user_data`, {
         headers: {
@@ -99,66 +99,67 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       });
 
       if (!response.ok) {
+        if (response.status === 400) {
+          // Si el error es 400, intentamos obtener los datos del token
+          const tokenParts = currentToken.split('.');
+          if (tokenParts.length === 3) {
+            const payload = JSON.parse(atob(tokenParts[1]));
+            const userData: UserDAO = {
+              email: payload.sub,
+              name: payload['user.name'] || '',
+              id_number: payload['user.id_number'] || '',
+              role_id: payload['user.role'] || 0,
+              status: payload['user.status'] || false,
+              user_name: payload['user.name'] || '',
+              phone: '',
+              birth_date: 0,
+              gender: '',
+              address: '',
+              password: '',
+              start_date: null,
+              final_date: null,
+              is_verified: payload['user.is_verified'] === true
+            };
+            setUser(userData);
+            setProfile(userData);
+            return;
+          }
+        }
         throw new Error('Error al obtener datos del usuario');
       }
 
       const data = await response.json();
-      console.log('Respuesta de user_data:', data); // Para debug
+      console.log('Respuesta de user_data:', data);
       
       if (!data.data || !data.data["sub"]) {
         console.error('Datos de usuario inválidos:', data);
         throw new Error('Datos de usuario inválidos');
       }
 
-      const profileData = await getProfileByEmail(data.data["sub"], currentToken);
-      console.log('Datos del perfil:', profileData); // Para debug
-
-      if (!profileData) {
-        throw new Error('No se pudo obtener el perfil del usuario');
-      }
-
-      //Usuario de migue      
+      // Construir el objeto usuario con los datos disponibles
       const userData: UserDAO = {
-        ...user!,
-        role_id: data.data["user.role"] || user?.role_id || 0,
-        name: data.data["user.name"] || user?.name || "",
-        email: data.data["sub"] || user?.email || "", 
-        id_number: user?.id_number || "",
-        user_name: user?.user_name || "",
-        phone: user?.phone || "",
-        birth_date: user?.birth_date || 0,
-        gender: user?.gender || "",
-        address: user?.address || "",
-        password: user?.password || "",
-        status: user?.status || false,
-        start_date: user?.start_date || null,
-        final_date: user?.final_date || null
-      };
-
-      //usuario andres
-      const profileUser: UserDAO = {
-        ...profile!,
-        role_id: profileData["role"] || profile?.role_id || 0,
-        name: profileData["name"] || profile?.name || "",
-        email: profileData["email"] || profile?.email || "", 
-        id_number: profileData["id_number"] || profile?.id_number || "",
-        user_name: profileData["user_name"] || profile?.user_name || "",
-        phone: profileData["phone"] || profile?.phone || "",
-        birth_date: profileData["birth_date"] || profile?.birth_date || 0,
-        gender: profileData["gender"] ? (profileData["gender"] == 'm' ? 'Masculino' : 'Femenino') : profile?.gender || "",
-        address: profileData["address"] || profile?.address || "",
-        password: profileData["password"] || profile?.password || "",
-        status: profileData["status"] || profile?.status || false,
-        start_date: profileData["start_date"] || profile?.start_date || null,
-        final_date: profileData["final_date"] || profile?.final_date || null
+        email: data.data["sub"] || '',
+        name: data.data["user.name"] || '',
+        id_number: data.data["user.id_number"] || '',
+        role_id: data.data["user.role"] || 0,
+        status: data.data["user.status"] || false,
+        user_name: data.data["user.name"] || '',
+        phone: '',
+        birth_date: 0,
+        gender: '',
+        address: '',
+        password: '',
+        start_date: null,
+        final_date: null,
+        is_verified: data.data["user.is_verified"] === true
       };
 
       setUser(userData);
-      setProfile(profileUser);
-      setRole(data.data["user.role"] || userData.role_id);
+      setProfile(userData);
     } catch (error) {
-      console.error('Error fetching user data:', error);
-      await logout();
+      console.error('Error en fetchUserData:', error);
+      // No lanzamos el error para evitar que la app se rompa
+      // En su lugar, intentamos mantener los datos del token
     }
   };
 

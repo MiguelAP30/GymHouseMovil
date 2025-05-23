@@ -43,22 +43,22 @@ export default function ResendVerification() {
       );
     } catch (error) {
       console.error('Error al reenviar código:', error);
+      console.log('Tipo de error:', typeof error);
+      console.log('Error completo:', JSON.stringify(error, null, 2));
       
-      // Manejar el caso específico de usuario ya verificado
-      const errorMessage = error instanceof Error ? error.message : 'Error al reenviar el código de verificación';
+      let errorMessage = 'Error al reenviar el código de verificación';
       
-      if (errorMessage.includes('ya está verificado') || errorMessage.includes('El usuario ya está verificado')) {
-        Alert.alert(
-          "Usuario ya verificado",
-          "Tu cuenta ya está verificada. Puedes iniciar sesión normalmente.",
-          [
-            {
-              text: "OK",
-              onPress: () => router.replace('/')
-            }
-          ]
-        );
-        return;
+      if (typeof error === 'object' && error !== null) {
+        const errorObj = error as any;
+      console.log("-------------------------------- \n")
+        console.log('Error object:', errorObj);
+        console.log('Error data:', errorObj.errorData);
+      console.log("-------------------------------- \n")
+        
+        if (errorObj.errorData?.detail) {
+          errorMessage = errorObj.errorData.detail;
+          console.log('Mensaje de error encontrado:', errorMessage);
+        }
       }
 
       Alert.alert(

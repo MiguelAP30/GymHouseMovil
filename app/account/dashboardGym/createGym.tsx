@@ -259,8 +259,8 @@ const CreateGym = () => {
         {
           text: 'OK',
           onPress: () => {
-            // Navegar a la pantalla de MyGym
-            router.replace('/account/dashboardGym/index')
+            // Navegar a la pantalla de MyGym usando la ruta correcta
+            router.replace('/account/dashboardGym')
           }
         }
       ])
