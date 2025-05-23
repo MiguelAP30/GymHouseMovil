@@ -128,8 +128,8 @@ const Stats = () => {
     const stats = calculateStats(filteredData);
 
     return (
-        <View className="p-4 bg-gray-50">
-            <View className="bg-white rounded-xl p-4 mb-4 shadow-md">
+        <View className="flex-1 bg-gray-50">
+            <View className="bg-white p-4 mb-4 shadow-md">
                 <View className="flex-row items-center gap-2">
                     <View className="flex-1 bg-gray-100 rounded-lg">
                         <Picker
@@ -164,11 +164,11 @@ const Stats = () => {
             </View>
 
             {filteredData.length > 0 && (
-                <View className="bg-white rounded-xl p-4 shadow-md">
+                <View className="bg-white p-4 shadow-md">
                     <Text className="text-lg font-bold mb-2">Gráfico de progreso:</Text>
                     <LineChart
                         data={chartData}
-                        width={screenWidth - 40}
+                        width={screenWidth}
                         height={220}
                         chartConfig={{
                             backgroundColor: '#ffffff',

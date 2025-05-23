@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, ActivityIndicator, TouchableOpacity, Dimensions, Linking } from 'react-native'
+import { View, Text, ScrollView, ActivityIndicator, TouchableOpacity, Dimensions, Linking, Modal } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import { useLocalSearchParams } from 'expo-router'
 import { useAuth } from '../../../../context/AuthStore'
@@ -17,6 +17,7 @@ import { DropsetPRExercise, HistoryPRExercise, SeriesPRExercise } from '../../..
 import { ExerciseDAO, DifficultyDAO, MuscleDAO, SpecificMuscleDAO } from '../../../../interfaces/exercise'
 import { Picker } from '@react-native-picker/picker'
 import { LineChart } from 'react-native-chart-kit'
+import Pagination from '../../../../components/organisms/paginacion'
 
 type TabType = 'resumen' | 'historia' | 'indicaciones'
 type TimeFilter = 'all' | 'week' | 'month' | 'sixMonths' | 'year'
@@ -52,8 +53,15 @@ const ExerciseHistory = () => {
   const [activeTab, setActiveTab] = useState<TabType>('resumen')
   const [timeFilter, setTimeFilter] = useState<TimeFilter>('all')
   const [selectedMetric, setSelectedMetric] = useState<MetricType>('totalReps')
-  const [dateRange, setDateRange] = useState<DateRange>('all')
+  const [dateRange, setDateRange] = useState<DateRange>('last3')
   const screenWidth = Dimensions.get('window').width
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 5
+  const [selectedSeries, setSelectedSeries] = useState<SeriesPRExercise & { dropsets?: DropsetPRExercise[] } | null>(null)
+  const [selectedDropset, setSelectedDropset] = useState<DropsetPRExercise | null>(null)
+  const [showSeriesModal, setShowSeriesModal] = useState(false)
+  const [showDropsetModal, setShowDropsetModal] = useState(false)
+  const [expandedRecords, setExpandedRecords] = useState<number[]>([])
 
   const formatDate = (dateString: string): string => {
     const date = new Date(dateString);
@@ -199,6 +207,14 @@ const ExerciseHistory = () => {
       .sort((a, b) => b.reps - a.reps);
   };
 
+  const toggleRecord = (index: number) => {
+    setExpandedRecords(prev => 
+      prev.includes(index) 
+        ? prev.filter(i => i !== index)
+        : [...prev, index]
+    )
+  }
+
   useEffect(() => {
     const loadData = async () => {
       const isAuthenticated = await checkAuth()
@@ -273,6 +289,82 @@ const ExerciseHistory = () => {
     return history.filter(record => new Date(record.date) >= filterDate)
   }
 
+  const renderSeriesModal = () => (
+    <Modal
+      visible={showSeriesModal}
+      transparent={true}
+      animationType="slide"
+      onRequestClose={() => setShowSeriesModal(false)}
+    >
+      <View className="flex-1 justify-center items-center bg-black/50">
+        <View className="bg-white w-11/12 rounded-xl p-6">
+          <View className="flex-row justify-between items-center mb-4">
+            <Text className="text-xl font-bold text-gray-800">Detalles de la Serie</Text>
+            <TouchableOpacity onPress={() => setShowSeriesModal(false)}>
+              <Text className="text-blue-500 text-lg">Cerrar</Text>
+            </TouchableOpacity>
+          </View>
+          
+          {selectedSeries && (
+            <View className="space-y-4">
+              <View className="flex-row justify-between items-center py-2 border-b border-gray-200">
+                <Text className="text-gray-600 font-medium">Repeticiones:</Text>
+                <Text className="text-gray-800 font-bold">{selectedSeries.reps} reps</Text>
+              </View>
+              <View className="flex-row justify-between items-center py-2 border-b border-gray-200">
+                <Text className="text-gray-600 font-medium">Peso:</Text>
+                <Text className="text-gray-800 font-bold">{selectedSeries.weight} kg</Text>
+              </View>
+              <View className="flex-row justify-between items-center py-2 border-b border-gray-200">
+                <Text className="text-gray-600 font-medium">RPE:</Text>
+                <Text className="text-gray-800 font-bold">{selectedSeries.rpe}</Text>
+              </View>
+              {selectedSeries.notas_serie && (
+                <View className="mt-2">
+                  <Text className="text-gray-600 font-medium mb-1">Notas:</Text>
+                  <Text className="text-gray-700 italic">{selectedSeries.notas_serie}</Text>
+                </View>
+              )}
+            </View>
+          )}
+        </View>
+      </View>
+    </Modal>
+  )
+
+  const renderDropsetModal = () => (
+    <Modal
+      visible={showDropsetModal}
+      transparent={true}
+      animationType="slide"
+      onRequestClose={() => setShowDropsetModal(false)}
+    >
+      <View className="flex-1 justify-center items-center bg-black/50">
+        <View className="bg-white w-11/12 rounded-xl p-6">
+          <View className="flex-row justify-between items-center mb-4">
+            <Text className="text-xl font-bold text-gray-800">Detalles del Dropset</Text>
+            <TouchableOpacity onPress={() => setShowDropsetModal(false)}>
+              <Text className="text-blue-500 text-lg">Cerrar</Text>
+            </TouchableOpacity>
+          </View>
+          
+          {selectedDropset && (
+            <View className="space-y-4">
+              <View className="flex-row justify-between items-center py-2 border-b border-gray-200">
+                <Text className="text-gray-600 font-medium">Repeticiones:</Text>
+                <Text className="text-gray-800 font-bold">{selectedDropset.reps} reps</Text>
+              </View>
+              <View className="flex-row justify-between items-center py-2 border-b border-gray-200">
+                <Text className="text-gray-600 font-medium">Peso:</Text>
+                <Text className="text-gray-800 font-bold">{selectedDropset.weight} kg</Text>
+              </View>
+            </View>
+          )}
+        </View>
+      </View>
+    </Modal>
+  )
+
   const renderTabContent = () => {
     switch (activeTab) {
       case 'resumen':
@@ -331,7 +423,7 @@ const ExerciseHistory = () => {
                       backgroundColor: '#ffffff',
                       backgroundGradientFrom: '#ffffff',
                       backgroundGradientTo: '#ffffff',
-                      decimalPlaces: 2,
+                      decimalPlaces: 1,
                       color: (opacity = 1) => `rgba(0, 122, 255, ${opacity})`,
                       labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
                       style: {
@@ -341,13 +433,22 @@ const ExerciseHistory = () => {
                         r: '6',
                         strokeWidth: '2',
                         stroke: '#007AFF'
-                      }
+                      },
+                      formatYLabel: (value) => {
+                        const num = parseFloat(value);
+                        if (isNaN(num)) return '0';
+                        return num.toFixed(1);
+                      },
+                      formatXLabel: (value) => value
                     }}
                     bezier
                     style={{
                       marginVertical: 8,
                       borderRadius: 16
                     }}
+                    yAxisSuffix={selectedMetric === 'maxWeight' || selectedMetric === 'oneRM' ? ' kg' : 
+                                selectedMetric === 'sessionVolume' ? ' kg' : ''}
+                    yAxisInterval={1}
                   />
 
                   <ScrollView 
@@ -470,6 +571,10 @@ const ExerciseHistory = () => {
         )
       case 'historia':
         const filteredHistory = filterHistoryByTime(history)
+        const totalPages = Math.ceil(filteredHistory.length / itemsPerPage)
+        const startIndex = (currentPage - 1) * itemsPerPage
+        const paginatedHistory = filteredHistory.slice(startIndex, startIndex + itemsPerPage)
+
         return (
           <View>
             <View className="bg-white p-5 rounded-lg shadow-md mb-8">
@@ -477,7 +582,11 @@ const ExerciseHistory = () => {
               <View className="border-2 border-gray-200 rounded-lg overflow-hidden">
                 <Picker
                   selectedValue={timeFilter}
-                  onValueChange={(value: TimeFilter) => setTimeFilter(value)}
+                  onValueChange={(value: TimeFilter) => {
+                    setTimeFilter(value)
+                    setCurrentPage(1)
+                    setExpandedRecords([])
+                  }}
                   style={{ height: 50 }}
                 >
                   <Picker.Item label="Todos los registros" value="all" />
@@ -496,71 +605,102 @@ const ExerciseHistory = () => {
                 </Text>
               </View>
             ) : (
-              filteredHistory.map((record, index) => (
-                <View key={index} className="bg-white p-5 rounded-lg shadow-md mb-8">
-                  <View className="flex-row justify-between items-start mb-3">
-                    <Text className="text-xl font-bold text-gray-800">
-                      {formatDate(record.date)}
-                    </Text>
-                    <View className="bg-blue-100 px-4 py-1.5 rounded-full">
-                      <Text className="text-blue-800 font-semibold">
-                        {record.tipo_sesion}
-                      </Text>
-                    </View>
-                  </View>
-
-                  {record.notas && (
-                    <View className="mb-4 bg-gray-50 p-3 rounded-lg">
-                      <Text className="text-gray-700 font-medium mb-1">Notas:</Text>
-                      <Text className="text-gray-600 italic">
-                        "{record.notas}"
-                      </Text>
-                    </View>
-                  )}
-
-                  {record.series && record.series.length > 0 && (
-                    <View className="mt-5">
-                      <Text className="text-lg font-bold text-gray-800 mb-3">Series:</Text>
-                      {record.series.map((serie, serieIndex) => (
-                        <View key={serieIndex} className="bg-gray-50 p-4 rounded-lg mb-3 border border-gray-200">
-                          <View className="flex-row justify-between items-center mb-2">
-                            <Text className="font-bold text-gray-800">Serie {serie.orden_serie}</Text>
-                            <Text className="text-gray-700 font-semibold">
-                              {serie.reps} reps × {serie.weight}kg
-                            </Text>
-                          </View>
-                          <View className="flex-row items-center mb-2">
-                            <Text className="text-gray-700 font-medium">RPE:</Text>
-                            <Text className="text-gray-600 ml-2">{serie.rpe}</Text>
-                          </View>
-                          {serie.notas_serie && (
-                            <View className="mt-2 bg-white p-2 rounded">
-                              <Text className="text-gray-700 font-medium mb-1">Notas:</Text>
-                              <Text className="text-gray-600 italic text-sm">
-                                {serie.notas_serie}
-                              </Text>
-                            </View>
-                          )}
-
-                          {serie.dropsets && serie.dropsets.length > 0 && (
-                            <View className="mt-3 pl-4 border-l-2 border-blue-200">
-                              <Text className="font-bold text-gray-800 mb-2">Dropsets:</Text>
-                              {serie.dropsets.map((dropset, dropsetIndex) => (
-                                <View key={dropsetIndex} className="bg-white p-3 rounded mb-2 border border-gray-100">
-                                  <Text className="text-gray-700 font-medium">
-                                    {dropset.reps} reps × {dropset.weight}kg
-                                  </Text>
-                                </View>
-                              ))}
-                            </View>
-                          )}
+              <>
+                {paginatedHistory.map((record, index) => (
+                  <TouchableOpacity 
+                    key={index} 
+                    className="bg-white p-5 rounded-lg shadow-md mb-4"
+                    onPress={() => toggleRecord(index)}
+                  >
+                    <View className="flex-row justify-between items-start">
+                      <View className="flex-1">
+                        <Text className="text-xl font-bold text-gray-800">
+                          {formatDate(record.date)}
+                        </Text>
+                        {record.notas && (
+                          <Text className="text-gray-600 mt-1" numberOfLines={expandedRecords.includes(index) ? undefined : 1}>
+                            {record.notas}
+                          </Text>
+                        )}
+                      </View>
+                      <View className="flex-row items-center space-x-2">
+                        <View className="bg-blue-100 px-4 py-1.5 rounded-full">
+                          <Text className="text-blue-800 font-semibold">
+                            {record.tipo_sesion}
+                          </Text>
                         </View>
-                      ))}
+                        <View className="bg-gray-100 px-3 py-1.5 rounded-full">
+                          <Text className="text-gray-600">
+                            {expandedRecords.includes(index) ? '▲' : '▼'}
+                          </Text>
+                        </View>
+                      </View>
                     </View>
-                  )}
-                </View>
-              ))
+
+                    {expandedRecords.includes(index) && (
+                      <View className="mt-4 border-t border-gray-200 pt-4">
+                        {record.series && record.series.length > 0 && (
+                          <View>
+                            <Text className="text-lg font-bold text-gray-800 mb-3">Series:</Text>
+                            {record.series.map((serie, serieIndex) => (
+                              <View key={serieIndex} className="bg-gray-50 p-4 rounded-lg mb-3 border border-gray-200">
+                                <View className="flex-row justify-between items-center">
+                                  <Text className="font-bold text-gray-800">Serie {serie.orden_serie}</Text>
+                                  <TouchableOpacity 
+                                    className="bg-blue-500 px-4 py-2 rounded-lg"
+                                    onPress={() => {
+                                      setSelectedSeries(serie)
+                                      setShowSeriesModal(true)
+                                    }}
+                                  >
+                                    <Text className="text-white font-medium">Ver Detalles</Text>
+                                  </TouchableOpacity>
+                                </View>
+
+                                {serie.dropsets && serie.dropsets.length > 0 && (
+                                  <View className="mt-3 pl-4 border-l-2 border-blue-200">
+                                    <Text className="font-bold text-gray-800 mb-2">Dropsets:</Text>
+                                    {serie.dropsets.map((dropset, dropsetIndex) => (
+                                      <View key={dropsetIndex} className="bg-white p-3 rounded mb-2 border border-gray-100">
+                                        <View className="flex-row justify-between items-center">
+                                          <Text className="text-gray-700">
+                                            {dropset.reps} reps × {dropset.weight}kg
+                                          </Text>
+                                          <TouchableOpacity 
+                                            className="bg-blue-100 px-3 py-1 rounded"
+                                            onPress={() => {
+                                              setSelectedDropset(dropset)
+                                              setShowDropsetModal(true)
+                                            }}
+                                          >
+                                            <Text className="text-blue-600 text-sm">Detalles</Text>
+                                          </TouchableOpacity>
+                                        </View>
+                                      </View>
+                                    ))}
+                                  </View>
+                                )}
+                              </View>
+                            ))}
+                          </View>
+                        )}
+                      </View>
+                    )}
+                  </TouchableOpacity>
+                ))}
+                
+                {totalPages > 1 && (
+                  <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={setCurrentPage}
+                    size={5}
+                  />
+                )}
+              </>
             )}
+            {renderSeriesModal()}
+            {renderDropsetModal()}
           </View>
         )
       case 'indicaciones':
