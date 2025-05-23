@@ -5,7 +5,7 @@ import { Picker } from '@react-native-picker/picker'
 import { tarjetaForm, tituloForm, parrafoForm, botonGuardar, tituloFormRoles } from '../../../components/tokens'
 import { getAllUsers, updateUserRole } from '../../../lib/user'
 import { useAuth } from '../../../context/AuthStore'
-import { router } from 'expo-router'
+import { router, useFocusEffect } from 'expo-router'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import Pagination from '../../../components/organisms/paginacion'
 
@@ -26,21 +26,35 @@ const Roles = () => {
   const [selectedRoleFilter, setSelectedRoleFilter] = useState<number | null>(null)
 
   const fetchUsers = async () => {
-    const isAuthenticated = await checkAuth()
-    if (!isAuthenticated) return
+    try {
+      setLoading(true)
+      const isAuthenticated = await checkAuth()
+      if (!isAuthenticated) return
 
-    const response = await getAllUsers()
-    if (!response || !response.data) {
-      setError('Formato de respuesta inválido')
-      return
+      const response = await getAllUsers()
+      if (!response || !response.data) {
+        setError('Formato de respuesta inválido')
+        return
+      }
+
+      const filteredData = response.data.filter((user: UserDAO) => user.role_id !== ROLES.admin)
+      setUsers(filteredData)
+      setFilteredUsers(filteredData)
+      setError(null)
+    } catch (error) {
+      console.error('Error al obtener usuarios:', error)
+      setError('Error al cargar los usuarios')
+    } finally {
+      setLoading(false)
     }
-
-    const filteredData = response.data.filter((user: UserDAO) => user.role_id !== ROLES.admin)
-    setUsers(filteredData)
-    setFilteredUsers(filteredData)
-    setError(null)
-    setLoading(false)
   }
+
+  // Usar useFocusEffect para actualizar los datos cuando se navega a la pantalla
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchUsers()
+    }, [])
+  )
 
   const handleRoleUpdate = async () => {
     if (!selectedUser) return
@@ -119,10 +133,6 @@ const Roles = () => {
   const indexOfFirstUser = indexOfLastUser - itemsPerPage
   const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser)
   const totalPages = Math.ceil(filteredUsers.length / itemsPerPage)
-
-  useEffect(() => {
-    fetchUsers()
-  }, [])
 
   if (loading) {
     return (

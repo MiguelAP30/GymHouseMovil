@@ -5,9 +5,11 @@ import { router } from 'expo-router'
 import { createUserGym, getGymByUser } from '../../../lib/gym'
 import { UserGymDAO } from '../../../interfaces/gym'
 import DateTimePicker from '@react-native-community/datetimepicker'
+import { updateUserRole } from '../../../lib/user'
+import { ROLES } from '../../../interfaces/user'
 
 const AddUser = () => {
-  const { checkAuth, user } = useAuth()
+  const { checkAuth, user, fetchUserData } = useAuth()
   const [loading, setLoading] = useState(false)
   const [showStartDatePicker, setShowStartDatePicker] = useState(false)
   const [showFinalDatePicker, setShowFinalDatePicker] = useState(false)
@@ -119,13 +121,29 @@ const AddUser = () => {
       // Formatear las fechas al formato requerido por el backend (YYYY-MM-DD)
       const userGymData = {
         ...formData,
-        start_date: formData.start_date.toISOString().split('T')[0],
-        final_date: formData.final_date.toISOString().split('T')[0]
+        start_date: new Date(formData.start_date.toISOString().split('T')[0]),
+        final_date: new Date(formData.final_date.toISOString().split('T')[0]),
+        is_active: true,
+        is_premium: true
       }
 
+      // Crear la relación usuario-gimnasio
       await createUserGym(userGymData)
-      Alert.alert('Éxito', 'Usuario agregado correctamente al gimnasio')
+
+      // Actualizar el rol del usuario a premium
+      await updateUserRole(formData.user_email, ROLES.premium, formData.final_date.toISOString().split('T')[0])
+
+      // Esperar un momento para asegurar que los datos se hayan actualizado
+      await new Promise(resolve => setTimeout(resolve, 1000))
+
+      // Actualizar los datos del usuario
+      await fetchUserData()
+
+      // Navegar de vuelta inmediatamente
       router.back()
+
+      // Mostrar el mensaje de éxito después de navegar
+      Alert.alert('Éxito', 'Usuario agregado correctamente al gimnasio')
     } catch (error) {
       console.error('Error al agregar usuario:', error)
       if (error instanceof Error && error.message.includes('Sesión expirada')) {
