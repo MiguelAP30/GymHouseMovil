@@ -208,9 +208,12 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ isConnected }) => {
     return (
       <View className={`${fondoTotal} flex-1 px-6`}>
         <ScrollView 
-          contentContainerStyle={{ alignItems: 'center', paddingBottom: 20 }} 
+          contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', alignItems: 'center', paddingBottom: 20 }}
+
           showsVerticalScrollIndicator={false} 
         >
+          <View style={{ height: 100 }} />
+
           <Image 
             source={require('../../assets/logo.png')} 
             className="w-40 h-40 mt-8 mb-8 rounded-3xl" 

@@ -19,6 +19,11 @@ export default function ResetPassword() {
       return;
     }
 
+    if (!email) {
+      Alert.alert("Error", "No se encontró el correo electrónico. Por favor, vuelve a solicitar el restablecimiento de contraseña.");
+      return;
+    }
+
     if (!resetCode || !newPassword) {
       Alert.alert("Error", "Por favor, completa todos los campos");
       return;
@@ -31,6 +36,7 @@ export default function ResetPassword() {
 
     setIsLoading(true);
     try {
+      console.log('Intentando restablecer contraseña para:', email);
       await resetPassword({
         email: email as string,
         new_password: newPassword,

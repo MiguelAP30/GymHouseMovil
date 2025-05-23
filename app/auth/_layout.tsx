@@ -27,7 +27,22 @@ export default function AuthLayout() {
             headerShown: false 
           }} 
         />
+        <Stack.Screen 
+          name="resend-notification" 
+          options={{ 
+            title: 'Reenviar notificación',
+            headerShown: false 
+          }} 
+        />
+        <Stack.Screen 
+          name="resend-verification" 
+          options={{ 
+            title: 'Reenviar verificación',
+            headerShown: false 
+          }} 
+        />
       </Stack>
+      
       </SafeAreaView>
     </SafeAreaProvider>
   );

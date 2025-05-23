@@ -140,6 +140,8 @@ const HomeLayout = () => {
             <Stack.Screen name="account" options={{headerShown:false}}/>
             <Stack.Screen name="register" options={{headerShown:false}}/>
             <Stack.Screen name="unauthorized" options={{headerShown:false}}/>
+            <Stack.Screen name="exercisesWithoutInternet" options={{headerShown:false}}/>
+
           </Stack>
         </ConnectivityContext.Provider>
       </AuthProvider>

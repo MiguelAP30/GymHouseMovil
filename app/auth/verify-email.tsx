@@ -90,7 +90,8 @@ export default function VerifyEmail() {
   return (
     <View className={`${fondoTotal} flex-1 px-6`}>
       <ScrollView 
-        contentContainerStyle={{ alignItems: 'center', paddingBottom: 20 }} 
+        contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', alignItems: 'center', paddingBottom: 20 }}
+
         showsVerticalScrollIndicator={false} 
       >
         <Text className={tituloForm}>Verifica tu correo electrónico</Text>
@@ -127,7 +128,7 @@ export default function VerifyEmail() {
         </TouchableOpacity>
 
         <TouchableOpacity 
-          onPress={handleResendCode}
+          onPress={(()=> {router.push('/auth/resend-verification')})}
           className="mt-4"
           disabled={isLoading}
         >

@@ -150,17 +150,30 @@ export const resendVerificationCode = async (data: ResendVerificationDAO) => {
       body: JSON.stringify(data.email)
     });
 
+    const responseData = await response.json();
+
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
       console.error('Error al reenviar código de verificación:', {
         status: response.status,
         statusText: response.statusText,
-        errorData
+        errorData: responseData
       });
-      throw new Error(errorData.message || 'Error al reenviar código de verificación');
+      
+      // Manejar errores de validación específicos
+      if (response.status === 422) {
+        if (typeof responseData.detail === 'string') {
+          throw new Error(responseData.detail);
+        } else if (Array.isArray(responseData.detail)) {
+          const errorMessage = responseData.detail.map((err: any) => err.msg || err.message).join(', ');
+          throw new Error(errorMessage);
+        } else if (typeof responseData.detail === 'object') {
+          throw new Error(JSON.stringify(responseData.detail));
+        }
+      }
+      
+      throw new Error(responseData.message || 'Error al reenviar código de verificación');
     }
 
-    const responseData = await response.json();
     return {
       status: 200,
       message: responseData.message || 'Código de verificación reenviado exitosamente',
@@ -201,6 +214,7 @@ export const forgotPassword = async (email: string) => {
 export const resetPassword = async (data: ResetPasswordDAO) => {
   try {
     console.log('Intentando restablecer contraseña con URL:', `${API}/reset_password`);
+    console.log('Datos enviados:', data);
     const response = await fetch(`${API}/reset_password`, {
       method: 'POST',
       headers: {
@@ -209,17 +223,26 @@ export const resetPassword = async (data: ResetPasswordDAO) => {
       body: JSON.stringify(data)
     });
 
+    const responseData = await response.json();
+
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
       console.error('Error al restablecer contraseña:', {
         status: response.status,
         statusText: response.statusText,
-        errorData
+        errorData: responseData
       });
-      throw new Error(errorData.message || 'Error al restablecer contraseña');
+      
+      // Handle specific validation errors
+      if (response.status === 422 && responseData.detail) {
+        const errorMessage = Array.isArray(responseData.detail) 
+          ? responseData.detail.map((err: any) => err.msg || err.message).join(', ')
+          : responseData.detail;
+        throw new Error(errorMessage);
+      }
+      
+      throw new Error(responseData.message || 'Error al restablecer contraseña');
     }
 
-    const responseData = await response.json();
     return {
       status: 200,
       message: responseData.message || 'Contraseña restablecida exitosamente',

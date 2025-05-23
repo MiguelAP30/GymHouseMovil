@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "GymHouse",
-    "slug": "gymhouse-f7utpz38ahyq44t28hye",
+    "slug": "gymhouse",
     "scheme": "gymhouse",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -43,7 +43,7 @@
         "origin": false
       },
       "eas": {
-        "projectId": "d8d55a0d-714f-4899-accd-7855191a1047"
+        "projectId": "c6fd5f7c-a3b9-4ecd-808b-003d79245f06"
       }
     },
     "owner": "andre1438"

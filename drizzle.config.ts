@@ -1,9 +1,13 @@
 import type { Config } from 'drizzle-kit';
-import { PgSchema } from 'drizzle-orm/pg-core';
 
 export default {
-    schema: "./db/schema.ts",
-    out: "./drizzle", // Output directory for generated files
-    dialect: "sqlite",
-    driver: "expo"
-}   satisfies Config
+    schema: './db/schema.ts',
+    out: './drizzle',
+    driver: 'expo',
+    dialect: 'sqlite',
+    dbCredentials: {
+        url: 'gymhouse.db'
+    },
+    verbose: true,
+    strict: true,
+} satisfies Config

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Image, Alert, ScrollView } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Image, Alert, ScrollView, Touchable } from 'react-native';
 import { Link, router } from 'expo-router';
 import { useForm, Controller } from 'react-hook-form';
 import { 
@@ -15,6 +15,11 @@ import {
 import { useAuth } from '../../context/AuthStore';
 import { postLogin, forgotPassword, resetPassword, resendVerificationCode, verifyEmail } from '../../lib/auth';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import ExercisesWithoutInternet from '../../app/exercisesWithoutInternet';
+import ResetPassword from '../../app/auth/reset-password';
+import ForgotPassword from '../../app/auth/forgot-password';
+import VerifyEmail from '../../app/auth/verify-email';
+import ResendVerification from '../../app/auth/resend-verification';
 
 interface LoginFormProps {
   isConnected: boolean;
@@ -267,267 +272,60 @@ export const LoginForm: React.FC<LoginFormProps> = ({ isConnected }) => {
     }
   };
 
+/*   if(!isConnected){
+    return (
+      <ExercisesWithoutInternet />
+    )
+  } */
+
   if (isVerificationMode) {
     return (
-      <View className={`${fondoTotal} flex-1 px-6 justify-center`}>
-        <ScrollView 
-          contentContainerStyle={{ alignItems: 'center', paddingBottom: 20 }} 
-          showsVerticalScrollIndicator={false} 
-        >
-          <Text className={tituloForm}>Verifica tu correo electrónico</Text>
-          <Text className={parrafoForm}>
-            Ingresa tu correo electrónico y el código de verificación
-          </Text>
-
-          <View className="w-full mt-6">
-            <Text className={labelForm}>Correo electrónico</Text>
-            <TextInput
-              placeholder="tucorreo@ejemplo.com"
-              placeholderTextColor="gray"
-              className={inputForm}
-              onChangeText={(text) => setEmail(text)}
-              value={email}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              autoCorrect={false}
-            />
-          </View>
-
-          <View className="w-full mt-4">
-            <Text className={labelForm}>Código de verificación</Text>
-            <TextInput
-              placeholder="Ingresa el código (hasta 10 dígitos)"
-              placeholderTextColor="gray"
-              className={inputForm}
-              onChangeText={(text) => {
-                const numericValue = text.replace(/[^0-9]/g, '');
-                setVerificationCode(numericValue);
-              }}
-              value={verificationCode}
-              keyboardType="number-pad"
-              autoCapitalize="none"
-              autoCorrect={false}
-              maxLength={10}
-            />
-          </View>
-
-          <TouchableOpacity 
-            className={`${botonGeneral} mt-6 ${isLoading ? 'opacity-50' : ''}`} 
-            onPress={handleVerifyEmail}
-            disabled={isLoading}
-          >
-            <Text className={textoBotonGeneral}>
-              {isLoading ? 'Verificando...' : 'Verificar'}
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            onPress={handleResendVerificationCode}
-            className="mt-4"
-            disabled={isLoading}
-          >
-            <Text className="text-blue-400">Reenviar código de verificación</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            onPress={() => {
-              setIsVerificationMode(false);
-              setVerificationCode('');
-              setEmail('');
-            }}
-            className="mt-4"
-          >
-            <Text className="text-blue-400">Volver al inicio de sesión</Text>
-          </TouchableOpacity>
-        </ScrollView>
-      </View>
+     <VerifyEmail />
     );
   }
 
   if (isResettingPassword) {
     return (
-      <View className={`${fondoTotal} flex-1 px-6 justify-center`}>
-        <ScrollView 
-          contentContainerStyle={{ alignItems: 'center', paddingBottom: 20 }} 
-          showsVerticalScrollIndicator={false} 
-        >
-          <Text className={tituloForm}>Restablecer Contraseña</Text>
-          <Text className={parrafoForm}>
-            Ingresa el código de recuperación y tu nueva contraseña
-          </Text>
-
-          <View className="w-full mt-6">
-            <Text className={labelForm}>Código de recuperación</Text>
-            <TextInput
-              placeholder="Ingresa el código enviado a tu correo"
-              placeholderTextColor="gray"
-              className={inputForm}
-              onChangeText={setResetCode}
-              value={resetCode}
-              keyboardType="number-pad"
-              autoCapitalize="none"
-              autoCorrect={false}
-            />
-          </View>
-
-          <View className="w-full mt-4">
-            <Text className={labelForm}>Nueva Contraseña</Text>
-            <Controller
-              control={resetControl}
-              name="password"
-              rules={{ 
-                required: "La contraseña es obligatoria", 
-                minLength: { value: 6, message: "Mínimo 6 caracteres" } 
-              }}
-              render={({ field: { onChange, onBlur, value } }) => (
-                <TextInput
-                  placeholder="********"
-                  placeholderTextColor="gray"
-                  secureTextEntry
-                  className={inputForm}
-                  onBlur={onBlur}
-                  onChangeText={onChange}
-                  value={value}
-                />
-              )}
-            />
-            {resetErrors.password && <Text className="text-red-500">{resetErrors.password.message?.toString()}</Text>}
-          </View>
-
-          <TouchableOpacity 
-            className={`${botonGeneral} ${isLoading ? 'opacity-50' : ''}`} 
-            onPress={handleResetSubmit(handleResetPassword)}
-            disabled={isLoading}
-          >
-            <Text className={textoBotonGeneral}>
-              {isLoading ? 'Restableciendo...' : 'Restablecer Contraseña'}
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            onPress={() => {
-              setIsResettingPassword(false);
-              setResetCode('');
-              setEmail('');
-            }}
-            className="mt-4"
-          >
-            <Text className="text-blue-400">Volver al inicio de sesión</Text>
-          </TouchableOpacity>
-        </ScrollView>
-      </View>
+      <ResetPassword />
     );
   }
 
   if (isResendVerificationMode) {
     return (
-      <View className={`${fondoTotal} flex-1 px-6 justify-center`}>
-        <ScrollView 
-          contentContainerStyle={{ alignItems: 'center', paddingBottom: 20 }} 
-          showsVerticalScrollIndicator={false} 
-        >
-          <Text className={tituloForm}>Reenviar código de verificación</Text>
-          <Text className={parrafoForm}>
-            Ingresa tu correo electrónico para reenviar el código de verificación
-          </Text>
-
-          <View className="w-full mt-6">
-            <Text className={labelForm}>Correo electrónico</Text>
-            <TextInput
-              placeholder="tucorreo@ejemplo.com"
-              placeholderTextColor="gray"
-              className={inputForm}
-              onChangeText={setResendEmail}
-              value={resendEmail}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              autoCorrect={false}
-            />
-          </View>
-
-          <TouchableOpacity 
-            className={`${botonGeneral} ${isLoading ? 'opacity-50' : ''}`} 
-            onPress={handleResendVerificationSubmit}
-            disabled={isLoading}
-          >
-            <Text className={textoBotonGeneral}>
-              {isLoading ? 'Enviando...' : 'Reenviar código'}
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            onPress={() => {
-              setIsResendVerificationMode(false);
-              setResendEmail('');
-            }}
-            className="mt-4"
-          >
-            <Text className="text-blue-400">Volver al inicio de sesión</Text>
-          </TouchableOpacity>
-        </ScrollView>
-      </View>
+      <ResendVerification />
     );
   }
 
   if (isForgotPasswordMode) {
     return (
-      <View className={`${fondoTotal} flex-1 px-6 justify-center`}>
-        <ScrollView 
-          contentContainerStyle={{ alignItems: 'center', paddingBottom: 20 }} 
-          showsVerticalScrollIndicator={false} 
-        >
-          <Text className={tituloForm}>Recuperar contraseña</Text>
-          <Text className={parrafoForm}>
-            Ingresa tu correo electrónico para recuperar tu contraseña
-          </Text>
-
-          <View className="w-full mt-6">
-            <Text className={labelForm}>Correo electrónico</Text>
-            <TextInput
-              placeholder="tucorreo@ejemplo.com"
-              placeholderTextColor="gray"
-              className={inputForm}
-              onChangeText={setForgotPasswordEmail}
-              value={forgotPasswordEmail}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              autoCorrect={false}
-            />
-          </View>
-
-          <TouchableOpacity 
-            className={`${botonGeneral} ${isLoading ? 'opacity-50' : ''}`} 
-            onPress={handleForgotPasswordSubmit}
-            disabled={isLoading}
-          >
-            <Text className={textoBotonGeneral}>
-              {isLoading ? 'Enviando...' : 'Recuperar contraseña'}
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            onPress={() => {
-              setIsForgotPasswordMode(false);
-              setForgotPasswordEmail('');
-            }}
-            className="mt-4"
-          >
-            <Text className="text-blue-400">Volver al inicio de sesión</Text>
-          </TouchableOpacity>
-        </ScrollView>
-      </View>
+      <ForgotPassword />
     );
   }
 
   return (
     <View className={`${fondoTotal} flex-1 justify-center px-6`}>
       <ScrollView 
-        contentContainerStyle={{ alignItems: 'center', paddingVertical: 40 }} 
+        contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', alignItems: 'center', paddingBottom: 20 }}
+
         showsVerticalScrollIndicator={false} 
       >
-        {isConnected === false && (
+      {isConnected === false && (
+        <View style={{ alignItems: 'center' }}>
           <Text className="text-red-500 mb-4">No tienes conexión a Internet</Text>
-        )}
+          <TouchableOpacity
+            style={{
+              backgroundColor: '#007bff',
+              padding: 10,
+              borderRadius: 8,
+              alignItems: 'center',
+            }}
+            onPress={() => router.push('/exercisesWithoutInternet')}
+          >
+            <Text style={{ color: '#fff', fontSize: 16 }}>Ver ejercicios</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+        
           
         <Image 
           source={require('../../assets/logo.png')} 
