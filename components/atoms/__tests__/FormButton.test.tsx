@@ -68,4 +68,9 @@ describe('FormButton', () => {
     fireEvent.press(getByText('Test Button'));
     expect(onPress).not.toHaveBeenCalled();
   });
+
+  it('renders with different title', () => {
+    const { getByText } = render(<FormButton title="Otro Botón" />);
+    expect(getByText('Otro Botón')).toBeTruthy();
+  });
 }); 

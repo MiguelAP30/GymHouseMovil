@@ -79,4 +79,22 @@ describe('FormInput', () => {
     const input = getByPlaceholderText('Test Placeholder');
     expect(input.props.className).toContain('border-red-500');
   });
+
+  /**
+   * Prueba el renderizado del componente cuando se proporciona una etiqueta diferente
+   * Verifica que la etiqueta sea visible en la interfaz
+   */
+  it('renders with another label', () => {
+    const { getByText } = render(<FormInput label="Otro Label" placeholder="Test" />);
+    expect(getByText('Otro Label')).toBeTruthy();
+  });
+
+  /**
+   * Prueba el renderizado del componente cuando no se proporciona una etiqueta y el input existe
+   * Verifica que el input exista en la interfaz
+   */
+  it('renders without label and input exists', () => {
+    const { getByPlaceholderText } = render(<FormInput placeholder="TestInput" />);
+    expect(getByPlaceholderText('TestInput')).toBeTruthy();
+  });
 }); 

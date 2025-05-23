@@ -1,0 +1,112 @@
+import * as React from "react"
+import Svg, { SvgProps, Path, G, PathProps } from "react-native-svg"
+import { TouchableOpacity, View } from "react-native"
+
+interface EspaldaNormalInteractive extends SvgProps {
+  selectedMuscle?: string;
+  muscleColors?: Record<string, string>;
+  onMusclePress?: (muscleId: string) => void;
+}
+
+const SvgComponent = (props: EspaldaNormalInteractive) => {
+  const { selectedMuscle, muscleColors = {}, onMusclePress, ...restProps } = props;
+  
+  // Función para determinar el color de un músculo
+  const getMuscleColor = (muscleId: string) => {
+    if (selectedMuscle === muscleId) {
+      return muscleColors[muscleId] || "#FF5733"; // Color por defecto si no se especifica
+    }
+    return "#d0d0d0"; // Color gris claro para músculos no seleccionados
+  };
+
+  // Función para manejar el toque en un músculo
+  const handleMusclePress = (muscleId: string) => {
+    if (onMusclePress) {
+      onMusclePress(muscleId);
+    }
+  };
+
+  return (
+    <Svg {...restProps} viewBox="0 0 297 533">
+      <Path d="M124 22c-2 3-2 6-2 19 1 16 1 16 4 19 2 2 3 3 3 13 0 11 0 11-3 13l-26 12c-4 0-15 6-19 10-6 5-10 11-12 19-1 4-4 8-6 11-3 4-16 29-16 32l-6 7c-7 8-11 14-15 23a326 326 0 0 0-20 63c-2 7-2 7 0 14 2 6 3 8 6 11l5 4 3-4c2-4 2-5 1-8-2-3-1-8 0-8l2 2c1 2 5 3 7 1v-15l-1-6-2-6c0-3 4-9 13-19 6-7 13-16 17-24l16-22a296 296 0 0 0 18-23l3 7 5 13c4 8 5 16 5 32l-2 22-3 15-2 12a265 265 0 0 0-6 82l2 17c1 9-2 28-5 40-5 17-6 24-2 55 4 42 3 46-10 54-3 1-6 3-7 5v4l8 4c4 0 7 2 8 3 5 4 15 5 19 3s4-5 5-22c0-22 4-37 13-62 2-5 2-16 1-30-2-18-2-20 2-26 5-6 5-8 8-27l7-29 8-34c0-4 0-4 2 6l6 26 6 26c4 22 5 25 9 32s4 7 3 21c-2 24-2 29 3 42 8 22 11 36 11 61 0 11 0 11 3 14s4 3 9 3c4 0 7-1 11-4l8-3c6-2 9-4 9-6 0-3-2-5-7-8l-8-5c-5-6-5-12-3-38 2-13 2-28 2-37 0-16 0-17-3-27-5-18-7-35-4-55 2-10 2-16 2-32-1-22-2-34-7-53-5-22-8-49-7-61 0-9 3-17 6-22l4-11 3-7 4 5 12 16a224 224 0 0 1 23 33l12 16 11 13c2 5 2 5 1 8l-2 14c-1 9-1 10 1 11s6-1 7-3 1-2 1 1v7c-1 3-1 4 1 7l3 4 5-4c3-3 4-5 6-11 1-8 1-8-1-17l-3-13-2-8-7-19c-7-23-12-31-22-43-3-3-7-7-7-10-4-9-12-25-16-29l-5-9c-4-16-16-28-31-31l-17-7c-11-5-11-5-12-12-1-10 0-15 3-19 3-3 5-10 3-15v-5c1-5 0-12-3-18-11-27-41-14-47 0z" />
+      <Path
+        fill={getMuscleColor("PiesTraceros")}
+        onPress={() => handleMusclePress("PiesTraceros")}
+        pointerEvents="auto"
+        d="M196 445c3 5 7 7 10 5 3-1 2-3 0 19-2 27 0 36 12 42 6 2 8 5 6 6l-6 2-9 3c-2 2-6 3-9 4-4 0-5 0-7-2-1-2-2-4-2-17 0-17-1-26-6-42l-3-11 3-2c3 0 5-2 6-8l2-4 3 5zm-91-1c1 5 4 8 7 8l3 1-3 11c-5 17-7 26-7 50 0 8 0 9-2 11-4 2-11 1-15-2l-8-4c-8-2-8-2-8-4l5-3c7-4 12-10 13-15 2-8 1-31-1-44-1-3-1-3 2-3 4 1 8-1 11-6 2-4 3-4 3 0z"
+      />
+      <Path
+        fill={getMuscleColor("Pantorrillas")}
+        onPress={() => handleMusclePress("Pantorrillas")}
+        pointerEvents="auto"
+        d="M206 404c5 14 4 38-1 43-2 2-4 1-8-7-4-6-7-7-8-2-2 11-2 12-6 11-2-1-4-3-5-6-2-4-2-5-2-17 1-10 1-14 3-17 2-4 2-4 10-2 3 0 4 0 8-4l7-4s2 2 2 5zm-107-1c5 4 6 5 14 3 5-2 7 5 7 22 1 10 0 12-1 15-5 8-9 8-11-2-2-7-4-8-8 0-4 6-6 7-8 6-6-5-6-36-1-46 2-3 3-3 8 2z"
+      />
+      <Path
+        fill={getMuscleColor("ArticulacionesRodilla")}
+        onPress={() => handleMusclePress("ArticulacionesRodilla")}
+        pointerEvents="auto"
+        d="M191 376c3 1 6 0 7-2 2-4 3-2 3 5l2 11c0 4 0 5-6 9-6 5-6 5-10 4l-6-1c-3 1-3 1-3-4 0-4 0-6-3-9-5-8-4-7 0-6 3 0 4 0 6-3l3-6c1-9 1-9 3-4l4 5zm-76 4c1 2 4 3 8 3l2-1-3 6c-3 4-4 6-4 10 0 5 0 5-4 5h-7c-1 1-3 0-6-3l-7-5v-5l1-10 1-7c1-2 1-2 2 0 2 3 5 4 7 3l4-6c2-5 2-5 4 1l2 9z"
+      />
+      <Path
+        fill={getMuscleColor("Isquiotibiales")}
+        onPress={() => handleMusclePress("Isquiotibiales")}
+        pointerEvents="auto"
+        d="M191 241c1 2 3 5 3 8l3 13c8 28 9 67 4 93-5 20-7 22-12 11-3-6-5-8-7-7l-1 9-1 9c-1 2-4 3-6 2s-5-9-7-18l-4-18a370 370 0 0 1-12-57l3 1c4 2 22 1 27-2 8-4 13-14 12-24l-7-22c0-3 2-2 5 2zm-84 9c-5 16-3 26 5 32l8 5h23c2-1 2-1 2 6l-8 37-8 35c-2 8-5 14-8 15-3 0-5-4-6-12 0-7-1-8-2-8-2 0-3 1-5 6l-5 7c-2 0-4-5-7-18-6-28-4-63 4-95l3-14c0-2 6-10 7-8l-3 12z"
+      />
+      <Path
+        fill={getMuscleColor("Gluteos")}
+        onPress={() => handleMusclePress("Gluteos")}
+        pointerEvents="auto"
+        d="M176 231c5 2 6 5 10 16 3 9 4 20 2 25-2 6-8 11-15 12-8 2-17 1-20-2-2-2-2-3-2-22 0-22 0-24 5-28 6-4 13-5 20-1zm-36 0c6 4 6 7 7 28 0 21-1 23-7 25-5 2-18 1-23-2-10-5-12-15-7-34 5-13 7-17 15-19 5-1 10-1 15 2zM284 248l3 13c2 8 2 9 0 15-1 5-2 8-4 9-2 3-3 2 0-2 3-5 1-14-4-17s-6-2-7 2l-2 5c-1 0 0-16 2-21 1-3 2-4 4-4l5-2c2-2 3-1 3 2zm-263 0c3 0 5 4 5 16v8l-2-5c0-3-2-3-6-1-3 2-4 3-5 8-1 4-1 5 1 9 3 4 2 5-1 2-2-2-3-5-4-9-1-6-1-7 1-17l3-12c0-2 0-2 3-1l5 2zM253 179l6 7c6 8 10 17 17 37 6 18 7 20 2 22-4 0-6-1-9-6l-11-13c-10-12-27-37-24-38s4-2 4-6l2-5h6c4 0 6 0 7 2zm-196-1 2 5c0 3 1 4 3 5h2a711 711 0 0 1-25 38l-11 12c-3 4-5 7-7 7-3 0-6-3-6-5 0-3 10-30 14-39 3-8 7-13 13-20 4-4 4-5 9-5s6 1 6 2z"
+      />
+      <Path
+        fill={getMuscleColor("Mano")}
+        onPress={() => handleMusclePress("Mano")}
+        pointerEvents="auto"
+        d="M222 133c6 2 11 8 17 21l7 16c0 4 0 4-3 3-5 0-7 1-7 6l-2 5c0 1-4-1-9-5s-19-25-19-28l3-19c0-1 6-1 13 1zm-133 8c1 5 2 11 1 12-1 4-14 22-18 26-8 7-11 7-11 1l-1-5c-1-2-2-2-6-2-4 1-4 1-3-2 0-5 9-23 12-28 5-7 8-9 16-11l8-1 2 10zM151 168l2-2 2 5 7 17c5 12 6 13 6 28 1 9 1 9-2 9-5 0-12 4-15 8-3 3-3 3-6-1s-10-7-15-7c-3 0-3 0-2-7 0-15 1-18 6-28l9-23c0-1 1-1 3 1h5z"
+      />
+      <Path
+        fill={getMuscleColor("Antebrazos")}
+        onPress={() => handleMusclePress("Antebrazos")}
+        pointerEvents="auto"
+        d="m186 116 13 10c6 4 7 6 5 14l-1 11c0 6-3 16-8 26-6 13-7 26-5 47l2 12-5-3-9-5c-6-3-6-4-6-17-1-9-1-11-6-20-10-22-11-27-6-44 4-11 16-37 18-37l8 6zm-61 6c18 37 18 42 5 70-4 8-4 9-5 20 0 8-1 11-2 13-3 2-17 11-18 10l1-9v-36l-4-12c-7-14-7-15-10-41 0-7 0-7 11-15a171 171 0 0 0 16-12l6 12zM165 111l7 1-3 7a517 517 0 0 0-21 46l-9-19-10-23c-5-11-5-11 1-12h35zm9-19c11 4 15 6 11 7l-7 6-9 4c-7-2-22-3-31-2-14 2-14 2-19-2-2-2-5-5-7-5l-2-2c0-1 13-6 19-7 10-1 40 0 45 1zM205 104c8 4 14 10 17 17 4 9 4 9-2 8-13-1-19-4-35-18-6-5-6-6 2-9 5-2 12-1 18 2zm-94-1c3 1 5 3 5 4l-24 19c-4 2-20 5-20 4-1-1 4-12 7-16s10-9 15-11c6-3 12-2 17 0zM155 68c4 2 6 2 7 1 2-1 2-1 2 5l1 10c1 3 1 3-17 3-15 0-17 0-17-2l1-9c0-7 0-7 2-7 2 1 5 0 7-1 6-3 8-2 14 0z"
+      />
+      <Path
+        fill={getMuscleColor("Triceps")}
+        onPress={() => handleMusclePress("Triceps")}
+        pointerEvents="auto"
+        d="M164 17c5 6 7 12 7 18-2 18-3 21-9 29-2 3-2 3-6 1-5-2-10-3-15-1l-4 2c-3 0-8-10-9-16l-2-13V26c6-19 30-18 38-9z"
+      />
+      <Path
+        fill={getMuscleColor("EspaldaBaja")}
+        onPress={() => handleMusclePress("EspaldaBaja")}
+        pointerEvents="auto"
+      />
+      <Path
+        fill={getMuscleColor("Dorsales")}
+        onPress={() => handleMusclePress("Dorsales")}
+        pointerEvents="auto"
+      />
+      <Path
+        d="M205 104c8 4 14 10 17 17 4 9 4 9-2 8-13-1-19-4-35-18-6-5-6-6 2-9 5-2 12-1 18 2zM111 103c3 1 5 3 5 4l-24 19c-4 2-20 5-20 4-1-1 4-12 7-16s10-9 15-11c6-3 12-2 17 0z"
+        fill={getMuscleColor("HombrosTraceros")}
+        onPress={() => handleMusclePress("HombrosTraceros")}
+        pointerEvents="auto"
+      />
+      <Path
+        d="M155 68c4 2 6 2 7 1 2-1 2-1 2 5l1 10c1 3 1 3-17 3-15 0-17 0-17-2l1-9c0-7 0-7 2-7 2 1 5 0 7-1 6-3 8-2 14 0z"
+        fill={getMuscleColor("Cuello")}
+        onPress={() => handleMusclePress("Cuello")}
+        pointerEvents="auto"
+      />
+      <Path
+        d="M164 17c5 6 7 12 7 18-2 18-3 21-9 29-2 3-2 3-6 1-5-2-10-3-15-1l-4 2c-3 0-8-10-9-16l-2-13V26c6-19 30-18 38-9z"
+        fill={getMuscleColor("Cabeza")}
+        onPress={() => handleMusclePress("Cabeza")}
+        pointerEvents="auto"
+      />
+    </Svg>
+  );
+};
+
+export default SvgComponent;
