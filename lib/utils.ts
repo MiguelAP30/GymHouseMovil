@@ -6,6 +6,7 @@ const API = getEnvironment().API_URL;
 export const authenticatedFetch = async (url: string, options: RequestInit = {}) => {
   try {
     const token = await AsyncStorage.getItem('token');
+    console.log('Token in authenticatedFetch:', token ? 'Present' : 'Missing');
     
     if (!token) {
       throw new Error('No hay token de autenticación');
@@ -17,13 +18,19 @@ export const authenticatedFetch = async (url: string, options: RequestInit = {})
       'Content-Type': 'application/json',
     };
 
+    console.log('Making request to:', `${API}${url}`);
+    console.log('Request headers:', headers);
+
     const response = await fetch(`${API}${url}`, {
       ...options,
       headers,
     });
     
+    console.log('Response status:', response.status);
+    
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
+      console.log('Error response:', errorData);
       
       if (response.status === 401) {
         await AsyncStorage.removeItem('token');
@@ -36,6 +43,7 @@ export const authenticatedFetch = async (url: string, options: RequestInit = {})
 
     return response;
   } catch (error) {
+    console.error('Error in authenticatedFetch:', error);
     if (error instanceof Error) {
       throw error;
     }

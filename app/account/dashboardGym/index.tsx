@@ -7,7 +7,7 @@ import { useAuth } from '../../../context/AuthStore'
 import { router, useFocusEffect } from 'expo-router'
 
 const MyGym = () => {
-  const { checkAuth } = useAuth()
+  const { checkAuth, user, fetchUserData } = useAuth()
   const [loading, setLoading] = useState(true)
   const [gym, setGym] = useState<GymDAO | null>(null)
   const [users, setUsers] = useState<UserGymDAO[]>([])
@@ -25,6 +25,12 @@ const MyGym = () => {
       if (!isAuthenticated) {
         router.replace('/')
         return
+      }
+
+      await fetchUserData()
+
+      if (!user?.email) {
+        throw new Error('No se pudo obtener la información del usuario')
       }
 
       const response = await getGymByUser()
@@ -85,6 +91,7 @@ const MyGym = () => {
           style: 'destructive',
           onPress: async () => {
             try {
+              if (!gym?.id) throw new Error('ID del gimnasio no disponible')
               await deleteUserGymById(gym.id, userEmail)
               await fetchUsers() // Recargar la lista de usuarios
               Alert.alert('Éxito', 'Usuario eliminado correctamente')

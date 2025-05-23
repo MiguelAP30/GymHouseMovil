@@ -36,14 +36,14 @@ const DashboardGymLayout = () => {
         name="createGym"
         options={{
           title: 'Crear Gimnasio',
-          headerShown: true,
+          headerShown: false,
         }}
       />
       <Stack.Screen
         name="addUser"
         options={{
           title: 'Agregar Usuario',
-          headerShown: true,
+          headerShown: false,
         }}
       />
       <Stack.Screen

@@ -91,15 +91,6 @@ const DashboardAdminLayout = () => {
       />
 
       <Drawer.Screen
-          name="exercisesMuscles"
-          options={{
-            title: 'Ejercicio/Musculo',
-            headerShown: true,
-            drawerIcon: ({ size }) => <Ionicons name="barbell" size={size} color={'#fff'} />,
-          }}
-        />
-
-      <Drawer.Screen
         name="rateExercises"
         options={{
           title: 'Valor de ejercicio',
@@ -107,6 +98,16 @@ const DashboardAdminLayout = () => {
           drawerIcon: ({ size }) => <Ionicons name="star" size={size} color={'#fff'} />,
         }}
       />
+
+      <Drawer.Screen
+          name="exercisesMuscles"
+          options={{
+            title: 'Ver Ejercicio/Musculo',
+            headerShown: true,
+            drawerIcon: ({ size }) => <Ionicons name="barbell" size={size} color={'#fff'} />,
+          }}
+        />
+
       <Drawer.Screen
         name="roles"
         options={{

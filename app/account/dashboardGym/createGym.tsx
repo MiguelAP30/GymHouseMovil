@@ -7,7 +7,7 @@ import { GymDAO } from '../../../interfaces/gym'
 import DateTimePicker from '@react-native-community/datetimepicker'
 
 const CreateGym = () => {
-  const { checkAuth, user } = useAuth()
+  const { checkAuth, user, fetchUserData } = useAuth()
   const [loading, setLoading] = useState(false)
   const [showOpenTimePicker, setShowOpenTimePicker] = useState(false)
   const [showCloseTimePicker, setShowCloseTimePicker] = useState(false)
@@ -241,18 +241,30 @@ const CreateGym = () => {
         website: formData.website || 'indefinido'
       }
 
+      // Crear el gimnasio
       await postGym(gymData as GymDAO)
-      Alert.alert('Éxito', 'Gimnasio creado correctamente')
       
-      // Recargar las pantallas para reflejar los cambios
-      // Primero navegamos a la pantalla de MyGym
-      router.replace('/account/dashboardGym/myGym')
+      // Esperar un momento para asegurar que los datos se hayan actualizado
+      await new Promise(resolve => setTimeout(resolve, 1000))
       
-      // Luego, si el usuario es admin, también actualizamos la lista de gimnasios
-      if (user?.role_id === 4) { // 4 es el rol de admin según la interfaz ROLES
-        // Forzamos una recarga de la pantalla de gimnasios
-        router.push('/account/dashboardAdmin/gyms')
+      // Fetch user data to ensure it's up to date
+      await fetchUserData()
+      
+      // Verificar que tenemos los datos del usuario antes de proceder
+      if (!user?.email) {
+        throw new Error('No se pudo obtener la información del usuario')
       }
+      
+      Alert.alert('Éxito', 'Gimnasio creado correctamente', [
+        {
+          text: 'OK',
+          onPress: () => {
+            // Navegar a la pantalla de MyGym
+            router.replace('/account/dashboardGym/index')
+          }
+        }
+      ])
+      
     } catch (error) {
       console.error('Error al crear gimnasio:', error)
       if (error instanceof Error && error.message.includes('Sesión expirada')) {
