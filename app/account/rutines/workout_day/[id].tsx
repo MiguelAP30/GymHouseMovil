@@ -739,25 +739,31 @@ const WorkoutDayDetail = () => {
                     className="border border-gray-300 p-2 rounded-lg"
                     value={exerciseData.historyPR.notas}
                     onChangeText={(text) => {
-                      setExercises(prevExercises => 
-                        prevExercises.map(ex => {
-                          if (ex.exercise.id === exerciseData.exercise.id) {
-                            return {
-                              ...ex,
-                              historyPR: {
-                                ...ex.historyPR!,
-                                notas: text
-                              }
-                            };
-                          }
-                          return ex;
-                        })
-                      );
+                      if (text.length <= 200) {
+                        setExercises(prevExercises => 
+                          prevExercises.map(ex => {
+                            if (ex.exercise.id === exerciseData.exercise.id) {
+                              return {
+                                ...ex,
+                                historyPR: {
+                                  ...ex.historyPR!,
+                                  notas: text
+                                }
+                              };
+                            }
+                            return ex;
+                          })
+                        );
+                      }
                     }}
                     placeholder="Agrega notas sobre la sesión"
                     multiline
                     numberOfLines={3}
+                    maxLength={200}
                   />
+                  <Text className="text-gray-500 text-right text-xs mt-1">
+                    {exerciseData.historyPR.notas.length}/200 caracteres
+                  </Text>
                 </View>
 
                 <View className="flex-row justify-between items-center mb-2">
@@ -942,7 +948,11 @@ const WorkoutDayDetail = () => {
                     multiline
                     numberOfLines={3}
                     placeholder="Agregue notas sobre la serie"
+                    maxLength={200}
                   />
+                  <Text className="text-gray-500 text-right text-xs mt-1">
+                    {newSeries.notas_serie.length}/200 caracteres
+                  </Text>
                 </View>
 
                 <View className="flex-row space-x-2">
@@ -1149,7 +1159,11 @@ const WorkoutDayDetail = () => {
                     multiline
                     numberOfLines={3}
                     placeholder="Agrega notas o instrucciones especiales"
+                    maxLength={200}
                   />
+                  <Text className="text-gray-500 text-right text-xs mt-1">
+                    {newExercise.notes.length}/200 caracteres
+                  </Text>
                 </View>
 
                 <View className="flex-row space-x-2">

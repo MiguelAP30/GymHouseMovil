@@ -131,6 +131,7 @@ const MyGym = () => {
     <View className="flex-1 p-5 bg-gray-100">
       <View className="flex-row justify-between items-center mb-5">
         <Text className="text-2xl font-bold">Mi Gimnasio</Text>
+        {/* Botón de eliminar comentado
         <TouchableOpacity 
           className="bg-red-500 p-2.5 rounded-lg"
           onPress={() => {
@@ -153,6 +154,7 @@ const MyGym = () => {
         >
           <Text className="text-white font-bold">Eliminar</Text>
         </TouchableOpacity>
+        */}
       </View>
 
       <ScrollView className="flex-1">
